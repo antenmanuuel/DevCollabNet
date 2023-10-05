@@ -23,16 +23,17 @@ window.onload = function () {
     const timeString = postTime.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
+      hour12 : false,
     });
 
     if (diffInSeconds < 31536000) {
       return `${postTime.toLocaleDateString("en-US", {
-        month: "long",
+        month: "short",
         day: "numeric",
       })} at ${timeString}`;
     }
     return `${postTime.toLocaleDateString("en-US", {
-      month: "long",
+      month: "short",
       day: "numeric",
       year: "numeric",
     })} at ${timeString}`;
