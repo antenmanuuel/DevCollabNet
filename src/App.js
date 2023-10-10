@@ -7,6 +7,7 @@ import SideNavbar from "./components/SideNavbar/SideNavbar";
 
 import "./stylesheets/App.css";
 import TagsContainer from "./components/TagsPage/TagsContainer";
+import QuestionsForm from "./components/QuestionsForm/QuestionsForm";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Routes>
           <Route path="/" Component={QuestionsContainer} />
           <Route path="/questions" Component={QuestionsContainer} />
+          <Route path="/askQuestion" Component={QuestionsForm} />
           <Route path="/tags" Component={TagsContainer} />
         </Routes>
       </div>
