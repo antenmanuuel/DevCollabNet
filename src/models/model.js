@@ -1,5 +1,9 @@
 export default class Model {
+  static instance = null;
   constructor() {
+    if (Model.instance) {
+      return Model.instance;
+    }
     this.data = {
       questions: [
         {
@@ -76,6 +80,15 @@ export default class Model {
         },
       ],
     };
+    Model.instance = this;
+  }
+
+   // Method to get a shared instance
+   static getInstance() {
+    if (!Model.instance) {
+      Model.instance = new Model();
+    }
+    return Model.instance;
   }
 
   // QUESTIONS METHODS

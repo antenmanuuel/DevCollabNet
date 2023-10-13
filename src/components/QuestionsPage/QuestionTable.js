@@ -1,28 +1,32 @@
 import React, { useEffect, useState } from "react";
 import "../../stylesheets/QuestionTable.css";
 import Model from "../../models/model";
-import formatDate from "../../utils/formatDate";
+import Helper from "../../utils/Helper";
+import { Link } from "react-router-dom";
 
-const QuestionTable = () => {
+const QuestionTable = ({ updateKey }) => {
   const [questionsData, setQuestionData] = useState([]);
-  const model = new Model();
+  const model = Model.getInstance();
+  const helper = new Helper();
 
   useEffect(() => {
     const questions = model.getAllQuestions();
-    const formattedQuestions = questions.map((question) => {
-      const tagNames = question.tagIds.map((tagId) =>
-        model.getTagNameById(tagId)
-      );
-      const formattedDate = formatDate(new Date(question.askDate));
+    const formattedQuestions = questions
+      .map((question) => {
+        const tagNames = question.tagIds.map((tagId) =>
+          model.getTagNameById(tagId)
+        );
+        const formattedDate = helper.formatDate(new Date(question.askDate));
 
-      return {
-        ...question,
-        tagNames,
-        formattedDate,
-      };
-    });
+        return {
+          ...question,
+          tagNames,
+          formattedDate,
+        };
+      })
+      .sort(helper.sortNewestToOldest());
     setQuestionData(formattedQuestions);
-  }, []);
+  }, [updateKey]); // Using updateKey to trigger rerender
 
   return (
     <div className="questionTableContainer">
@@ -39,9 +43,9 @@ const QuestionTable = () => {
               <td id="td2">
                 <ul id="ulrow2">
                   <li id="title_questions">
-                    <button id="link_ans">
-                      <p id="paraf">{question.title}</p>
-                    </button>
+                    <Link to={`/questions/${question.qid}`} id="link_ans">
+                      <div id="paraf">{question.title}</div>
+                    </Link>
                   </li>
                   <li>
                     <ul id="ulrow3">
@@ -56,9 +60,10 @@ const QuestionTable = () => {
               </td>
               <td id="who_asked">
                 <p>
-                  <span style={{ color: "red" }}>{question.askedBy}</span>
+                  <span style={{ color: "red" }}>
+                    {question.askedBy} {""}
+                  </span>
                   <span style={{ color: "gray" }}>
-                    {" "}
                     asked {question.formattedDate}
                   </span>
                 </p>

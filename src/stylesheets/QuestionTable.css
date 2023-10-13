@@ -19,9 +19,7 @@
   
   .questionTableContainer .question #tr1 {
     border-width: 3px;
-    border-bottom: 1pt dotted grey;
-
-    border-width: 3px;
+    border-bottom: 1px dotted grey;
   }
   
   .questionTableContainer .question #td1 {
@@ -30,7 +28,7 @@
   
   .questionTableContainer .question #who_asked {
     font-size: 16px;
-    padding-left: 290px;
+    padding-left:460px;
   }
   
   .questionTableContainer .question #td1 {
@@ -45,6 +43,7 @@
   .questionTableContainer .question #paraf {
     font-size: 24px;
     color: blue;
+    border-style: none;
   }
   
   #ulrow3 > #keyword-1,
@@ -57,7 +56,9 @@
     background: dimgrey;
     padding-left: 5px;
     padding-right: 5px;
-    padding-top: 5px;
+    margin-top: 10px;
+    margin-right: 3px;
+    padding-top: 6px;
     padding-bottom: 5px;
     width: 150px;
     height: 20px;
