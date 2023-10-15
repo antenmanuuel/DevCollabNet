@@ -1,7 +1,7 @@
 import React from "react";
 import "../../stylesheets/AskQuestionButton.css";
 
-function AskQuestionButton({ onPress }) {
+function AskQuestionButtonForHomePage({ onPress }) {
   return (
     <div>
       <input 
@@ -15,4 +15,4 @@ function AskQuestionButton({ onPress }) {
 }
 
 
-export default AskQuestionButton;
+export default AskQuestionButtonForHomePage;
