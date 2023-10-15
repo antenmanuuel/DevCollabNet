@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Model from "../../models/model";
 import "../../stylesheets/QuestionForm.css";
 import SubmitQuestionButton from "../QuestionsPage/SubmitQuestionButton";
+import QuestionsPage from "../QuestionsPage/QuestionsPage";
 
 const model = new Model();
 
@@ -21,7 +21,7 @@ const QuestionsForm = (props) => {
     usernameError: "",
   });
 
-  const navigate = useNavigate();
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -86,8 +86,12 @@ const QuestionsForm = (props) => {
       username: "",
     });
 
-    navigate("/questions"); 
+    setIsFormSubmitted(true);
   };
+
+  if(isFormSubmitted) {
+    return <QuestionsPage />
+  }
 
   return (
     <div className="questionFormContainer">

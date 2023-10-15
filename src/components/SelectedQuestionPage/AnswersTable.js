@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import Model from "../../models/model";
 import "../../stylesheets/AnswersTable.css";
+import Helper from "../../utils/Helper";
 
-const AnswersTable = () => {
-  const { questionId } = useParams();
+const AnswersTable = ({ questionId }) => {
   const [answers, setAnswers] = useState([]);
 
   useEffect(() => {
@@ -17,6 +16,8 @@ const AnswersTable = () => {
     setAnswers(ans);
   }, [questionId]);
 
+  const helper = new Helper();
+
   return (
     <div className="answersContainer">
       <div className="answers">
@@ -24,7 +25,16 @@ const AnswersTable = () => {
           {answers.map((answer) => (
             <tr key={answer.aid} id="tr1">
               <td id="answerText">{answer.text}</td>
-              <td id="author">{answer.ansBy}</td>
+              <td>
+                <ul className="authorAndDate">
+                  <li id="author">
+                    {answer.ansBy}
+                  </li>
+                  <li id="date">
+                    answered {helper.formatDate(new Date(answer.ansDate))}
+                  </li>
+                </ul>
+              </td>
             </tr>
           ))}
         </table>
