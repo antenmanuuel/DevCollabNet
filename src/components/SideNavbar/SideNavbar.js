@@ -1,12 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
+import "../../stylesheets/NavLink.css";
 import "../../stylesheets/SideNavbar.css";
-import QuestionsLink from "../Links/QuestionsLink";
-import TagsLink from "../Links/TagsLink";
-function SideNavbar() {
+
+function SideNavbar({ setQuestionsPage, setTagsPage }) {
+  const handleQuestionsLinkClick = () => {
+    setQuestionsPage(true);
+    setTagsPage(false);
+  };
+
+  const handleTagsLinkClick = () => {
+    setTagsPage(true);
+    setQuestionsPage(false);
+  };
+
   return (
     <div className="sideNavbar">
-      <QuestionsLink />
-      <TagsLink />
+      <button className='btn-link' onClick={handleTagsLinkClick}>Questions</button>
+      <button className='btn-link' onClick={handleQuestionsLinkClick}>Tags</button>
     </div>
   );
 }

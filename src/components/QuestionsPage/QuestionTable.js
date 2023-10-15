@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import "../../stylesheets/QuestionTable.css";
 import Model from "../../models/model";
 import Helper from "../../utils/Helper";
-import { Link } from "react-router-dom";
+import SelectedQuestionPage from "../SelectedQuestionPage/SelectedQuestionPage";
 
-const QuestionTable = ({ updateKey }) => {
+const QuestionTable = ({ updateKey, onQuestionTitleClick }) => {
   const [questionsData, setQuestionData] = useState([]);
   const model = Model.getInstance();
   const helper = new Helper();
@@ -17,7 +17,6 @@ const QuestionTable = ({ updateKey }) => {
           model.getTagNameById(tagId)
         );
         const formattedDate = helper.formatDate(new Date(question.askDate));
-
         return {
           ...question,
           tagNames,
@@ -26,7 +25,13 @@ const QuestionTable = ({ updateKey }) => {
       })
       .sort(helper.sortNewestToOldest());
     setQuestionData(formattedQuestions);
-  }, [updateKey]); // Using updateKey to trigger rerender
+  }, [updateKey]);
+
+  const handleQuestionTitleClickLocal = (questionId) => {
+    if (onQuestionTitleClick) {
+      onQuestionTitleClick(questionId);
+    }
+  };
 
   return (
     <div className="questionTableContainer">
@@ -43,9 +48,13 @@ const QuestionTable = ({ updateKey }) => {
               <td id="td2">
                 <ul id="ulrow2">
                   <li id="title_questions">
-                    <Link to={`/questions/${question.qid}`} id="link_ans">
+                    <div
+                      id="link_ans"
+                      onClick={() => handleQuestionTitleClickLocal(question.qid)}
+                      style={{ cursor: "pointer" }}
+                    >
                       <div id="paraf">{question.title}</div>
-                    </Link>
+                    </div>
                   </li>
                   <li>
                     <ul id="ulrow3">
@@ -60,9 +69,8 @@ const QuestionTable = ({ updateKey }) => {
               </td>
               <td id="who_asked">
                 <p>
-                  <span style={{ color: "red" }}>
-                    {question.askedBy} {""}
-                  </span>
+                  <span style={{ color: "red" }}>{question.askedBy}</span>
+                  {" "}
                   <span style={{ color: "gray" }}>
                     asked {question.formattedDate}
                   </span>
