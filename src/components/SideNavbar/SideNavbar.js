@@ -4,19 +4,19 @@ import "../../stylesheets/SideNavbar.css";
 
 function SideNavbar({ setQuestionsPage, setTagsPage }) {
   const handleQuestionsLinkClick = () => {
-    setQuestionsPage(true);
-    setTagsPage(false);
-  };
-
-  const handleTagsLinkClick = () => {
     setTagsPage(true);
     setQuestionsPage(false);
   };
 
+  const handleTagsLinkClick = () => {
+    setQuestionsPage(true);
+    setTagsPage(false);;
+  };
+
   return (
     <div className="sideNavbar">
-      <button className='btn-link' onClick={handleTagsLinkClick}>Questions</button>
-      <button className='btn-link' onClick={handleQuestionsLinkClick}>Tags</button>
+      <button className='btn-link' onClick={handleQuestionsLinkClick}>Questions</button>
+      <button className='btn-link' onClick={handleTagsLinkClick}>Tags</button>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import "../../stylesheets/TagsTop.css";
-import AskQuestionButton from '../QuestionsPage/AskQuestionButton';
+import AskQuestionButton from '../QuestionsPage/AskQuestionButtonForHomePage';
 import Model from '../../models/model';
 
 const TagsTop = ({ onAskQuestionPress }) => {

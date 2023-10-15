@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import "../../stylesheets/QuestionTop.css";
-import AskQuestionButton from './AskQuestionButton';
+import AskQuestionButton from './AskQuestionButtonForHomePage';
 import Filter from './Filter';
 
 const QuestionTop = ({ numOfQuestions, onAskQuestionPress }) => {
