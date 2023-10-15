@@ -2,11 +2,14 @@ import React, { useState } from "react";
 import "../../stylesheets/AnswerButton.css";
 import AnswersForm from "../AnswerForm/AnswerForm"
 
-const AnswerButton = () => {
+const AnswerButton = ({onPress }) => {
   const [showAnswersForm, setShowAnswersForm] = useState(false);
 
   const handleButtonClick = () => {
     setShowAnswersForm(!showAnswersForm);
+    if (onPress) {
+      onPress();
+    }
   };
 
   return (
