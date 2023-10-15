@@ -1,16 +1,32 @@
-// ************** THIS IS YOUR APP'S ENTRY POINT. CHANGE THIS FILE AS NEEDED. **************
-// ************** DEFINE YOUR REACT COMPONENTS in ./components directory **************
-import Header from './components/Header/Header';
-import SideNavbar from './components/SideNavbar/SideNavbar';
-import './stylesheets/App.css';
-
-
+import React, { useState } from "react";
+import Header from "./components/Header/Header";
+import SideNavbar from "./components/SideNavbar/SideNavbar";
+import MainContainer from "./components/MainPage/MainPage";
 
 function App() {
+  const [updateKey, setUpdateKey] = useState(0);
+  const [currentPage, setCurrentPage] = useState("QuestionsPage"); // Default to QuestionsPage
+  
+
+  const handleSetQuestionsPage = () => {
+    setCurrentPage("QuestionsPage");
+  };
+
+  const handleSetTagsPage = () => {
+    setCurrentPage("TagsPage");
+  };
+
   return (
     <div>
-    <Header />
-    <SideNavbar />
+      <Header />
+      <SideNavbar
+        setQuestionsPage={handleSetQuestionsPage}
+        setTagsPage={handleSetTagsPage}
+      />
+      <MainContainer
+        showQuestionsPage={currentPage === "QuestionsPage"}
+        showTagsPage={currentPage === "TagsPage"}
+      />
     </div>
   );
 }

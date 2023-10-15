@@ -1,0 +1,48 @@
+.answersContainer {
+  width: 100%;
+  height: 74.4%;
+  display: flex;
+  flex-direction: row;
+  position: absolute;
+  left: 200px;
+  top: 327px;
+  display: flex;
+  flex-direction: row;
+
+}
+
+.answersContainer .answers #answersTable {
+  width: 88%;
+  margin-left:35px;
+  margin-top: 1px;
+  border-top: 4px gray dotted;
+  border-collapse: collapse;
+}
+
+.answersContainer .answers #tr1 {
+    border-width: 3px;
+    border-bottom: 1px gray dotted;
+  }
+
+.answersContainer .answers #answerText {
+    padding-top: 40px;
+    padding-bottom: 40px;
+    font-weight: bolder;
+    width: 90%;
+}
+
+.answersContainer .answers #author {
+    width: 25%;
+    color: red;
+    padding-left: 0px;
+}
+
+.answersContainer .answers #date {
+  color: gray;
+  padding-right: 5px;
+}
+
+.answersContainer .answers .authorAndDate {
+  list-style-type: none;
+}
+
