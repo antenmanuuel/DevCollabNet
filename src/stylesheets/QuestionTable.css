@@ -3,9 +3,8 @@
     height: 725px;
     display: flex;
     flex-direction: row;
-    position:absolute;
-    left: 5px;
-    top: 200px;
+    margin-left: 5px;
+    margin-top: 200px;
     display: flex;
     flex-direction: row;
 }
@@ -19,7 +18,7 @@
   
   .questionTableContainer .question #tr1 {
     border-width: 3px;
-    border-bottom: 1px dotted grey;
+    border-bottom: 3px dotted grey;
   }
   
   .questionTableContainer .question #td1 {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AskQuestionButton from "../QuestionsPage/AskQuestionButton";
+import AskQuestionButton from "../QuestionsPage/AskQuestionButtonForSelectedPage";
 import "../../stylesheets/QuestionDetailTop.css";
 import Model from "../../models/model";
 

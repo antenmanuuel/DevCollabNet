@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Model from "../../models/model";
 import "../../stylesheets/AnswersTable.css";
 import Helper from "../../utils/Helper";
+import AnswerButton from "./AnswerButton";
 
 const AnswersTable = ({ questionId }) => {
   const [answers, setAnswers] = useState([]);
@@ -19,7 +20,7 @@ const AnswersTable = ({ questionId }) => {
   const helper = new Helper();
 
   return (
-    <div className="answersContainer">
+    
       <div className="answers">
         <table id="answersTable">
           {answers.map((answer) => (
@@ -39,7 +40,7 @@ const AnswersTable = ({ questionId }) => {
           ))}
         </table>
       </div>
-    </div>
+   
   );
 };
 

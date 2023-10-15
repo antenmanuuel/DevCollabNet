@@ -3,10 +3,9 @@
     height: 8%;
     display: flex;
     flex-direction: row;
-    position:absolute;
     display: flex;
-    left: 200px;
-    top: 75px;
+    margin-left: 200px;
+    margin-top: 75px;
     flex-direction: row;
 }
 

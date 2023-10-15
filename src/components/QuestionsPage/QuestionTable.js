@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import "../../stylesheets/QuestionTable.css";
 import Model from "../../models/model";
 import Helper from "../../utils/Helper";
-import SelectedQuestionPage from "../SelectedQuestionPage/SelectedQuestionPage";
 
 const QuestionTable = ({ updateKey, onQuestionTitleClick }) => {
   const [questionsData, setQuestionData] = useState([]);
@@ -28,6 +27,15 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick }) => {
   }, [updateKey]);
 
   const handleQuestionTitleClickLocal = (questionId) => {
+    model.incrementViewsForQuestion(questionId);
+
+    // Update local state to reflect the new views count
+    setQuestionData((prevQuestions) =>
+      prevQuestions.map((q) =>
+        q.qid === questionId ? { ...q, views: q.views + 1 } : q
+      )
+    );
+
     if (onQuestionTitleClick) {
       onQuestionTitleClick(questionId);
     }
@@ -50,7 +58,9 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick }) => {
                   <li id="title_questions">
                     <div
                       id="link_ans"
-                      onClick={() => handleQuestionTitleClickLocal(question.qid)}
+                      onClick={() =>
+                        handleQuestionTitleClickLocal(question.qid)
+                      }
                       style={{ cursor: "pointer" }}
                     >
                       <div id="paraf">{question.title}</div>
@@ -69,8 +79,7 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick }) => {
               </td>
               <td id="who_asked">
                 <p>
-                  <span style={{ color: "red" }}>{question.askedBy}</span>
-                  {" "}
+                  <span style={{ color: "red" }}>{question.askedBy}</span>{" "}
                   <span style={{ color: "gray" }}>
                     asked {question.formattedDate}
                   </span>
