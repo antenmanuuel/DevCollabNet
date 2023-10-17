@@ -8,11 +8,6 @@ export default class Helper {
     }
   }
 
-  //decision(){
-//
-  //}
-
-
   parseSearchTerm(searchTerm) {
     const tags = [];
     const nonTags = [];
