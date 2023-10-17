@@ -18,7 +18,7 @@ const QuestionDetail = ({ questionId }) => {
       <table className="questionDetails">
         <tr id="tr-ans">
           <th id="numOfViews">{question && question.views} views</th>
-          <th id="questionText">{question && question.text}</th>
+          <th id="questionText">{question && helper.renderTextWithLinks(question.text)}</th>
           <th id="author">{question && question.askedBy}</th>
           <th id="askedBy">asked {question && helper.formatDate(new Date(question.askDate))}</th>
         </tr>

@@ -2,16 +2,15 @@ import Model from "../models/model";
 export default class Helper {
   sortNewestToOldest() {
     return (a, b) => {
-        const dateA = new Date(a.askDate);
-        const dateB = new Date(b.askDate);
-        return dateB - dateA;
-    }
+      const dateA = new Date(a.askDate);
+      const dateB = new Date(b.askDate);
+      return dateB - dateA;
+    };
   }
 
   //decision(){
-//
+  //
   //}
-
 
   parseSearchTerm(searchTerm) {
     const tags = [];
@@ -76,4 +75,37 @@ export default class Helper {
       year: "numeric",
     })} at ${timeString}`;
   }
+
+  renderTextWithLinks = (text) => {
+    const hyperlinkPattern = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g;
+
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = hyperlinkPattern.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+
+      parts.push(
+        <a
+          key={match.index}
+          href={match[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {match[1]}
+        </a>
+      );
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+
+    return parts;
+  };
 }
