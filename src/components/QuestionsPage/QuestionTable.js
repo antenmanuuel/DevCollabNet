@@ -3,15 +3,15 @@ import "../../stylesheets/QuestionTable.css";
 import Model from "../../models/model";
 import Helper from "../../utils/Helper";
 
-const QuestionTable = ({ updateKey, onQuestionTitleClick, filter }) => {
+const QuestionTable = ({ updateKey, onQuestionTitleClick, filter, questions }) => {
   const [questionsData, setQuestionData] = useState([]);
   const model = Model.getInstance();
   const helper = new Helper();
 
   useEffect(() => {
-    let questions = model.getAllQuestions();
+    let fetchedQuestions = questions || model.getAllQuestions();
 
-    questions = questions.map((question) => {
+    fetchedQuestions = fetchedQuestions.map((question) => {
       const tagNames = question.tagIds.map((tagId) =>
         model.getTagNameById(tagId)
       );
@@ -25,10 +25,10 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick, filter }) => {
 
     switch (filter) {
       case 'newest':
-        questions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
+        fetchedQuestions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
         break;
       case 'active':
-        questions.sort((a, b) => {
+        fetchedQuestions.sort((a, b) => {
           const aLastAnswerDate = model.getMostRecentAnswerDateForQuestion(a);
           const bLastAnswerDate = model.getMostRecentAnswerDateForQuestion(b);
           if (aLastAnswerDate.getTime() === bLastAnswerDate.getTime()) {
@@ -38,14 +38,14 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick, filter }) => {
         });
         break;
       case 'unanswered':
-        questions = questions.filter(question => question.ansIds.length === 0);
+        fetchedQuestions = fetchedQuestions.filter(question => question.ansIds.length === 0);
         break;
       default:
-        questions.sort(helper.sortNewestToOldest());
+        fetchedQuestions.sort(helper.sortNewestToOldest());
     }
 
-    setQuestionData(questions);
-  }, [updateKey, filter]);
+    setQuestionData(fetchedQuestions);
+  }, [updateKey, filter, questions]);
 
   const handleQuestionTitleClickLocal = (questionId) => {
     model.incrementViewsForQuestion(questionId);
@@ -61,8 +61,8 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick, filter }) => {
 
   return (
     <div className="questionTableContainer">
-      <div className="question">
         <table id="question-table">
+        <div className="question">
           {questionsData.length > 0 ? 
             questionsData.map((question, index) => (
               <tr key={index} data-qid={question.qid} id="tr1">
@@ -107,15 +107,15 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick, filter }) => {
               </tr>
             ))
             : 
-            (filter === 'unanswered' && 
+            ( 
               <tr>
                 <td colSpan="3" style={{textAlign: 'center'}}>No questions found</td>
               </tr>
             )
           }
+          </div>
         </table>
       </div>
-    </div>
   );
 };
 
