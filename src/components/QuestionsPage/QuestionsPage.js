@@ -10,8 +10,7 @@ const QuestionsPage = () => {
   const model = Model.getInstance();
   const [numOfQuestions, setNumOfQuestions] = useState(0);
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
-  const [updateKey, setUpdateKey] = useState(0); // This will be our trigger for re-fetching questions
-  const [filter, setFilter] = useState('newest'); // default to 'newest'
+  const [updateKey, setUpdateKey] = useState(0); // This will be our trigger for re-fetching questions\\
   
   useEffect(() => {
     const totalQuestions = model.getAllQuestions().length;
@@ -31,10 +30,6 @@ const QuestionsPage = () => {
     setSelectedQuestionId(questionId);
   };
 
-  // This function will update the filter state based on the filter selected
-  const handleFilterChange = (selectedFilter) => {
-    setFilter(selectedFilter);
-  }
 
   if (!isQuestionPageVisible) {
     if (showQuestionsForm) {
@@ -47,16 +42,8 @@ const QuestionsPage = () => {
 
   return (
     <div className="questionContainer">
-      <QuestionTop 
-        numOfQuestions={numOfQuestions} 
-        onAskQuestionPress={handleAskQuestionPress} 
-        setFilter={handleFilterChange} // Pass the filter change handler to QuestionTop
-      />
-      <QuestionTable 
-        updateKey={updateKey} 
-        onQuestionTitleClick={handleQuestionTitleClick} 
-        filter={filter} // Pass the current filter to the QuestionTable
-      />
+      <QuestionTop numOfQuestions={numOfQuestions} onAskQuestionPress={handleAskQuestionPress} />
+      <QuestionTable updateKey={updateKey} onQuestionTitleClick={handleQuestionTitleClick} />
     </div>
   );
 };

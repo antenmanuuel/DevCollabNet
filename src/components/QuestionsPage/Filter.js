@@ -1,19 +1,19 @@
 import React from "react";
 import "../../stylesheets/Filter.css";
-const Filter = ({ onSetFilter }) => {
+const Filter = () => {
   return (
     <div className="nau">
       <table id="nau-table">
         <tbody>
           <tr>
             <th id="nauth1">
-              <button id="NauB1" onClick={() => onSetFilter('newest')}>Newest</button>
+              <button id="NauB1">Newest</button>
             </th>
             <th id="nauth2">
-              <button id="NauB2" onClick={() => onSetFilter('active')}>Active</button>
+              <button id="NauB2">Active</button>
             </th>
             <th id="nauth3">
-              <button id="NauB3" onClick={() => onSetFilter('unanswered')}>Unanswered</button>
+              <button id="NauB3">Unanswered</button>
             </th>
           </tr>
         </tbody>
