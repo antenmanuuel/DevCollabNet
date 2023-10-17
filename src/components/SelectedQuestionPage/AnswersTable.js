@@ -22,10 +22,10 @@ const AnswersTable = ({ questionId }) => {
   return (
     
       <div className="answers">
-        <table id="answersTable">
+        <table className="answersTable">
           {answers.map((answer) => (
             <tr key={answer.aid} id="tr1">
-              <td id="answerText">{answer.text}</td>
+              <td id="answerText">{helper.renderTextWithLinks(answer.text)}</td>
               <td>
                 <ul className="authorAndDate">
                   <li id="author">

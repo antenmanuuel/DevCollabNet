@@ -8,7 +8,7 @@
   align-items: stretch;
 }
 
- .answers #answersTable {
+ .answers .answersTable {
   width: 96%;
   margin-left:30px;
   margin-top: 1px;
@@ -25,6 +25,18 @@
     width: 50%;
     overflow: auto;
 }
+
+.answers .answersTable #answerText a {
+  color: #007bff; /* Sets the link color */
+  text-decoration: none; /* Removes the underline */
+  transition: color 0.3s; /* Smooth color transition for hover effect */
+}
+
+.answers .answersTable #answerText a:hover {
+  color: #0056b3; /* Darkens the link color on hover */
+  text-decoration: underline; /* Underlines the link on hover */
+}
+
 
  .answers #author {
     color: red;

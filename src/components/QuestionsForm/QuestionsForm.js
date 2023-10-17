@@ -39,6 +39,27 @@ const QuestionsForm = (props) => {
       formData.questionText.trim() === ""
         ? "Question text cannot be empty."
         : "";
+
+    // Hyperlink validation
+    // Hyperlink validation
+    const hyperlinkPattern = /\[([^\[]+?)\]\((https?:\/\/[^\s]+?)\)/g;
+    let match;
+    let hyperlinkError = "";
+    while ((match = hyperlinkPattern.exec(formData.questionText)) !== null) {
+      if (!match[1]) {
+        hyperlinkError = "The name of the hyperlink cannot be empty.";
+        break;
+      } else if (
+        !match[2].startsWith("http://") &&
+        !match[2].startsWith("https://")
+      ) {
+        hyperlinkError = "Hyperlink must begin with 'http://' or 'https://'.";
+        break;
+      }
+    }
+
+    // ... rest of your code
+
     const tags = formData.tags.trim().split(/\s+/);
     const tagsError =
       formData.tags.trim() === ""
@@ -51,10 +72,16 @@ const QuestionsForm = (props) => {
     const usernameError =
       formData.username.trim() === "" ? "Username cannot be empty." : "";
 
-    if (titleError || textError || tagsError || usernameError) {
+    if (
+      titleError ||
+      textError ||
+      tagsError ||
+      usernameError ||
+      hyperlinkError
+    ) {
       setErrors({
         questionTitleError: titleError,
-        questionTextError: textError,
+        questionTextError: textError || hyperlinkError,
         tagsError: tagsError,
         usernameError: usernameError,
       });
@@ -74,7 +101,6 @@ const QuestionsForm = (props) => {
 
     model.addQuestion(newQuestion);
 
- 
     if (props.onQuestionAdded) {
       props.onQuestionAdded();
     }
@@ -89,8 +115,8 @@ const QuestionsForm = (props) => {
     setIsFormSubmitted(true);
   };
 
-  if(isFormSubmitted) {
-    return <QuestionsPage />
+  if (isFormSubmitted) {
+    return <QuestionsPage />;
   }
 
   return (
