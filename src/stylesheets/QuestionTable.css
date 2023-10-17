@@ -10,7 +10,7 @@
 }
 
 
-.questionTableContainer .question #question-table {
+.questionTableContainer  #question-table .question {
     margin-left: 20px;
     border-collapse: collapse;
     width: 100%;
