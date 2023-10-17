@@ -4,6 +4,7 @@ import SideNavbar from "./components/SideNavbar/SideNavbar";
 import MainContainer from "./components/MainPage/MainPage";
 
 function App() {
+  //currentpage - current state, setcurrentpage function that updates current state
   const [currentPage, setCurrentPage] = useState("QuestionsPage"); // Default to QuestionsPage
   const [questionsKey, setQuestionsKey] = useState(0); // This will be used to force a rerender
 
