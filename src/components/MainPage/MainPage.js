@@ -1,14 +1,16 @@
-import React from 'react'
+import React from 'react';
 import QuestionsPage from '../QuestionsPage/QuestionsPage';
 import TagsPage from '../TagsPage/TagsPage';
-import "../../stylesheets/MainPage.css"
-const MainPage = ({showQuestionsPage, showTagsPage}) => {
+import "../../stylesheets/MainPage.css";
+
+const MainPage = ({ showQuestionsPage, showTagsPage, searchTerm}) => { 
   return (
     <div className='mainPage'>
-      {showQuestionsPage && <QuestionsPage />}
+      {showQuestionsPage && <QuestionsPage searchTerm={searchTerm} />} 
       {showTagsPage && <TagsPage />}
     </div>
-  )
+  );
 }
 
-export default MainPage
+
+export default MainPage;

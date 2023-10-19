@@ -4,28 +4,39 @@ import SideNavbar from "./components/SideNavbar/SideNavbar";
 import MainContainer from "./components/MainPage/MainPage";
 
 function App() {
-  //currentpage - current state, setcurrentpage function that updates current state
-  const [currentPage, setCurrentPage] = useState("QuestionsPage"); // Default to QuestionsPage
-  const [questionsKey, setQuestionsKey] = useState(0); // This will be used to force a rerender
+  const [currentPage, setCurrentPage] = useState("QuestionsPage"); 
+  const [questionsKey, setQuestionsKey] = useState(0); 
+  const [searchTerm, setSearchTermState] = useState("");
 
   const handleSetQuestionsPage = () => {
     setCurrentPage("QuestionsPage");
-    setQuestionsKey(prevKey => prevKey + 1);  // Increment the key to force rerender
+    setQuestionsKey(prevKey => prevKey + 1);  
   };
 
   const handleSetTagsPage = () => {
     setCurrentPage("TagsPage");
   };
 
+  const handleSearch = (term) => {
+    setSearchTermState(term);
+    if (currentPage === "TagsPage") {
+      setCurrentPage("QuestionsPage");
+    } else {
+      setCurrentPage("TagsPage");
+      setTimeout(() => setCurrentPage("QuestionsPage"), 1); // delay to ensure re-render
+    }
+  };
+
   return (
     <div>
-      <Header/>
+      <Header setSearchTerm={handleSearch} currentPage={currentPage} /> 
       <SideNavbar
         setQuestionsPage={handleSetQuestionsPage}
         setTagsPage={handleSetTagsPage}
       />
       <MainContainer
-        key={questionsKey} // Use the key to rerender the component
+        key={questionsKey} 
+        searchTerm={searchTerm} 
         showQuestionsPage={currentPage === "QuestionsPage"}
         showTagsPage={currentPage === "TagsPage"}
       />
