@@ -29,10 +29,29 @@ const AnswerForm = (props) => {
     const textError =
       formData.answerText.trim() === "" ? "Answer text cannot be empty." : "";
 
-    if (usernameError || textError) {
+    // Hyperlink validation
+    const hyperlinkPattern = /\[([^\[]+?)\]\((https?:\/\/[^\s]+?)\)/g;
+    let match;
+    let hyperlinkError = "";
+    while ((match = hyperlinkPattern.exec(formData.answerText)) !== null) {
+      if (!match[1]) {
+        hyperlinkError = "The name of the hyperlink cannot be empty.";
+        break;
+      } else if (
+        !match[2].startsWith("http://") &&
+        !match[2].startsWith("https://")
+      ) {
+        hyperlinkError = "Hyperlink must begin with 'http://' or 'https://'.";
+        break;
+      }
+    }
+
+    // ... rest of your code
+
+    if (usernameError || textError || hyperlinkError) {
       setErrors({
         usernameError: usernameError,
-        answerTextError: textError,
+        answerTextError: textError || hyperlinkError,
       });
       return;
     }
@@ -64,13 +83,16 @@ const AnswerForm = (props) => {
       <form className="answersForm" onSubmit={handleFormSubmit}>
         <label id="answersText">Answer Text*</label>
         <h4 id="answerTextErrorMessage">Add details</h4>
-        <textarea 
-          id="answerTextBox" 
-          name="answerText" 
+        <textarea
+          id="answerTextBox"
+          name="answerText"
           value={formData.answerText}
           onChange={handleInputChange}
         ></textarea>
-        <span id="answerTextError" style={{ display: errors.answerTextError ? "block" : "none" }}>
+        <span
+          id="answerTextError"
+          style={{ display: errors.answerTextError ? "block" : "none" }}
+        >
           {errors.answerTextError}
         </span>
 
@@ -81,7 +103,10 @@ const AnswerForm = (props) => {
           value={formData.username}
           onChange={handleInputChange}
         ></textarea>
-        <span id="usernameErrorForAnswer" style={{ display: errors.usernameError ? "block" : "none" }}>
+        <span
+          id="usernameErrorForAnswer"
+          style={{ display: errors.usernameError ? "block" : "none" }}
+        >
           {errors.usernameError}
         </span>
 
