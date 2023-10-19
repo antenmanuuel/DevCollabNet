@@ -68,8 +68,8 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick, filter, questions }) =
               <tr key={index} data-qid={question.qid} id="tr1">
                 <td id="td1">
                   <ul>
-                    <li id="num_ans">{question.ansIds.length} answers</li>
-                    <li id="num_ques">{question.views} views</li>
+                    <li id="num_ans"style={{paddingLeft:"30px"}}>{question.ansIds.length} answers</li>
+                    <li id="num_ques"style={{paddingLeft:"30px"}}>{question.views} views</li>
                   </ul>
                 </td>
                 <td id="td2">
