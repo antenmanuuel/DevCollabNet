@@ -1,4 +1,5 @@
 /* ask question button */
+
 #askQuestionButtonSP {
   background-color: rgb(15, 170, 205);
   border: none;
@@ -7,12 +8,13 @@
   padding: 10px;
   border-width: 2px;
   color: white;
-  display: flex;
-  margin-left: 140px;
-  margin-top: 20px;
-  flex-direction: column;
+  display: flexbox;
   border-style: solid;
   cursor: pointer;
   text-decoration: none;
   text-align: center;
+  position: absolute;
+
+  right: 20px;
+  top: 90px;
 }
