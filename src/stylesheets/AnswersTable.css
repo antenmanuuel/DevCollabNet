@@ -30,6 +30,7 @@
     font-weight: bolder;
     width: 50%;
     overflow: auto;
+    padding-left: 10px;
 }
 
 .answers .answersTable #answerText a {
