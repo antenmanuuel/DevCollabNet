@@ -1,24 +1,31 @@
 .answers {
   width: 89%;
   height: 40%;
-  display: flex;
-  flex-direction: row;
+  display: inline-block;
   margin-left: 200px;
   align-items: stretch;
+ 
 
 }
- .answers #answersTable {
+ .answers .answersTable {
   width: 100%;
   margin-left:20px;
   margin-top: 1px;
   border-collapse: collapse;
+  border-bottom: 3px gray dotted;
 }
+
 
  .answers #tr1 {
     border-width: 3px;
     border-bottom: 3px gray dotted;
-    
   }
+
+.answers td{
+  border-collapse: collapse;
+  border-bottom: 3px gray dotted;
+}
+
 .answers #answerText {
     font-weight: bolder;
     width: 50%;
