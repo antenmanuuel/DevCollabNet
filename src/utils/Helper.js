@@ -1,4 +1,6 @@
 import Model from "../models/model";
+
+
 export default class Helper {
   sortNewestToOldest() {
     return (a, b) => {
@@ -8,11 +10,8 @@ export default class Helper {
     };
   }
 
-  //decision(){
-  //
-  //}
-
   parseSearchTerm(searchTerm) {
+    const modelInstance = Model.getInstance();
     const tags = [];
     const nonTags = [];
     let buffer = "";
@@ -27,7 +26,7 @@ export default class Helper {
         buffer += char;
       } else if (char === "]") {
         buffer += char;
-        if (Model.isValidTag(buffer.slice(1, -1).toLowerCase())) {
+        if (modelInstance.isValidTag(buffer.slice(1, -1).toLowerCase())) {
           tags.push(buffer);
         } else {
           nonTags.push(buffer);
