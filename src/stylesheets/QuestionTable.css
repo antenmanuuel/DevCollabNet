@@ -1,21 +1,28 @@
 .questionTableContainer {
     width: 100%;
     height: 725px;
-    display: flex;
-    flex-direction: row;
+    display: block;
+    /*flex-direction: row;*/
     margin-left: 5px;
     margin-top: 200px;
-    display: flex;
-    flex-direction: row;
+    /*display: flex;
+    flex-direction: row;*/
+}
+
+.questionTableContainer .question {
+  border-collapse: collapse;
+  width: 100%;
 }
 
 
-.questionTableContainer  #question-table .question {
+
+
+/*.questionTableContainer  #question-table .question {
     margin-left: 20px;
     border-collapse: collapse;
     width: 100%;
-  }
-  
+  }*/
+
   .questionTableContainer .question #tr1 {
     border-width: 3px;
     border-bottom: 3px dotted grey;

@@ -1,9 +1,7 @@
 .mainPage {
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: row;
+  display: block;
   position: absolute;
-  display: flex;
-  flex-direction: row;
+
 }
