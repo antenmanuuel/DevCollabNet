@@ -109,7 +109,7 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick, filter, questions }) =
             : 
             ( 
               <tr>
-                <td colSpan="3" style={{textAlign: 'center'}}>No questions found</td>
+                <td colSpan="3" style={{textAlign: 'center', paddingLeft:"30px", paddingTop:"30px"}}>No questions found</td>
               </tr>
             )
           }
