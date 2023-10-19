@@ -1,0 +1,17 @@
+#answerButton {
+    background-color: rgb(15, 170, 205);
+    border: none;
+    width: 150px;
+    font-size: 16px;
+    padding: 10px;
+    border-width: 2px;
+    color: white;
+    display: flex;
+    margin-left: 250px;
+    margin-top:150px;
+    flex-direction: row;
+    border-style: solid;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+}

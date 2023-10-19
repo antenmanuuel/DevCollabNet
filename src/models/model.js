@@ -1,5 +1,9 @@
 export default class Model {
+  static instance = null;
   constructor() {
+    if (Model.instance) {
+      return Model.instance;
+    }
     this.data = {
       questions: [
         {
@@ -76,6 +80,15 @@ export default class Model {
         },
       ],
     };
+    Model.instance = this;
+  }
+
+  // Method to get a shared instance
+  static getInstance() {
+    if (!Model.instance) {
+      Model.instance = new Model();
+    }
+    return Model.instance;
   }
 
   // QUESTIONS METHODS
@@ -94,7 +107,6 @@ export default class Model {
   addQuestion(question) {
     this.data.questions.push(question);
   }
-
 
   // TAGS METHODS
 
@@ -132,17 +144,27 @@ export default class Model {
     this.data.tags.push(tag);
   }
 
-
-// gets the count of questions associated with a given tagName.
+  // gets the count of questions associated with a given tagName.
   getQuestionsCountForTag(tagName) {
     const tagId = this.getTagIdByName(tagName);
-    return this.data.questions.filter((question) => question.tagIds.includes(tagId)).length;
+    return this.data.questions.filter((question) =>
+      question.tagIds.includes(tagId)
+    ).length;
   }
 
-  
- // Checks if a given tagName exists in the 'tags' data.
+  // Increments the views for a specific question by 1
+  incrementViewsForQuestion(qid) {
+    const question = this.getQuestionById(qid);
+    if (question) {
+      question.views += 1;
+    }
+  }
+
+  // Checks if a given tagName exists in the 'tags' data.
   isValidTag(tagName) {
-    return this.data.tags.some(t => t.name.toLowerCase() === tagName.toLowerCase());
+    return this.data.tags.some(
+      (t) => t.name.toLowerCase() === tagName.toLowerCase()
+    );
   }
 
   // ANSWERS METHODS
@@ -162,10 +184,10 @@ export default class Model {
     this.data.answers.push(answer);
   }
 
-// gets the most recent answer date for a given question.
+  // gets the most recent answer date for a given question.
   getMostRecentAnswerDateForQuestion(question) {
     const answers = question.ansIds.map((ansId) => this.getAnswerById(ansId));
-    if (!answers.length) return new Date(0); 
+    if (!answers.length) return new Date(0);
     answers.sort((a, b) => new Date(b.ansDate) - new Date(a.ansDate));
     return new Date(answers[0].ansDate);
   }

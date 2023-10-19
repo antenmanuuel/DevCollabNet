@@ -6,6 +6,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center; 
+    cursor: pointer;
 }
 
 .container {
@@ -27,6 +28,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center; 
+    
 }
 
 
