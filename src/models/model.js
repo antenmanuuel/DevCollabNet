@@ -108,6 +108,13 @@ export default class Model {
     this.data.questions.push(question);
   }
 
+  // Return the count of unanswered questions
+  getUnansweredQuestionsCount() {
+    return this.data.questions.filter(
+      (question) => question.ansIds.length === 0
+    ).length;
+  }
+
   // TAGS METHODS
 
   // Return all tags
