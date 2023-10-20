@@ -10,7 +10,6 @@ In the sections below, list and describe each contribution briefly.
 * Created and Implemented Question Form with validation
 * Implement posting the questions data to the model and dynamically show that question on questions page
 * Implemented dynamic rendering of Questions table
-* Implement dynamically showing questions details after the question titled is clicked
 * Implemented dynamically showing question details and its answers to a question after clicking on the title
 * Implement adding an answer to answer model and dynamically showing the answer for that particular question
 
