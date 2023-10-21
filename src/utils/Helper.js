@@ -1,6 +1,5 @@
 import Model from "../models/model";
 
-
 export default class Helper {
   sortNewestToOldest() {
     return (a, b) => {
@@ -76,27 +75,36 @@ export default class Helper {
   }
 
   renderTextWithLinks = (text) => {
-    const hyperlinkPattern = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g;
+    const hyperlinkPattern = /\[([^\]]*?)\]\((https?:\/\/[^\s]+?)\)/g;
 
     const parts = [];
     let lastIndex = 0;
     let match;
 
     while ((match = hyperlinkPattern.exec(text)) !== null) {
+      const linkName = match[1].trim();
+      const linkURL = match[2];
+
       if (match.index > lastIndex) {
         parts.push(text.substring(lastIndex, match.index));
       }
 
-      parts.push(
-        <a
-          key={match.index}
-          href={match[2]}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {match[1]}
-        </a>
-      );
+      if (
+        linkName &&
+        !/\[.*\]/.test(linkName) &&
+        (linkURL.startsWith("http://") || linkURL.startsWith("https://"))
+      ) {
+        parts.push(
+          <a
+            key={match.index}
+            href={linkURL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {linkName}
+          </a>
+        );
+      }
 
       lastIndex = match.index + match[0].length;
     }
