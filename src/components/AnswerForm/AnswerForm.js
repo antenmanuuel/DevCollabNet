@@ -29,29 +29,48 @@ const AnswerForm = (props) => {
     const textError =
       formData.answerText.trim() === "" ? "Answer text cannot be empty." : "";
 
-    // Hyperlink validation
-    const hyperlinkPattern = /\[([^\[]+?)\]\((https?:\/\/[^\s]+?)\)/g;
-    let match;
     let hyperlinkError = "";
-    while ((match = hyperlinkPattern.exec(formData.answerText)) !== null) {
-      if (!match[1]) {
-        hyperlinkError = "The name of the hyperlink cannot be empty.";
-        break;
-      } else if (
-        !match[2].startsWith("http://") &&
-        !match[2].startsWith("https://")
-      ) {
-        hyperlinkError = "Hyperlink must begin with 'http://' or 'https://'.";
-        break;
+
+    const allHyperLinks =
+      formData.answerText.match(/\[[^\]]*\]\([^)]*\)/g) || [];
+    const validHyperLinks =
+      formData.answerText.match(/\[[^\]]*\]\((https?:\/\/[^)]*)\)/g) || [];
+
+    if (allHyperLinks.length !== validHyperLinks.length) {
+      for (let i = 0; i < allHyperLinks.length; i++) {
+        const singleLinkPattern = /\[([^\]]*?)\]\(([^)]+)\)/;
+        const match = allHyperLinks[i].match(singleLinkPattern);
+
+        if (match) {
+          if (!match[1].trim()) {
+            hyperlinkError = "The name of the hyperlink cannot be empty.";
+            break;
+          }
+
+          if (/\[.*\]/.test(match[1])) {
+            hyperlinkError =
+              "Link name should not contain nested square brackets.";
+            break;
+          }
+
+          if (
+            !match[2].startsWith("http://") &&
+            !match[2].startsWith("https://")
+          ) {
+            hyperlinkError =
+              "Hyperlink must begin with 'http://' or 'https://'.";
+            break;
+          }
+        }
       }
     }
 
-    // ... rest of your code
+    const error = hyperlinkError ? hyperlinkError : textError;
 
-    if (usernameError || textError || hyperlinkError) {
+    if (usernameError || error) {
       setErrors({
         usernameError: usernameError,
-        answerTextError: textError || hyperlinkError,
+        answerTextError: error,
       });
       return;
     }

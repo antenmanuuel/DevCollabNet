@@ -40,25 +40,43 @@ const QuestionsForm = (props) => {
         ? "Question text cannot be empty."
         : "";
 
-    // Hyperlink validation
-    // Hyperlink validation
-    const hyperlinkPattern = /\[([^\[]+?)\]\((https?:\/\/[^\s]+?)\)/g;
-    let match;
     let hyperlinkError = "";
-    while ((match = hyperlinkPattern.exec(formData.questionText)) !== null) {
-      if (!match[1]) {
-        hyperlinkError = "The name of the hyperlink cannot be empty.";
-        break;
-      } else if (
-        !match[2].startsWith("http://") &&
-        !match[2].startsWith("https://")
-      ) {
-        hyperlinkError = "Hyperlink must begin with 'http://' or 'https://'.";
-        break;
+
+    const allHyperLinks =
+      formData.questionText.match(/\[[^\]]*\]\([^)]*\)/g) || [];
+    const validHyperLinks =
+      formData.questionText.match(/\[[^\]]*\]\((https?:\/\/[^)]*)\)/g) || [];
+
+    if (allHyperLinks.length !== validHyperLinks.length) {
+      for (let i = 0; i < allHyperLinks.length; i++) {
+        const singleLinkPattern = /\[([^\]]*?)\]\(([^)]+)\)/;
+        const match = allHyperLinks[i].match(singleLinkPattern);
+
+        if (match) {
+          if (!match[1].trim()) {
+            hyperlinkError = "The name of the hyperlink cannot be empty.";
+            break;
+          }
+
+          if (/\[.*\]/.test(match[1])) {
+            hyperlinkError =
+              "Link name should not contain nested square brackets.";
+            break;
+          }
+
+          if (
+            !match[2].startsWith("http://") &&
+            !match[2].startsWith("https://")
+          ) {
+            hyperlinkError =
+              "Hyperlink must begin with 'http://' or 'https://'.";
+            break;
+          }
+        }
       }
     }
 
-    // ... rest of your code
+    const errror = hyperlinkError ? hyperlinkError : textError;
 
     const tags = formData.tags.trim().split(/\s+/);
     const tagsError =
@@ -72,16 +90,10 @@ const QuestionsForm = (props) => {
     const usernameError =
       formData.username.trim() === "" ? "Username cannot be empty." : "";
 
-    if (
-      titleError ||
-      textError ||
-      tagsError ||
-      usernameError ||
-      hyperlinkError
-    ) {
+    if (titleError || errror || tagsError || usernameError) {
       setErrors({
         questionTitleError: titleError,
-        questionTextError: textError || hyperlinkError,
+        questionTextError: errror,
         tagsError: tagsError,
         usernameError: usernameError,
       });
