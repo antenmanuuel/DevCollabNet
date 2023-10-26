@@ -1,9 +1,10 @@
+// ********************* DO NOT CHANGE THIS FILE *********************
 import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import FakeStackOverflow from './components/fakestackoverflow.js';
+import ReactDOM from 'react-dom/client';
+import './stylesheets/index.css';
+import App from './App';
 
-ReactDOM.render(
-  <FakeStackOverflow />,
-  document.getElementById('root')
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <App />
 );
