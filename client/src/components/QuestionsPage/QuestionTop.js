@@ -1,23 +1,25 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import "../../stylesheets/QuestionTop.css";
 import AskQuestionButton from './AskQuestionButtonForHomePage';
 import Filter from './Filter';
-import Model from "../../models/model";
+import axios from 'axios'; 
 
-const QuestionTop = ({ numOfQuestions, onAskQuestionPress, setFilter, searchTerm }) => {
-  const [questionCount, setQuestionCount] = useState(numOfQuestions);
-  const [unansweredCount, setUnansweredCount] = useState(0); 
-
-  const model = Model.getInstance();
+const QuestionTop = ({ onAskQuestionPress, setFilter, searchTerm }) => {
+  const [questionCount, setQuestionCount] = useState(0);
 
   useEffect(() => {
-    setQuestionCount(numOfQuestions);
+    // Fetch the count of all questions using axios
+    axios.get('http://localhost:8000/posts/questions')
+      .then(response => {
+        setQuestionCount(response.data.length);
+      })
+      .catch(error => {
+        console.error("Error fetching all questions count:", error);
+      });
 
-    const unansweredQuestionsCount = model.getUnansweredQuestionsCount();
-    setUnansweredCount(unansweredQuestionsCount);
+  }, []);
 
-  }, [numOfQuestions]);
-
+  /*
   const handleFilterChange = useCallback((newFilter) => {
     setFilter(newFilter);
     if (newFilter === 'unanswered') {
@@ -26,13 +28,14 @@ const QuestionTop = ({ numOfQuestions, onAskQuestionPress, setFilter, searchTerm
       setQuestionCount(numOfQuestions);
     }
   }, [setFilter, unansweredCount, numOfQuestions]);
+  */
 
   return (
     <div className='questionTop'>
         <h1 id='allQuestionID'>  {searchTerm ? 'Search Results' : 'All Questions'}</h1>
         <AskQuestionButton onPress={onAskQuestionPress}/>
         <h4 id='numQuestion'>{`${questionCount} Questions`}</h4>
-        <Filter onSetFilter={handleFilterChange} />
+        <Filter onSetFilter={() => {}} /> {/* Temporarily passing an empty function */}
     </div>
   );
 }

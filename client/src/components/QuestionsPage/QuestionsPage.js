@@ -2,64 +2,52 @@ import React, { useState, useEffect, useCallback } from "react";
 import "../../stylesheets/QuestionsPage.css";
 import QuestionTop from "./QuestionTop";
 import QuestionTable from "./QuestionTable";
-import Model from "../../models/model";
+import axios from 'axios'; 
 import QuestionsForm from "../QuestionsForm/QuestionsForm";
 import SelectedQuestionPage from "../SelectedQuestionPage/SelectedQuestionPage";
-import Helper from "../../utils/Helper";
 
-const QuestionsPage = ({ questions, searchTerm, setSearchTerm }) => {
-  const model = Model.getInstance();
-  const helper = new Helper();
-  
+const QuestionsPage = () => {
   const [numOfQuestions, setNumOfQuestions] = useState(0);
-  const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [updateKey, setUpdateKey] = useState(0);
-  const [filter, setFilter] = useState('newest');
-  const [filteredQuestions, setFilteredQuestions] = useState([]);
-
-  const fetchQuestions = useCallback(() => {
-    const allQuestions = questions || model.getAllQuestions();
-    let fetchedQuestions = [...allQuestions];
-
-    if (searchTerm) {
-      const parsedTerms = helper.parseSearchTerm(searchTerm);
-      const tags = parsedTerms.tags.map((tag) => tag.slice(1, -1).toLowerCase());
-
-      fetchedQuestions = fetchedQuestions.filter((question) => {
-        const title = question.title.toLowerCase();
-        const text = question.text.toLowerCase();
-        const tagNames = question.tagIds.map((tagId) => model.getTagNameById(tagId).toLowerCase());
-        const matchesSearchWords = parsedTerms.nonTags.some((word) => title.includes(word) || text.includes(word));
-        const matchesTags = tags.some((tag) => tagNames.includes(tag));
-        return matchesSearchWords || matchesTags;
-      });
-    }
-
-    setFilteredQuestions(fetchedQuestions);
-    setNumOfQuestions(fetchedQuestions.length);
-  }, [questions, searchTerm]);
-
-  useEffect(fetchQuestions, [fetchQuestions]);
-
   const [isQuestionPageVisible, setIsQuestionPageVisible] = useState(true);
+  const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [showQuestionsForm, setShowQuestionsForm] = useState(false);
+
+  useEffect(() => {
+    // Fetch the count of all questions using axios
+    axios.get('http://localhost:8000/posts/questions')
+      .then(response => {
+        setNumOfQuestions(response.data.length);
+      })
+      .catch(error => {
+        console.error("Error fetching all questions count:", error);
+      });
+  }, []);
 
   const handleAskQuestionPress = useCallback(() => {
     setIsQuestionPageVisible(false);
     setShowQuestionsForm((prev) => !prev);
   }, []);
 
-  const handleQuestionTitleClick = useCallback((questionId) => {
-    setIsQuestionPageVisible(false);
-    setSelectedQuestionId(questionId);
-  }, []);
-
-  const handleFilterChange = useCallback((selectedFilter) => {
-    setFilter(selectedFilter);
+  const handleFilterChange = useCallback(() => {
+    // Temporarily empty as filter logic is commented out
   }, []);
 
   const handleQuestionAdded = useCallback(() => {
     setUpdateKey((prevKey) => prevKey + 1);
+  }, []);
+
+
+  const handleQuestionTitleClick = useCallback((questionId) => {
+    axios.patch(`http://localhost:8000/posts/questions/incrementViews/${questionId}`)
+      .then(() => {
+        setUpdateKey((prevKey) => prevKey + 1);  // Trigger a re-fetch of data
+      })
+      .catch(error => {
+        console.error("Error incrementing views:", error);
+      });
+      setIsQuestionPageVisible(false);
+      setSelectedQuestionId(questionId);
   }, []);
 
   if (!isQuestionPageVisible) {
@@ -67,7 +55,7 @@ const QuestionsPage = ({ questions, searchTerm, setSearchTerm }) => {
       return (
         <QuestionsForm 
           onQuestionAdded={handleQuestionAdded}
-          setSearchTerm={setSearchTerm}
+          // setSearchTerm={setSearchTerm}
         />
       );
     }
@@ -81,14 +69,13 @@ const QuestionsPage = ({ questions, searchTerm, setSearchTerm }) => {
       <QuestionTop 
         numOfQuestions={numOfQuestions} 
         onAskQuestionPress={handleAskQuestionPress} 
-        setFilter={handleFilterChange}
-        searchTerm={searchTerm}
+        // setFilter={handleFilterChange}
+        // searchTerm={searchTerm}
       />
       <QuestionTable 
-        updateKey={updateKey} 
         onQuestionTitleClick={handleQuestionTitleClick} 
-        filter={filter}
-        questions={filteredQuestions}
+        // filter={filter}
+        // questions={filteredQuestions}
       />
     </div>
   );

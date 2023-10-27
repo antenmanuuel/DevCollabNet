@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import "../../stylesheets/AnswerForm.css";
 import SubmitAnswerButton from "../SelectedQuestionPage/SubmitAnswerButton";
-import Model from "../../models/model";
-
-const model = Model.getInstance();
+import axios from "axios";
 
 const AnswerForm = (props) => {
   const [formData, setFormData] = useState({
@@ -75,26 +73,24 @@ const AnswerForm = (props) => {
       return;
     }
 
-    const currentQuestion = model.getQuestionById(props.questionId); // Use the passed questionId prop here
-
-    const newAnswer = {
-      aid: "a" + (model.getAllAnswers().length + 1),
-      text: formData.answerText,
-      ansBy: formData.username,
-      ansDate: new Date(),
-    };
-
-    model.addAnswer(newAnswer);
-    currentQuestion.ansIds.push(newAnswer.aid);
-
-    if (props.onAnswerAdded) {
-      props.onAnswerAdded();
-    }
-
-    setFormData({
-      username: "",
-      answerText: "",
-    });
+    axios
+      .post("http://localhost:8000/posts/answers/answerQuestion", {
+        text: formData.answerText,
+        ansBy: formData.username,
+        qid: props.questionId,
+      })
+      .then((response) => {
+        if (props.onAnswerAdded) {
+          props.onAnswerAdded();
+        }
+        setFormData({
+          username: "",
+          answerText: "",
+        });
+      })
+      .catch((error) => {
+        console.error("Error posting answer:", error);
+      });
   };
 
   return (
