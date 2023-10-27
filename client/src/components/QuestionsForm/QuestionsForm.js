@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import Model from "../../models/model";
 import "../../stylesheets/QuestionForm.css";
 import SubmitQuestionButton from "../QuestionsPage/SubmitQuestionButton";
 import QuestionsPage from "../QuestionsPage/QuestionsPage";
-
-const model = new Model();
+import axios from "axios";
 
 const QuestionsForm = (props) => {
   const [formData, setFormData] = useState({
@@ -28,7 +26,7 @@ const QuestionsForm = (props) => {
     setFormData((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleFormSubmit = (event) => {
+  const handleFormSubmit =  async (event) => {
     event.preventDefault();
 
     const titleError =
@@ -100,31 +98,38 @@ const QuestionsForm = (props) => {
       return;
     }
 
+     // Fetching tag Ids for the given tag names
+     const tagNames = formData.tags.split(/\s+/);
+
     const newQuestion = {
-      qid: "q" + (model.getAllQuestions().length + 1),
       title: formData.title,
       text: formData.questionText,
-      tagIds: tags.map((tag) => model.getTagIdByName(tag.toLowerCase())),
+      tagIds: tagNames, 
       askedBy: formData.username,
-      askDate: new Date(),
-      ansIds: [],
       views: 0,
     };
 
-    model.addQuestion(newQuestion);
+     // Submit the new question using axios
+     try {
+      await axios.post('http://localhost:8000/posts/questions/askQuestion', newQuestion);
 
-    if (props.onQuestionAdded) {
-      props.onQuestionAdded();
+      if (props.onQuestionAdded) {
+        props.onQuestionAdded();
+      }
+
+      setFormData({
+        title: "",
+        questionText: "",
+        tags: "",
+        username: "",
+      });
+
+      setIsFormSubmitted(true);
+    } catch (error) {
+      console.error("Error submitting the question:", error);
     }
 
-    setFormData({
-      title: "",
-      questionText: "",
-      tags: "",
-      username: "",
-    });
-
-    setIsFormSubmitted(true);
+    
   };
 
   if (isFormSubmitted) {

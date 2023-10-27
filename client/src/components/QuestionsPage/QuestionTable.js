@@ -1,75 +1,66 @@
 import React, { useEffect, useState } from "react";
 import "../../stylesheets/QuestionTable.css";
-import Model from "../../models/model";
 import Helper from "../../utils/Helper";
+import axios from "axios";
 
-const QuestionTable = ({ updateKey, onQuestionTitleClick, filter, questions }) => {
+const QuestionTable = ({ updateKey, filter, onQuestionTitleClick }) => {
   const [questionsData, setQuestionData] = useState([]);
-  const model = Model.getInstance();
   const helper = new Helper();
 
   useEffect(() => {
-    let fetchedQuestions = questions || model.getAllQuestions();
-
-    fetchedQuestions = fetchedQuestions.map((question) => {
-      const tagNames = question.tagIds.map((tagId) =>
-        model.getTagNameById(tagId)
-      );
-      const formattedDate = helper.formatDate(new Date(question.askDate));
-      return {
-        ...question,
-        tagNames,
-        formattedDate,
-      };
-    });
-
-    switch (filter) {
-      case 'newest':
-        fetchedQuestions.sort((a, b) => new Date(b.askDate) - new Date(a.askDate));
-        break;
-      case 'active':
-        fetchedQuestions.sort((a, b) => {
-          const aLastAnswerDate = model.getMostRecentAnswerDateForQuestion(a);
-          const bLastAnswerDate = model.getMostRecentAnswerDateForQuestion(b);
-          if (aLastAnswerDate.getTime() === bLastAnswerDate.getTime()) {
-            return new Date(b.askDate) - new Date(a.askDate);
-          }
-          return bLastAnswerDate - aLastAnswerDate;
+    axios.get('http://localhost:8000/posts/tags')
+      .then(response => {
+        const tagMap = {};
+        response.data.forEach(tag => {
+          tagMap[tag._id] = tag.name;
         });
-        break;
-      case 'unanswered':
-        fetchedQuestions = fetchedQuestions.filter(question => question.ansIds.length === 0);
-        break;
-      default:
-        fetchedQuestions.sort(helper.sortNewestToOldest());
-    }
-
-    setQuestionData(fetchedQuestions);
-  }, [updateKey, filter, questions]);
+        return tagMap;
+      })
+      .then(tagMap => {
+        const endpoint = 'http://localhost:8000/posts/questions';
+        return axios.get(endpoint).then(response => ({ questions: response.data, tagMap }));
+      })
+      .then(({ questions, tagMap }) => {
+        const processedQuestions = questions.map(question => ({
+          ...question,
+          tagNames: question.tags.map(tagId => tagMap[tagId] || "Unknown Tag"),
+          formattedDate: helper.formatDate(new Date(question.ask_date_time))
+        }));
+        setQuestionData(processedQuestions);
+      })
+      .catch(error => {
+        console.error("Error:", error);
+      });
+  }, [updateKey, filter]);
 
   const handleQuestionTitleClickLocal = (questionId) => {
-    model.incrementViewsForQuestion(questionId);
-    setQuestionData((prevQuestions) =>
-      prevQuestions.map((question) =>
-        question.qid === questionId ? { ...question, views: question.views + 1 } : question
-      )
-    );
-    if (onQuestionTitleClick) {
-      onQuestionTitleClick(questionId);
-    }
+    axios.patch(`http://localhost:8000/posts/questions/incrementViews/${questionId}`)
+      .then(response => {
+        setQuestionData((prevQuestions) =>
+          prevQuestions.map((question) =>
+            question._id === questionId ? { ...question, views: question.views + 1 } : question
+          )
+        );
+        if (onQuestionTitleClick) {
+          onQuestionTitleClick(questionId);
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+      });
   };
 
   return (
     <div className="questionTableContainer">
-        <table id="question-table">
+      <table id="question-table">
         <div className="question">
           {questionsData.length > 0 ? 
             questionsData.map((question, index) => (
-              <tr key={index} data-qid={question.qid} id="tr1">
+              <tr key={index} data-qid={question._id} id="tr1">
                 <td id="td1">
                   <ul>
-                    <li id="num_ans"style={{paddingLeft:"30px"}}>{question.ansIds.length} answers</li>
-                    <li id="num_ques"style={{paddingLeft:"30px"}}>{question.views} views</li>
+                    <li id="num_ans" style={{paddingLeft:"30px"}}>{question.answers.length} answers</li>
+                    <li id="num_ques" style={{paddingLeft:"30px"}}>{question.views} views</li>
                   </ul>
                 </td>
                 <td id="td2">
@@ -77,9 +68,7 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick, filter, questions }) =
                     <li id="title_questions">
                       <div
                         id="link_ans"
-                        onClick={() =>
-                          handleQuestionTitleClickLocal(question.qid)
-                        }
+                        onClick={() => handleQuestionTitleClickLocal(question._id)}
                         style={{ cursor: "pointer" }}
                       >
                         <div id="paraf">{question.title}</div>
@@ -98,7 +87,7 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick, filter, questions }) =
                 </td>
                 <td id="who_asked">
                   <p>
-                    <span style={{ color: "red" }}>{question.askedBy}</span>{" "}
+                    <span style={{ color: "red" }}>{question.asked_by}</span>{" "}
                     <span style={{ color: "gray" }}>
                       asked {question.formattedDate}
                     </span>
@@ -113,9 +102,9 @@ const QuestionTable = ({ updateKey, onQuestionTitleClick, filter, questions }) =
               </tr>
             )
           }
-          </div>
-        </table>
-      </div>
+        </div>
+      </table>
+    </div>
   );
 };
 
