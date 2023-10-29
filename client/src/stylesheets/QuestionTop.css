@@ -1,0 +1,19 @@
+.questionTop {
+    width: 100%;
+    height: 200px;
+    border-bottom-style: dotted;
+    border-color: gray;
+    position: absolute;
+}
+
+.questionTop #allQuestionID {
+    padding-left: 60px;
+    
+}
+
+.questionTop #numQuestion {
+    padding-left: 60px;
+    padding-top: 20px;
+ 
+}
+
