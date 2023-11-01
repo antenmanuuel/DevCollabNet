@@ -69,7 +69,8 @@ router.get("/tag_id/:tag_id/questions/:filter?", async (req, res) => {
 
     let finalQuestions;
 
-    // Apply filtering based on route parameters
+    // filtering based on route parameters for tags
+    
     switch (req.params.filter) {
       case "newest":
         query = query.sort({ ask_date_time: -1 });
