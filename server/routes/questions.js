@@ -77,6 +77,69 @@ router.get("/newest", async (req, res) => {
   }
 });
 
+// Route to get the questions by newest filter
+router.get("/newest", async (req, res) => {
+  try {
+    const result = await Questions.find().sort({ ask_date_time: -1 }).exec();
+    res.send(result);
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+// Route to get the questions by unanswered filter
+router.get("/unanswered", async (req, res, next) => {
+  try {
+    const result = await Questions.find({ answers: { $size: 0 } }).sort({
+      ask_date_time: -1,
+    });
+    res.send(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+async function getLatestAnswerDate(answerIds){
+  const answerDates = await Answers.find(
+    {
+      _id: { $in: answerIds},
+    },
+    "ans_date_time"
+  );
+  return Math.max(...answerDates.map((a) => a.ans_date_time));
+}
+
+
+// Route to get the questions by active filter
+router.get("/active", async (req, res, next) => {
+  try {
+    const allQuestions = await Questions.find().sort({ ask_date_time: -1 }).lean().exec();
+
+    for (let question of allQuestions) {
+      if(question.answers && question.answers.length > 0 ){
+        question.latestAnswerDate = await getLatestAnswerDate(question.answers);
+      }
+    }
+
+    const questionsWithAnswers = allQuestions.filter(q => q.latestAnswerDate);
+    const questionsWithoutAnswers = allQuestions.filter(q => !q.latestAnswerDate);
+
+    questionsWithAnswers.sort((a,b) => b.latestAnswerDate - a.latestAnswerDate);
+    
+    const sortedQuestions = [...questionsWithAnswers, ...questionsWithoutAnswers];
+
+    res.send(sortedQuestions)
+
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+
+
+
+
 // Route to increment the view count for a question
 router.patch("/incrementViews/:question", async (req, res) => {
   try {
