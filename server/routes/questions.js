@@ -3,6 +3,7 @@ const router = express.Router();
 
 const Questions = require("../models/questions");
 const Tags = require("../models/tags");
+const Answers = require("../models/answers");
 
 // Error handling middleware
 const handleError = (err, res) => {
@@ -10,7 +11,7 @@ const handleError = (err, res) => {
   res.status(500).send("Internal Server Error");
 };
 
-// Utility function to create or fetch a tag based on its name
+// helper function to create or fetch a tag based on its name
 const createOrFetchTag = async (tagName) => {
   let tag = await Tags.findOne({ name: tagName }).exec();
   if (!tag) {
@@ -21,7 +22,7 @@ const createOrFetchTag = async (tagName) => {
 };
 
 // Route to fetch all questions
-router.get("/", async ( _, res) => {
+router.get("/", async (_, res) => {
   try {
     const questions = await Questions.find().exec();
     res.send(questions);
@@ -31,14 +32,76 @@ router.get("/", async ( _, res) => {
 });
 
 // Route to get the count of unanswered questions
-router.get("/unanswered/count", async ( _ , res) => {
-    try {
-      const unansweredCount = await Questions.countDocuments({ answers: { $size: 0 } }).exec();
-      res.send({ count: unansweredCount });
-    } catch (err) {
-      handleError(err, res);
+router.get("/unanswered/count", async (_, res) => {
+  try {
+    const unansweredCount = await Questions.countDocuments({
+      answers: { $size: 0 },
+    }).exec();
+    res.send({ count: unansweredCount });
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+// Route to get the questions by newest filter
+router.get("/newest", async (req, res) => {
+  try {
+    const result = await Questions.find().sort({ ask_date_time: -1 }).exec();
+    res.send(result);
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+// Get the latest answer date for a list of answer ids corresponding to a particular question
+async function getLatestAnswerDate(answerIds) {
+  const answerDates = await Answers.find(
+    {
+      _id: { $in: answerIds },
+    },
+    "ans_date_time"
+  );
+
+  return Math.max(...answerDates.map((a) => a.ans_date_time));
+}
+
+// route to filter by active questions filter
+router.get("/active", async (req, res, next) => {
+  try {
+    const allQuestions = await Questions.find()
+      .sort({ ask_date_time: -1 })
+      .lean()
+      .exec();
+    for (let question of allQuestions) {
+      if (question.answers && question.answers.length > 0) {
+        question.latestAnswerDate = await getLatestAnswerDate(question.answers);
+      }
     }
-  });
+    const questionsWithAnswers = allQuestions.filter((q) => q.latestAnswerDate);
+    const questionsWithoutAnswers = allQuestions.filter(
+      (q) => !q.latestAnswerDate
+    );
+    questionsWithAnswers.sort(
+      (a, b) => b.latestAnswerDate - a.latestAnswerDate
+    );
+    const sortedQuestions = [...questionsWithAnswers,...questionsWithoutAnswers,];
+    res.send(sortedQuestions);
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+// route to unanswered questions filter
+router.get("/unanswered", async (req, res, next) => {
+  try {
+    const result = await Questions.find({ answers: { $size: 0 } }).sort({
+      ask_date_time: -1,
+    });
+    res.send(result);
+  } catch (err) {
+    handleError(err, res);
+  }
+});
 
 // Route to fetch a question by its ID
 router.get("/:question", async (req, res) => {
@@ -67,14 +130,8 @@ router.post("/askQuestion", async (req, res) => {
   }
 });
 
-// Route to get the questions by newest filter
-router.get("/newest", async (req, res) => {
-  try {
-    const result = await Questions.find().sort({ ask_date_time: -1 }).exec();
-    res.send(result);
-  } catch (err) {
-    handleError(err, res);
-  }
+router.use((err, req, res, next) => {
+  handleError(err, res);
 });
 
 // Route to increment the view count for a question
