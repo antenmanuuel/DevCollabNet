@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import "../../stylesheets/TagsTop.css";
 import AskQuestionButton from '../QuestionsPage/AskQuestionButtonForHomePage';
-import Model from '../../models/model';
 
 const TagsTop = ({ onAskQuestionPress }) => {
-  const model = new Model();
   const [numOfTags, setNumOfTags] = useState(0);
 
   useEffect(() => {
-    const tags = model.getAllTags();
-    setNumOfTags(tags.length);
-  }, []); // added dependency array to prevent infinite loop
+    //fetch tags from the server
+    axios.get('http://localhost:8000/posts/tags')
+      .then(response => {
+        setNumOfTags(response.data.length);
+      })
+      .catch(error => {
+        console.error('Error fetching tags:', error);
+      });
+  }, []); 
 
   return (
     <div className='tagsTop'>
