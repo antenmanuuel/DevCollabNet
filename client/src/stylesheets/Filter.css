@@ -1,0 +1,47 @@
+/*Filter Button Styles */
+.nau #nau-table,
+#nauth1,
+#nauth2,
+#nauth3 {
+  margin-left: 1025px;
+  margin-bottom: 100px;
+  font-size: 16px;
+  border: 1px solid;
+  border-collapse: collapse;
+  z-index: 0;
+  padding: 0;
+}
+
+.nau #NauB1,
+#NauB2,
+#NauB3 {
+  border: none;
+  background-color: white;
+  display: inline-block;
+  padding-bottom: 4px;
+  padding-top: 4px;
+  padding-left: 8px;
+  z-index: 1;
+  cursor: pointer;
+}
+
+
+.nau #NauB1:hover:not(.active),
+.nau #NauB2:hover:not(.active),
+.nau #NauB3:hover:not(.active) {
+  background-color: whitesmoke;
+}
+
+.nau #NauB1.active,
+.nau #NauB2.active,
+.nau #NauB3.active {
+  background-color:gray; 
+
+}
+
+.nau {
+  display: flex;
+  flex-direction: row;
+  width: 200px;
+  height: 100px;
+}

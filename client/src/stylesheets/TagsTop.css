@@ -1,0 +1,14 @@
+.tagsTop {
+    width: 100%;
+    height: 100px;
+   
+}
+.tagsTop #numTags {
+    padding-left: 60px;
+}
+
+.tagsTop #allTags {
+    position: absolute;
+    top: 6px;
+    left:500px;
+}

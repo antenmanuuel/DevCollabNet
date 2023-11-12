@@ -1,0 +1,43 @@
+/* Sidebar Styles */
+.sideNavbar {
+    height: 100%; 
+    width: 200px; 
+    position: absolute;
+    z-index: 1; 
+    top: 80px; 
+    left: 3px;
+    background-color: white; 
+    padding-top: 20px;
+    border-right-style: dotted;
+    border-color: gray;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 4k Screens */
+@media (min-width: 3840px) {
+    .sideNavbar {
+        width: 300px;
+        top: 100px;
+        left: 5px;
+    }
+}
+
+/* 1440p Screens */
+@media (min-width: 2560px) and (max-width: 3839px) {
+    .sideNavbar {
+        width: 250px;
+        top: 75px;
+        left: 4px;
+    }
+}
+
+/* 1080p Screens */
+@media (min-width: 1920px) and (max-width: 2559px) {
+    .sideNavbar {
+        width: 220px;
+        top: 75px;
+        left: 3.5px;
+    }
+}
