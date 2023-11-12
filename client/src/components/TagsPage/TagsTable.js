@@ -1,18 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import "../../stylesheets/TagsTable.css";
-import Model from '../../models/model';
 
 const TagsTable = ({ onTagSelected }) => {
-  const model = Model.getInstance();
   const [tagsData, setTagsData] = useState([]);
 
   useEffect(() => {
-    const tags = model.getAllTags();
-    const preparedTags = tags.map(tag => ({
-      name: tag.name,
-      count: model.getQuestionsCountForTag(tag.name)
-    }));
-    setTagsData(preparedTags);
+    axios.get('http://localhost:8000/posts/tags')
+      .then(response => {
+        const tags = response.data;
+
+        // Fetch count of questions for each tag
+        const fetchCounts = tags.map(tag => {
+          return axios.get(`http://localhost:8000/posts/tags/tag_id/${tag._id}/questions`)
+            .then(questionsResponse => {
+              return { name: tag.name, count: questionsResponse.data.length };
+            });
+        });
+
+        Promise.all(fetchCounts).then(preparedTags => {
+          setTagsData(preparedTags);
+        });
+      })
+      .catch(error => {
+        console.error('Error fetching tags:', error);
+      });
   }, []);
 
   const handleTagClick = (tagName) => {
@@ -39,7 +51,7 @@ const TagsTable = ({ onTagSelected }) => {
                       href="#" 
                       className="tag-link" 
                       onClick={(e) => {
-                        e.preventDefault(); // Prevent default anchor behavior
+                        e.preventDefault(); 
                         handleTagClick(tag.name);
                       }}
                     >

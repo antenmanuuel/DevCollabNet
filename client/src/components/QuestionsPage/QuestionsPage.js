@@ -2,60 +2,61 @@ import React, { useState, useEffect, useCallback } from "react";
 import "../../stylesheets/QuestionsPage.css";
 import QuestionTop from "./QuestionTop";
 import QuestionTable from "./QuestionTable";
-import axios from 'axios'; 
+import axios from "axios";
 import QuestionsForm from "../QuestionsForm/QuestionsForm";
 import SelectedQuestionPage from "../SelectedQuestionPage/SelectedQuestionPage";
 
-const QuestionsPage = () => {
+const QuestionsPage = ({ selectedTag = null, searchTerm, setSearchTerm }) => {
+  const [, setQuestions] = useState([]); 
   const [numOfQuestions, setNumOfQuestions] = useState(0);
   const [updateKey, setUpdateKey] = useState(0);
   const [isQuestionPageVisible, setIsQuestionPageVisible] = useState(true);
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [showQuestionsForm, setShowQuestionsForm] = useState(false);
+  const [filter, setFilter] = useState("newest");
+  
 
   useEffect(() => {
-    // Fetch the count of all questions using axios
-    axios.get('http://localhost:8000/posts/questions')
-      .then(response => {
+    let fetchUrl = "http://localhost:8000/posts/questions";
+    if (selectedTag) {
+      fetchUrl = `http://localhost:8000/posts/tags/tag_id/${selectedTag}/questions`;
+    }
+
+    axios
+      .get(fetchUrl)
+      .then((response) => {
+        setQuestions(response.data);
         setNumOfQuestions(response.data.length);
       })
-      .catch(error => {
-        console.error("Error fetching all questions count:", error);
+      .catch((error) => {
+        console.error("Error fetching questions:", error);
       });
-  }, []);
+  }, [selectedTag, updateKey]);
 
   const handleAskQuestionPress = useCallback(() => {
     setIsQuestionPageVisible(false);
     setShowQuestionsForm((prev) => !prev);
   }, []);
 
-  const handleFilterChange = useCallback(() => {
-    // Temporarily empty as filter logic is commented out
+  const handleFilterChange = useCallback((selectedFilter) => {
+    setFilter(selectedFilter);
   }, []);
 
   const handleQuestionAdded = useCallback(() => {
     setUpdateKey((prevKey) => prevKey + 1);
   }, []);
 
-
   const handleQuestionTitleClick = useCallback((questionId) => {
-    axios.patch(`http://localhost:8000/posts/questions/incrementViews/${questionId}`)
-      .then(() => {
-        setUpdateKey((prevKey) => prevKey + 1);  // Trigger a re-fetch of data
-      })
-      .catch(error => {
-        console.error("Error incrementing views:", error);
-      });
-      setIsQuestionPageVisible(false);
-      setSelectedQuestionId(questionId);
+    setIsQuestionPageVisible(false);
+    setSelectedQuestionId(questionId);
   }, []);
 
   if (!isQuestionPageVisible) {
     if (showQuestionsForm) {
       return (
-        <QuestionsForm 
+        <QuestionsForm
           onQuestionAdded={handleQuestionAdded}
-          // setSearchTerm={setSearchTerm}
+          setSearchTerm={setSearchTerm}
         />
       );
     }
@@ -66,16 +67,18 @@ const QuestionsPage = () => {
 
   return (
     <div className="questionContainer">
-      <QuestionTop 
-        numOfQuestions={numOfQuestions} 
-        onAskQuestionPress={handleAskQuestionPress} 
-        // setFilter={handleFilterChange}
-        // searchTerm={searchTerm}
+      <QuestionTop
+        numOfQuestions={numOfQuestions}
+        onAskQuestionPress={handleAskQuestionPress}
+        setFilter={handleFilterChange}
+        selectedTag={selectedTag}
+        searchTerm={searchTerm}
       />
-      <QuestionTable 
-        onQuestionTitleClick={handleQuestionTitleClick} 
-        // filter={filter}
-        // questions={filteredQuestions}
+      <QuestionTable
+        onQuestionTitleClick={handleQuestionTitleClick}
+        filter={filter}
+        selectedTag={selectedTag}
+        searchTerm={searchTerm}
       />
     </div>
   );
