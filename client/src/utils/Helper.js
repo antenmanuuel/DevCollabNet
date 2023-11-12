@@ -1,5 +1,4 @@
-import Model from "../models/model";
-
+import axios from "axios";
 export default class Helper {
   sortNewestToOldest() {
     return (a, b) => {
@@ -9,23 +8,24 @@ export default class Helper {
     };
   }
 
-  parseSearchTerm(searchTerm) {
-    const modelInstance = Model.getInstance();
+  async parseSearchTerm(searchTerm) {
+    const allTags = await this.fetchAllTags();
+    const tagNames = allTags.map((tag) => tag.name.toLowerCase());
     const tags = [];
-    const nonTags = [];
+    let nonTags = [];
     let buffer = "";
 
     for (let i = 0; i < searchTerm.length; i++) {
       const char = searchTerm[i];
       if (char === "[") {
         if (buffer) {
-          nonTags.push(buffer.trim());
+          nonTags.push(...buffer.trim().split(' ')); // Split by space here
           buffer = "";
         }
         buffer += char;
       } else if (char === "]") {
         buffer += char;
-        if (modelInstance.isValidTag(buffer.slice(1, -1).toLowerCase())) {
+        if (tagNames.includes(buffer.slice(1, -1).toLowerCase())) {
           tags.push(buffer);
         } else {
           nonTags.push(buffer);
@@ -34,13 +34,50 @@ export default class Helper {
       } else {
         buffer += char;
         if (i === searchTerm.length - 1) {
-          nonTags.push(buffer.trim());
+          nonTags.push(...buffer.trim().split(' ')); // Split by space here
         }
       }
     }
 
+    // Filter out any empty nonTags
+    nonTags = nonTags.filter(tag => tag !== '');
+
     return { tags, nonTags };
+}
+
+
+  async fetchAllTags() {
+    try {
+      const response = await axios.get("http://localhost:8000/posts/tags");
+      return response.data;
+    } catch (error) {
+      console.error("Failed to fetch tags:", error);
+      return [];
+    }
   }
+
+  async filterQuestionsBySearchTerm(searchTerm, questions) {
+    const allTags = await this.fetchAllTags();
+    const tagsMap = {};
+    allTags.forEach((tag) => {
+      tagsMap[tag._id] = tag.name.toLowerCase();
+    });
+  
+    const parsedTerms = await this.parseSearchTerm(searchTerm);
+    const tags = parsedTerms.tags.map((tag) => tag.slice(1, -1).toLowerCase());
+  
+    return questions.filter((question) => {
+      const title = question.title.toLowerCase();
+      const text = question.text.toLowerCase();
+      const tagNames = question.tags.map((tagId) => tagsMap[tagId] || "");
+      const matchesSearchWords = parsedTerms.nonTags.some(
+        (word) => title.includes(word) || text.includes(word)
+      );
+      const matchesTags = tags.some((tag) => tagNames.includes(tag));
+      return matchesSearchWords || matchesTags;
+    });
+  }
+  
 
   formatDate(postTime) {
     const now = new Date();
