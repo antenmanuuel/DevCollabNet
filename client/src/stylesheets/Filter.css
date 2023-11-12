@@ -11,6 +11,7 @@
   z-index: 0;
   padding: 0;
 }
+
 .nau #NauB1,
 #NauB2,
 #NauB3 {
@@ -24,15 +25,18 @@
   cursor: pointer;
 }
 
-/* When you mouse over the navigation links, change their color */
-.nau #NauB2:hover:not(.active) {
-  background-color: lightgray;
-}
-.nau #NauB1:hover:not(.active) {
-  background-color: lightgray;
-}
+
+.nau #NauB1:hover:not(.active),
+.nau #NauB2:hover:not(.active),
 .nau #NauB3:hover:not(.active) {
-  background-color: lightgray;
+  background-color: whitesmoke;
+}
+
+.nau #NauB1.active,
+.nau #NauB2.active,
+.nau #NauB3.active {
+  background-color:gray; 
+
 }
 
 .nau {
