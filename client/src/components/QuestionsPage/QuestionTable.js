@@ -1,51 +1,92 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import "../../stylesheets/QuestionTable.css";
 import Helper from "../../utils/Helper";
 import axios from "axios";
 
-const QuestionTable = ({ updateKey, filter, onQuestionTitleClick }) => {
+const QuestionTable = ({
+  updateKey,
+  filter,
+  onQuestionTitleClick,
+  selectedTag,
+  questions,
+  searchTerm,
+}) => {
   const [questionsData, setQuestionData] = useState([]);
   const helper = new Helper();
 
-  useEffect(() => {
-    axios.get('http://localhost:8000/posts/tags')
-      .then(response => {
-        const tagMap = {};
-        response.data.forEach(tag => {
-          tagMap[tag._id] = tag.name;
-        });
-        return tagMap;
-      })
-      .then(tagMap => {
-        const endpoint = 'http://localhost:8000/posts/questions';
-        return axios.get(endpoint).then(response => ({ questions: response.data, tagMap }));
-      })
-      .then(({ questions, tagMap }) => {
-        const processedQuestions = questions.map(question => ({
-          ...question,
-          tagNames: question.tags.map(tagId => tagMap[tagId] || "Unknown Tag"),
-          formattedDate: helper.formatDate(new Date(question.ask_date_time))
-        }));
-        setQuestionData(processedQuestions);
-      })
-      .catch(error => {
-        console.error("Error:", error);
+  const fetchQuestions = useCallback(async () => {
+    let endpoint = "http://localhost:8000/posts/questions";
+
+    
+    if (selectedTag) {
+      endpoint = `http://localhost:8000/posts/tags/tag_id/${selectedTag}/questions`;
+    }
+
+    
+    if (filter) {
+      switch (filter) {
+        case "newest":
+          endpoint += "/newest";
+          break;
+        case "active":
+          endpoint += "/active";
+          break;
+        case "unanswered":
+          endpoint += "/unanswered";
+          break;
+        default:
+          break;
+      }
+    }
+
+    try {
+      const tagResponse = await axios.get("http://localhost:8000/posts/tags");
+      const tagMap = {};
+      tagResponse.data.forEach((tag) => {
+        tagMap[tag._id] = tag.name;
       });
-  }, [updateKey, filter]);
+
+      const questionResponse = await axios.get(endpoint);
+      let filteredQuestions = questionResponse.data;
+
+      if (searchTerm) {
+        filteredQuestions = await helper.filterQuestionsBySearchTerm(searchTerm, filteredQuestions);
+      }
+
+      const processedQuestions = filteredQuestions.map((question) => ({
+        ...question,
+        tagNames: question.tags.map((tagId) => tagMap[tagId] || "Unknown Tag"),
+        formattedDate: helper.formatDate(new Date(question.ask_date_time)),
+      }));
+
+      setQuestionData(processedQuestions);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }, [updateKey, filter, selectedTag, questions, searchTerm]);
+
+  useEffect(() => {
+    fetchQuestions();
+  }, [fetchQuestions]);
 
   const handleQuestionTitleClickLocal = (questionId) => {
-    axios.patch(`http://localhost:8000/posts/questions/incrementViews/${questionId}`)
-      .then(response => {
+    axios
+      .patch(
+        `http://localhost:8000/posts/questions/incrementViews/${questionId}`
+      )
+      .then(() => {
         setQuestionData((prevQuestions) =>
           prevQuestions.map((question) =>
-            question._id === questionId ? { ...question, views: question.views + 1 } : question
+            question._id === questionId
+              ? { ...question, views: question.views + 1 }
+              : question
           )
         );
         if (onQuestionTitleClick) {
           onQuestionTitleClick(questionId);
         }
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error:", error);
       });
   };
@@ -54,13 +95,17 @@ const QuestionTable = ({ updateKey, filter, onQuestionTitleClick }) => {
     <div className="questionTableContainer">
       <table id="question-table">
         <div className="question">
-          {questionsData.length > 0 ? 
+          {questionsData.length > 0 ? (
             questionsData.map((question, index) => (
               <tr key={index} data-qid={question._id} id="tr1">
                 <td id="td1">
                   <ul>
-                    <li id="num_ans" style={{paddingLeft:"30px"}}>{question.answers.length} answers</li>
-                    <li id="num_ques" style={{paddingLeft:"30px"}}>{question.views} views</li>
+                    <li id="num_ans" style={{ paddingLeft: "30px" }}>
+                      {question.answers.length} answers
+                    </li>
+                    <li id="num_ques" style={{ paddingLeft: "30px" }}>
+                      {question.views} views
+                    </li>
                   </ul>
                 </td>
                 <td id="td2">
@@ -68,7 +113,9 @@ const QuestionTable = ({ updateKey, filter, onQuestionTitleClick }) => {
                     <li id="title_questions">
                       <div
                         id="link_ans"
-                        onClick={() => handleQuestionTitleClickLocal(question._id)}
+                        onClick={() =>
+                          handleQuestionTitleClickLocal(question._id)
+                        }
                         style={{ cursor: "pointer" }}
                       >
                         <div id="paraf">{question.title}</div>
@@ -95,13 +142,20 @@ const QuestionTable = ({ updateKey, filter, onQuestionTitleClick }) => {
                 </td>
               </tr>
             ))
-            : 
-            ( 
-              <tr>
-                <td colSpan="3" style={{textAlign: 'center', paddingLeft:"30px", paddingTop:"30px"}}>No questions found</td>
-              </tr>
-            )
-          }
+          ) : (
+            <tr>
+              <td
+                colSpan="3"
+                style={{
+                  textAlign: "center",
+                  paddingLeft: "30px",
+                  paddingTop: "30px",
+                }}
+              >
+                No questions found
+              </td>
+            </tr>
+          )}
         </div>
       </table>
     </div>
