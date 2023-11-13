@@ -46,6 +46,7 @@
   .questionTableContainer .question #td1 {
     font-size: 16px;
     color: grey;
+    padding-right:235px;
   }
   
   .questionTableContainer .question ul {
