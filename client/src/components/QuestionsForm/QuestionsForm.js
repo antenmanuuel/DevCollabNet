@@ -26,15 +26,18 @@ const QuestionsForm = (props) => {
     setFormData((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleFormSubmit =  async (event) => {
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
 
     const titleError =
-      formData.title.length === 0 || formData.title.length > 100
+      formData.title.length === 0 ||
+      formData.title.length > 100 ||
+      formData.questionText.match(/^\s*$/) !== null
         ? "Title should be between 1 and 100 characters."
         : "";
     const textError =
-      formData.questionText.trim() === ""
+      formData.questionText.trim() === "" ||
+      formData.title.match(/^\s*$/) !== null
         ? "Question text cannot be empty."
         : "";
 
@@ -98,20 +101,23 @@ const QuestionsForm = (props) => {
       return;
     }
 
-     // Fetching tag Ids for the given tag names
-     const tagNames = formData.tags.split(/\s+/);
+    // Fetching tag Ids for the given tag names
+    const tagNames = formData.tags.split(/\s+/);
 
     const newQuestion = {
       title: formData.title,
       text: formData.questionText,
-      tagIds: tagNames, 
+      tagIds: tagNames,
       askedBy: formData.username,
       views: 0,
     };
 
-     // Submit the new question using axios
-     try {
-      await axios.post('http://localhost:8000/posts/questions/askQuestion', newQuestion);
+    // Submit the new question using axios
+    try {
+      await axios.post(
+        "http://localhost:8000/posts/questions/askQuestion",
+        newQuestion
+      );
 
       if (props.onQuestionAdded) {
         props.onQuestionAdded();
@@ -128,8 +134,6 @@ const QuestionsForm = (props) => {
     } catch (error) {
       console.error("Error submitting the question:", error);
     }
-
-    
   };
 
   if (isFormSubmitted) {
