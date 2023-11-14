@@ -12,10 +12,11 @@ const QuestionTop = ({
   selectedTag,
 }) => {
   const [questionCount, setQuestionCount] = useState(0);
-  const helper = new Helper();
+
 
   const fetchQuestionCount = useCallback(
     async (filter) => {
+      const helper = new Helper();
       let endpoint = "http://localhost:8000/posts/questions";
       if (selectedTag) {
         endpoint = `http://localhost:8000/posts/tags/tag_id/${selectedTag}/questions`;

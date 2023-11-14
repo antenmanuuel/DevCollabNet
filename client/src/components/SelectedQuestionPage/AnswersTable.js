@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../../stylesheets/AnswersTable.css";
 import Helper from "../../utils/Helper";
-import AnswerButton from "./AnswerButton";
 
 const AnswersTable = ({ questionId }) => {
   const [answers, setAnswers] = useState([]);
