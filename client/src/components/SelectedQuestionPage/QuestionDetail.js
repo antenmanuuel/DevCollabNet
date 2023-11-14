@@ -21,12 +21,14 @@ const QuestionDetail = ({ questionId }) => {
   return (
     <div className="questionDetailContainer">
       <table className="questionDetails">
+        <tbody>
         <tr id="tr-ans">
           <th id="numOfViews">{question && question.views} views</th>
           <th id="questionText">{question && helper.renderTextWithLinks(question.text)}</th>
           <th id="author">{question && question.asked_by}</th>
           <th id="askedBy">asked {question && helper.formatDate(new Date(question.ask_date_time))}</th>
         </tr>
+        </tbody>
       </table>
     </div>
   );
