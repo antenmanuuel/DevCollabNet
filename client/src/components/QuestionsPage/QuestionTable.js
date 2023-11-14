@@ -12,9 +12,10 @@ const QuestionTable = ({
   searchTerm,
 }) => {
   const [questionsData, setQuestionData] = useState([]);
-  const helper = new Helper();
+
 
   const fetchQuestions = useCallback(async () => {
+    const helper = new Helper();
     let endpoint = "http://localhost:8000/posts/questions";
 
     
@@ -63,7 +64,7 @@ const QuestionTable = ({
     } catch (error) {
       console.error("Error:", error);
     }
-  }, [updateKey, filter, selectedTag, questions, searchTerm]);
+  }, [filter, selectedTag, searchTerm]);
 
   useEffect(() => {
     fetchQuestions();
@@ -94,7 +95,7 @@ const QuestionTable = ({
   return (
     <div className="questionTableContainer">
       <table id="question-table">
-        <div className="question">
+        <tbody>
           {questionsData.length > 0 ? (
             questionsData.map((question, index) => (
               <tr key={index} data-qid={question._id} id="tr1">
@@ -147,7 +148,7 @@ const QuestionTable = ({
               <td
                 colSpan="3"
                 style={{
-                  textAlign: "center",
+                  textAlign: "left",
                   paddingLeft: "30px",
                   paddingTop: "30px",
                 }}
@@ -156,7 +157,7 @@ const QuestionTable = ({
               </td>
             </tr>
           )}
-        </div>
+          </tbody>
       </table>
     </div>
   );

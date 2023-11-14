@@ -23,9 +23,9 @@ const AnswerForm = (props) => {
     event.preventDefault();
 
     const usernameError =
-      formData.username.trim() === "" ? "Username cannot be empty" : "";
+      formData.username.trim() === "" || formData.username.match(/^\s*$/) !== null ? "Username cannot be empty" : "" ;
     const textError =
-      formData.answerText.trim() === "" ? "Answer text cannot be empty." : "";
+      formData.answerText.trim() === "" || formData.answerText.match(/^\s*$/) !== null ? "Answer text cannot be empty." : "";
 
     let hyperlinkError = "";
 

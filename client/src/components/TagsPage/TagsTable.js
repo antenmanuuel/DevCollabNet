@@ -41,14 +41,14 @@ const TagsTable = ({ onTagSelected }) => {
   return (
     <div className="TagsPage">
       <table id="TagsTable">
+      <tbody>
         {rows.map((row, rowIndex) => (
           <tr key={rowIndex}>
             {row.map((tag, tagIndex) => (
               <td key={tagIndex} className="tag-container">
                 <ul className="tag-list">
                   <li className="tag-name">
-                    <a 
-                      href="#" 
+                    <div 
                       className="tag-link" 
                       onClick={(e) => {
                         e.preventDefault(); 
@@ -56,7 +56,7 @@ const TagsTable = ({ onTagSelected }) => {
                       }}
                     >
                       {tag.name}
-                    </a>
+                    </div>
                   </li>
                   <li className="tag-count">{tag.count} Questions</li>
                 </ul>
@@ -64,6 +64,7 @@ const TagsTable = ({ onTagSelected }) => {
             ))}
           </tr>
         ))}
+        </tbody>
       </table>
     </div>
   );

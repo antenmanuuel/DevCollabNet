@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../../stylesheets/AnswersTable.css";
 import Helper from "../../utils/Helper";
-import AnswerButton from "./AnswerButton";
 
 const AnswersTable = ({ questionId }) => {
   const [answers, setAnswers] = useState([]);
@@ -23,6 +22,7 @@ const AnswersTable = ({ questionId }) => {
   return (
     <div className="answers">
       <table className="answersTable">
+      <tbody>
         {answers.map((answer) => (
           <tr key={answer._id} id="tr1">
             <td id="answerText">{helper.renderTextWithLinks(answer.text)}</td>
@@ -38,6 +38,7 @@ const AnswersTable = ({ questionId }) => {
             </td>
           </tr>
         ))}
+        </tbody>
       </table>
     </div>
   );
