@@ -12,9 +12,10 @@ const QuestionTable = ({
   searchTerm,
 }) => {
   const [questionsData, setQuestionData] = useState([]);
-  const helper = new Helper();
+
 
   const fetchQuestions = useCallback(async () => {
+    const helper = new Helper();
     let endpoint = "http://localhost:8000/posts/questions";
 
     
@@ -63,7 +64,7 @@ const QuestionTable = ({
     } catch (error) {
       console.error("Error:", error);
     }
-  }, [updateKey, filter, selectedTag, questions, searchTerm]);
+  }, [filter, selectedTag, searchTerm]);
 
   useEffect(() => {
     fetchQuestions();
