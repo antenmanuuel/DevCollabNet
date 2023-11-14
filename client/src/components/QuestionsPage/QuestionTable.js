@@ -94,7 +94,7 @@ const QuestionTable = ({
   return (
     <div className="questionTableContainer">
       <table id="question-table">
-        <div className="question">
+        <tbody>
           {questionsData.length > 0 ? (
             questionsData.map((question, index) => (
               <tr key={index} data-qid={question._id} id="tr1">
@@ -147,7 +147,7 @@ const QuestionTable = ({
               <td
                 colSpan="3"
                 style={{
-                  textAlign: "center",
+                  textAlign: "left",
                   paddingLeft: "30px",
                   paddingTop: "30px",
                 }}
@@ -156,7 +156,7 @@ const QuestionTable = ({
               </td>
             </tr>
           )}
-        </div>
+          </tbody>
       </table>
     </div>
   );
