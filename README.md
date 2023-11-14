@@ -16,3 +16,9 @@ In the sections below, list and describe each contribution briefly.
 * fixed issues that includes higlighting, eslint warning, etc for frontend
 
 ## Team Member 2 Contribution - Christian Montano
+* Changed QuestionTable, QuestionTop, and QuestionPage to use axios for frontend for filtering/search/tags
+* Fixed some Minor Css bugs with unanswered/Tagspage
+* Changed TagsPage, TagsTable, and TagsTop to use axios for frontend for filtering/search/tags
+* implemented filtering for backend
+* implemented TagsAfterClicking for backend
+* Modified helper for axios use
