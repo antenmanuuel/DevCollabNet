@@ -1,5 +1,5 @@
 .tagsTop {
-    width: 100%;
+    width: 89.21%;
     height: 100px;
    
 }
@@ -11,4 +11,8 @@
     position: absolute;
     top: 6px;
     left:500px;
+}
+
+.tagsTop #askQuestionButton{
+    right: 80px;
 }
