@@ -41,6 +41,7 @@ const TagsTable = ({ onTagSelected }) => {
   return (
     <div className="TagsPage">
       <table id="TagsTable">
+      <tbody>
         {rows.map((row, rowIndex) => (
           <tr key={rowIndex}>
             {row.map((tag, tagIndex) => (
@@ -64,6 +65,7 @@ const TagsTable = ({ onTagSelected }) => {
             ))}
           </tr>
         ))}
+        </tbody>
       </table>
     </div>
   );

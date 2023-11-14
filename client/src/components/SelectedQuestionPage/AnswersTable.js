@@ -23,6 +23,7 @@ const AnswersTable = ({ questionId }) => {
   return (
     <div className="answers">
       <table className="answersTable">
+      <tbody>
         {answers.map((answer) => (
           <tr key={answer._id} id="tr1">
             <td id="answerText">{helper.renderTextWithLinks(answer.text)}</td>
@@ -38,6 +39,7 @@ const AnswersTable = ({ questionId }) => {
             </td>
           </tr>
         ))}
+        </tbody>
       </table>
     </div>
   );
