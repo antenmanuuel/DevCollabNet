@@ -48,8 +48,7 @@ const TagsTable = ({ onTagSelected }) => {
               <td key={tagIndex} className="tag-container">
                 <ul className="tag-list">
                   <li className="tag-name">
-                    <a 
-                      href="#" 
+                    <div 
                       className="tag-link" 
                       onClick={(e) => {
                         e.preventDefault(); 
@@ -57,7 +56,7 @@ const TagsTable = ({ onTagSelected }) => {
                       }}
                     >
                       {tag.name}
-                    </a>
+                    </div>
                   </li>
                   <li className="tag-count">{tag.count} Questions</li>
                 </ul>
