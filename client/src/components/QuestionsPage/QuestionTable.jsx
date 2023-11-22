@@ -9,6 +9,7 @@ import {
   Box,
   Typography,
   Chip,
+  Button,
 } from "@mui/material";
 
 const QuestionTable = ({
@@ -18,6 +19,8 @@ const QuestionTable = ({
   searchTerm,
 }) => {
   const [questionsData, setQuestionData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const questionsPerPage = 5;
 
   const fetchQuestions = useCallback(async () => {
     const helper = new Helper();
@@ -98,84 +101,130 @@ const QuestionTable = ({
       });
   };
 
+  const handleNext = () => {
+    setCurrentPage(
+      (prev) => (prev + 1) % Math.ceil(questionsData.length / questionsPerPage)
+    );
+  };
+
+  const handlePrev = () => {
+    setCurrentPage(
+      (prev) =>
+        (prev - 1 + Math.ceil(questionsData.length / questionsPerPage)) %
+        Math.ceil(questionsData.length / questionsPerPage)
+    );
+  };
+
+  const startIndex = currentPage * questionsPerPage;
+  const displayedQuestions = questionsData.slice(
+    startIndex,
+    startIndex + questionsPerPage
+  );
+
   return (
     <Box
       sx={{
-        width: "100%",
-        marginTop: "120px",
-        marginLeft: "15px",
-        overflow: "auto",
-        height: "500px",
+        width: "99%",
       }}
     >
-      <Table sx={{ width: "100%" }}>
-        <TableBody>
-          {questionsData.length > 0 ? (
-            questionsData.map((question, index) => (
+      <Box
+        sx={{
+          width: "100%",
+          marginTop: "120px",
+          marginLeft: "15px",
+          overflow: "auto",
+          height: "320px",
+        }}
+      >
+        <Table sx={{ width: "100%" }}>
+          <TableBody>
+            {displayedQuestions.length > 0 ? (
+              displayedQuestions.map((question, index) => (
+                <TableRow
+                  key={index}
+                  sx={{
+                    "&:last-child td, &:last-child th": { border: 0 },
+                    borderBottom: 4,
+                    borderTop: 4,
+                    borderColor: "grey.500",
+                    borderStyle: "dotted",
+                  }}
+                >
+                  <TableCell align="left">
+                    <Typography color={"gray"}>
+                      {question.answers.length} answers
+                    </Typography>
+                    <Typography color={"gray"}>
+                      {question.views} views
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="left">
+                    <Typography
+                      onClick={() =>
+                        handleQuestionTitleClickLocal(question._id)
+                      }
+                      sx={{
+                        cursor: "pointer",
+                        color: "blue",
+                        fontSize: "large",
+                      }}
+                    >
+                      {question.title}
+                    </Typography>
+                    <Box>
+                      {question.tagNames.map((tagName, id) => (
+                        <Chip
+                          key={id}
+                          label={tagName}
+                          sx={{
+                            marginRight: "10px",
+                            marginBottom: "10px",
+                            backgroundColor: "grey",
+                            color: "white",
+                            borderRadius: "4px",
+                            fontSize: "18px",
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  </TableCell>
+                  <TableCell align="left">
+                    <Typography color="error">{question.asked_by}</Typography>
+                    <Typography
+                      color={"gray"}
+                    >{`asked ${question.formattedDate}`}</Typography>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
               <TableRow
-                key={index}
                 sx={{
                   "&:last-child td, &:last-child th": { border: 0 },
-                  borderBottom: 4,
                   borderTop: 4,
                   borderColor: "grey.500",
                   borderStyle: "dotted",
                 }}
               >
-                <TableCell align="left">
-                  <Typography color={"gray"}>
-                    {question.answers.length} answers
-                  </Typography>
-                  <Typography color={"gray"}>{question.views} views</Typography>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography
-                    onClick={() => handleQuestionTitleClickLocal(question._id)}
-                    sx={{ cursor: "pointer", color: "blue", fontSize: "large" }}
-                  >
-                    {question.title}
-                  </Typography>
-                  <Box>
-                    {question.tagNames.map((tagName, id) => (
-                      <Chip
-                        key={id}
-                        label={tagName}
-                        sx={{
-                          marginRight: "10px",
-                          marginBottom: "10px",
-                          backgroundColor: "grey",
-                          color: "white",
-                          borderRadius: "4px",
-                          fontSize: "18px",
-                        }}
-                      />
-                    ))}
-                  </Box>
-                </TableCell>
-                <TableCell align="left">
-                  <Typography color="error">{question.asked_by}</Typography>
-                  <Typography
-                    color={"gray"}
-                  >{`asked ${question.formattedDate}`}</Typography>
+                <TableCell colSpan={3}>
+                  <Typography>No questions found</Typography>
                 </TableCell>
               </TableRow>
-            ))
-          ) : (
-            <TableRow
-              sx={{
-                "&:last-child td, &:last-child th": { border: 0 },
-                borderTop: 4,
-                borderColor: "grey.500",
-                borderStyle: "dotted",
-              }}
-            >
-              <TableCell colSpan={3}>
-                <Typography>No questions found</Typography>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            )}
+          </TableBody>
+        </Table>
+      </Box>
+
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <Button onClick={handlePrev} disabled={currentPage === 0}>
+          Prev
+        </Button>
+        <Button
+          onClick={handleNext}
+          disabled={startIndex + questionsPerPage >= questionsData.length}
+        >
+          Next
+        </Button>
+      </Box>
     </Box>
   );
 };
