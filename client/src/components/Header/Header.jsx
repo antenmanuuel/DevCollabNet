@@ -1,8 +1,23 @@
-import React from "react";
-import Search from "../Search/Search";
-import { Box, Typography } from "@mui/material";
+import React from 'react';
+import { Box, Typography, TextField, InputAdornment, IconButton } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
 function Header({ setSearchTerm, currentPage }) {
+  const handleSearch = (value) => {
+    setSearchTerm(value.trim(), currentPage === "TagsPage");
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch(e.target.value);
+    }
+  };
+
+  const handleClick = () => {
+    const value = document.getElementById('search-field').value;
+    handleSearch(value);
+  };
+
   return (
     <Box sx={{ display: "flex", width: "100%", overflow: "hidden" }}>
       <Box
@@ -18,7 +33,31 @@ function Header({ setSearchTerm, currentPage }) {
           alignItems: "center",
         }}
       >
-        <Search setSearchTerm={setSearchTerm} currentPage={currentPage} />
+        <TextField
+          id="search-field"
+          type="text"
+          variant="outlined"
+          size="small"
+          placeholder="Search ..."
+          onKeyPress={handleKeyPress}
+          sx={{
+            position: "absolute",
+            right: 16,
+            top: 10,
+            zIndex: 10,
+            backgroundColor: "white",
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <IconButton onClick={handleClick}>
+                  <SearchIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+
         <Typography
           variant="h3"
           sx={{
