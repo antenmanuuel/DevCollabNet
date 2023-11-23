@@ -1,0 +1,12 @@
+.tagsContainer {
+    width: 89.21%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    position:absolute;
+    left: 200px;
+    top: 75px;
+    display: flex;
+    flex-direction: row;
+}
+
