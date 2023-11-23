@@ -1,0 +1,608 @@
+/* Add CSS stylesheet */
+/*Navbar styles*/
+
+#title {
+    text-align: center;
+    font-size: 50px;
+    font-weight: bolder;
+    display: flex;
+   flex-direction: column;
+  }
+  
+  .header h1 {
+    border-style: inset;
+    border-color: black;
+    border-width: 2px;
+    background-color: lightgray;
+  }
+  
+  .header #searchInput {
+    position: absolute;
+    right: 25px;
+    top: 25px;
+    font-size: 18px;
+    display: flex;
+  }
+  
+  
+  /* Sidebar Styles */
+  .sideNavbar {
+    height: 100%; 
+    width: 160px; 
+    position: absolute;
+    z-index: 1; 
+    top: 71; 
+    left: 8;
+    background-color: white; 
+    padding-top: 20px;
+    border-right-style: dotted;
+    border-color: gray;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* The navigation menu links */
+  .btn-link {
+    display: flex;
+    color: blue;
+    padding: 16px;
+    text-decoration: none;
+    font-size: 24px;
+    text-align: center;
+    position: relative;
+    width: 100%;
+    border: none;
+    background-color: white;
+    height: 55px;
+    cursor: pointer;
+    border: none;
+    box-sizing: border-box; 
+    flex-direction: column;
+  
+  }
+  
+  .btn-link:hover {
+    background-color: whitesmoke;
+  }
+  
+  .btn-link:focus {
+    outline: none;
+  }
+  
+  .highlighted-link {
+    background-color: lightgray;
+  }
+  
+  
+  .top h1 {
+    font-weight: bolder;
+    padding-left: 200px;
+    position: absolute;
+    top: -80px;
+  }
+  
+  .top h2 {
+    position: absolute;
+    left: 900px;
+    top: -70px;
+    display: none;
+  }
+  
+  .top h4 {
+    position: absolute;
+    left: 200px;
+  }
+  
+  .top {
+    width: 100%;
+    height: 100px;
+    position: absolute;
+    border-color: gray;
+    top: 150px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /*Filter Button Styles */
+  .nau #nau-table,
+  #nauth1,
+  #nauth2,
+  #nauth3 {
+    margin-left: 1025px;
+    margin-top: 100px;
+    font-size: 16px;
+    border: 1px solid;
+    border-collapse: collapse;
+    z-index: 0;
+    padding: 0;
+  }
+  .nau #NauB1,
+  #NauB2,
+  #NauB3 {
+    border: none;
+    background-color: white;
+    display: inline-block;
+    padding-bottom: 4px;
+    padding-top: 4px;
+    padding-left: 8px;
+    z-index: 1;
+    cursor: pointer;
+  }
+  
+  /* When you mouse over the navigation links, change their color */
+  .nau #NauB2:hover:not(.active) {
+    background-color: lightgray;
+  }
+  .nau #NauB1:hover:not(.active) {
+    background-color: lightgray;
+  }
+  .nau #NauB3:hover:not(.active) {
+    background-color: lightgray;
+  }
+  
+  .nau {
+    display: flex;
+    flex-direction: row;
+  }
+  
+  /* ask question button */
+  .top #askQuestionButton {
+    background-color: rgb(15, 170, 205);
+    border: none;
+    width: 150px;
+    font-size: 16px;
+    padding: 10px;
+    border-width: 2px;
+    color: white;
+    display: flex;
+    margin-left: 1700px;
+    margin-top: -60px;
+    flex-direction: row;
+    border-style: solid;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+  }
+  
+  #titleofquestion {
+    margin-left: -300px;
+  }
+  
+  /* Question Section  */
+  
+  .question table {
+    margin-top: 80px;
+    margin-left: 160px;
+    border-collapse: collapse;
+    width: 91.5%;
+  }
+  
+  .question #tr1 {
+    border-width: 3px;
+    border-bottom: 1pt dotted grey;
+    border-top: 1pt dotted grey;
+    border-width: 3px;
+  }
+  
+  .question #td1 {
+    width: 20%;
+  }
+  
+  .question #who_asked {
+    font-size: 16px;
+    width: 20%;
+  }
+  
+  .question #td1 {
+    font-size: 16px;
+    color: grey;
+  }
+  
+  .question ul {
+    list-style: none;
+  }
+  
+  .question #paraf {
+    font-size: 24px;
+    color: blue;
+  }
+  
+  #ulrow3 > #keyword-1,
+  #keyword-2,
+  #keyword-3,
+  #keyword-4,
+  #keyword-5 {
+    display: inline-block;
+    border-radius: 10px;
+    background: dimgrey;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    width: 150px;
+    height: 20px;
+    border: 1.5px solid #000;
+    text-align: center;
+    color: white;
+    font-size: 16px;
+  }
+  /*Tags Page Styles */
+  .TagsPage {
+    margin-left: 300px;
+    margin-top: 170px;
+    width: 100%;
+    display: none;
+  }
+  
+  .TagsPage #TagsTable {
+    border-collapse: separate;
+    border-spacing: 160px 50px;
+  }
+  
+  .TagsPage .tag-container {
+    border-style: dotted;
+    border-width: thin-medium;
+    width: 150px;
+    padding-right: 70px;
+    padding-left: 25px;
+    border-spacing: 100px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    list-style-type: none;
+    text-align: center;
+  }
+  
+  .TagsPage .tag-list {
+    list-style-type: none;
+  }
+  
+  .TagsPage .tag-name,
+  .TagsPage {
+    font-size: 25px;
+  }
+  
+  .TagsPage .tag-count {
+    font-size: 20px;
+  }
+  
+  .tag-link {
+    text-decoration: none;
+    color: blue;
+  }
+  
+  #numQuestion {
+    display: none;
+  }
+  
+  /*Question Title Selection style */
+  .question #link_ans {
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+  }
+  
+  /*Answers for Question Styles */
+  .main_ans {
+    display: none;
+    text-align: center;
+    float: center;
+  }
+  .main_ans #ans_table {
+    width: 91.5%;
+    margin-left: 161.5px;
+    margin-top: 100px;
+  }
+  
+  .main_ans #th1-ans,
+  #th3-ans {
+    width: 25%;
+  }
+  
+  .main_ans #th3-ans {
+    padding-top: 30px;
+  }
+  
+  
+  
+  #border2 {
+    margin-top: 40px;
+    border-bottom: 1pt dotted grey;
+    border-width: 3px;
+    display: none;
+  }
+  
+  .main_ans #th4-ans {
+    position: absolute;
+    top: 265px;
+    right: 125px;
+    color: gray;
+  }
+  
+  .main_ans #th1-ans2,
+  #th3-ans2,
+  #th2-ans2 {
+    border: none;
+    border-bottom: 1pt dotted grey;
+    border-width: 3px;
+    padding-bottom: 40px;
+  }
+  
+  .main_ans #th1-ans2 {
+    font-weight: bolder;
+  }
+  
+  .main_ans #ans_table2 {
+    width: 91.5%;
+    margin-left: 161.5px;
+    margin-top: 50px;
+    border-top: 4px gray dotted;
+  }
+  
+  .main_ans #th3-ans2 {
+    width: 25%;
+  }
+  
+  .main_ans #th1-ans {
+    font-weight: bolder;
+  }
+  
+  .main_ans #th2-ans {
+    font-weight: bolder; 
+    text-align:left;
+  }
+  
+  .main_ans #th3-ans {
+    color: tomato;
+  }
+
+  
+  
+  .main_ans #askAnswerButton {
+    background-color: rgb(15, 170, 205);
+    border: none;
+    width: 150px;
+    font-size: 16px;
+    padding: 10px;
+    border-width: 2px;
+    color: white;
+    display: flex;
+    margin-left: 200px;
+    margin-top: 60px;
+    flex-direction: row;
+    border-style: solid;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+  }
+  
+  /* Question form styling */
+  
+  .main {
+    display: none;
+  }
+  
+  .main .questionForm #questionTitle {
+    margin-left: 260px;
+    font-size: xx-large;
+  }
+  
+  .main .questionForm #questionTitleErrorMessage {
+    position: absolute;
+    left: 290px;
+    top: 130px;
+    font-style: italic;
+  }
+  
+  .main .questionForm #questionTitleBox {
+    position: absolute;
+    left: 270px;
+    top: 175px;
+    font-size: 25px;
+  }
+  
+  .main .questionForm #questionText {
+    position: absolute;
+    top: 250px;
+    left: 270px;
+    font-size: xx-large;
+  }
+  
+  .main .questionForm #questionTextErrorMessage {
+    position: absolute;
+    left: 290px;
+    top: 280px;
+    font-style: italic;
+  }
+  
+  .main .questionForm #questionTextBox {
+    position: absolute;
+    left: 270px;
+    top: 330px;
+    font-size: 25px;
+  }
+  
+  .main .questionForm #tagsTitle {
+    position: absolute;
+    top: 435px;
+    left: 270px;
+    font-size: xx-large;
+  }
+  
+  .main .questionForm #tagsTitleErrorMessage {
+    position: absolute;
+    left: 290px;
+    top: 470px;
+    font-style: italic;
+  }
+  
+  .main .questionForm #tagsTextBox {
+    position: absolute;
+    left: 270px;
+    top: 520px;
+    font-size: 25px;
+  }
+  
+  .main .questionForm #usernameTitle {
+    position: absolute;
+    top: 640px;
+    left: 270px;
+    font-size: xx-large;
+  }
+  
+  .main .questionForm #usernameTextBox {
+    position: absolute;
+    left: 270px;
+    top: 690px;
+    font-size: 25px;
+  }
+  
+  .main .questionForm #submitQuestionButton {
+    background-color: rgb(15, 170, 205);
+    border: none;
+    width: 150px;
+    font-size: 16px;
+    padding: 10px;
+    border-width: 2px;
+    color: white;
+    display: flex;
+    margin-left: 200px;
+    margin-top: 675px;
+    flex-direction: row;
+    border-style: solid;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+  }
+  
+  .main .questionForm #message {
+    color: red;
+    position: absolute;
+    left: 1500px;
+    bottom: 30px;
+    font-size: x-large;
+  }
+  
+  .main .questionForm #questionTitleError {
+    color: red;
+    font-size: 14px;
+    position: absolute;
+    left: 275px;
+    top: 225px;
+    display: none;
+  }
+  
+  .main .questionForm #questionTextError {
+    color: red;
+    font-size: 14px;
+    position: absolute;
+    left: 275px;
+    top: 410px;
+    display: none;
+  }
+  
+  .main .questionForm #tagsError {
+    color: red;
+    font-size: 14px;
+    position: absolute;
+    left: 275px;
+    top: 600px;
+    display: none;
+  }
+  
+  .main .questionForm #usernameError {
+    color: red;
+    font-size: 14px;
+    position: absolute;
+    left: 275px;
+    top: 775px;
+    display: none;
+  }
+  
+  /* Answer Form Styling */
+  .mainForAnswer .answersForm #usernameTitleForAnswer {
+    position: absolute;
+    top: 300px;
+    left: 270px;
+    font-size: xx-large;
+  }
+  
+  .mainForAnswer {
+    display: none;
+  }
+  
+  .mainForAnswer .answersForm #usernameTextBoxForAnswer {
+    position: absolute;
+    left: 270px;
+    top: 350px;
+    font-size: 25px;
+  }
+  
+  .mainForAnswer .answersForm #answersText {
+    position: absolute;
+    top: 100px;
+    left: 270px;
+    font-size: xx-large;
+  }
+  
+  .mainForAnswer .answersForm #answerTextErrorMessage {
+    position: absolute;
+    left: 290px;
+    top: 130px;
+    font-style: italic;
+  }
+  
+  .mainForAnswer .answersForm #answerTextBox {
+    position: absolute;
+    left: 270px;
+    top: 180px;
+    font-size: 25px;
+  }
+  
+  .mainForAnswer .answersForm #usernameErrorForAnswer {
+    color: red;
+    font-size: 14px;
+    position: absolute;
+    left: 275px;
+    top: 440px;
+    display: none;
+  }
+  
+  .mainForAnswer .answersForm #answerTextError {
+    color: red;
+    font-size: 14px;
+    position: absolute;
+    left: 275px;
+    top: 260px;
+    display: none;
+  }
+  
+  .mainForAnswer .answersForm #submitAnswerButton {
+    background-color: rgb(15, 170, 205);
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    position: absolute;
+    left: 265px;
+    bottom: 340px;
+    border-style: solid;
+    border-width: 2px;
+  }
+  
+  .mainForAnswer .answersForm #message {
+    color: red;
+    position: absolute;
+    left: 1500px;
+    bottom: 340px;
+    font-size: x-large;
+  }
+  
+  
