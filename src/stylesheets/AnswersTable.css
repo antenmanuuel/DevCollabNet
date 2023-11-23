@@ -1,0 +1,61 @@
+.answers {
+  width: 89%;
+  height: 40%;
+  display: inline-block;
+  margin-left: 200px;
+  align-items: stretch;
+ 
+
+}
+ .answers .answersTable {
+  width: 100%;
+  margin-left:20px;
+  margin-top: 1px;
+  border-collapse: collapse;
+  border-bottom: 3px gray dotted;
+}
+
+
+ .answers #tr1 {
+    border-width: 3px;
+    border-bottom: 3px gray dotted;
+  }
+
+.answers td{
+  border-collapse: collapse;
+  border-bottom: 3px gray dotted;
+}
+
+.answers #answerText {
+    font-weight: bolder;
+    width: 50%;
+    overflow: auto;
+    padding-left: 10px;
+}
+
+.answers .answersTable #answerText a {
+  color: #007bff; /* Sets the link color */
+  text-decoration: none; /* Removes the underline */
+  transition: color 0.3s; /* Smooth color transition for hover effect */
+}
+
+.answers .answersTable #answerText a:hover {
+  color: #0056b3; /* Darkens the link color on hover */
+  text-decoration: underline; /* Underlines the link on hover */
+}
+
+
+ .answers #author {
+    color: red;
+    margin-left: 500px;
+    overflow: auto;
+}
+
+.answers #date {
+  color: gray;
+  margin-left: 500px;
+}
+.answers .authorAndDate {
+  list-style-type: none;
+}
+
