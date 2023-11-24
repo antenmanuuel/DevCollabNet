@@ -19,55 +19,55 @@ function Header({ setSearchTerm, currentPage }) {
   };
 
   return (
-    <Box sx={{ display: "flex", width: "100%", overflow: "hidden" }}>
+    <Box sx={{ display: "flex", flexDirection: 'column', width: "100%", overflow: "hidden" }}>
       <Box
         sx={{
           border: 2,
           borderColor: "black",
           backgroundColor: "grey.300",
           height: "70px",
-          width: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
           alignItems: "center",
+          px: 2
         }}
       >
-        <TextField
-          id="search-field"
-          type="text"
-          variant="outlined"
-          size="small"
-          placeholder="Search ..."
-          onKeyPress={handleKeyPress}
-          sx={{
-            position: "absolute",
-            right: 16,
-            top: 10,
-            zIndex: 10,
-            backgroundColor: "white",
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <IconButton onClick={handleClick}>
-                  <SearchIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-
+        {/* Left Spacer */}
+        <Box sx={{ flex: 1 }} />
+        
         <Typography
           variant="h3"
           sx={{
-            textAlign: "center",
             fontWeight: "extrabold",
             fontSize: { xs: "2rem", md: "4rem", lg: "45px", xl: "60px" },
+            textAlign: "center", 
+            flex: 2 
           }}
         >
           Fake Stack OverFlow
         </Typography>
+
+        <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+          <TextField
+            id="search-field"
+            type="text"
+            variant="outlined"
+            size="small"
+            placeholder="Search ..."
+            onKeyPress={handleKeyPress}
+            sx={{
+              backgroundColor: "white",
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <IconButton onClick={handleClick}>
+                    <SearchIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Box>
       </Box>
     </Box>
   );
