@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
-import AskQuestionButton from "./AskQuestionButtonForHomePage";
-import Filter from "./Filter";
 import axios from "axios";
 import Helper from "../../utils/Helper";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 
 const QuestionTop = ({
   onAskQuestionPress,
@@ -12,6 +10,7 @@ const QuestionTop = ({
   selectedTag,
 }) => {
   const [questionCount, setQuestionCount] = useState(0);
+  const [activeFilter, setActiveFilter] = useState("newest");
 
   const fetchQuestionCount = useCallback(
     async (filter) => {
@@ -47,11 +46,16 @@ const QuestionTop = ({
 
   const handleFilterChange = useCallback(
     (newFilter) => {
+      setActiveFilter(newFilter);
       setFilter(newFilter);
       fetchQuestionCount(newFilter);
     },
     [setFilter, fetchQuestionCount]
   );
+
+  const getButtonVariant = (filterName) => {
+    return activeFilter === filterName ? "contained" : "outlined";
+  };
 
   return (
     <Box sx={{ width: "100%", paddingBottom: 5, position: "absolute" }}>
@@ -67,7 +71,22 @@ const QuestionTop = ({
       >
         {searchTerm ? "Search Results" : "All Questions"}
       </Typography>
-      <AskQuestionButton onPress={onAskQuestionPress} />
+
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={onAskQuestionPress}
+        sx={{
+          marginLeft: "1450px",
+          marginTop: "-50px",
+          width: 150,
+          padding: "10px",
+          textTransform: "none"
+        }}
+      >
+        Ask Question
+      </Button>
+
       <Typography
         variant="h6"
         sx={{
@@ -79,7 +98,71 @@ const QuestionTop = ({
       >
         {`${questionCount} Questions`}
       </Typography>
-      <Filter onSetFilter={handleFilterChange} />
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          width: 300,
+          marginLeft: "1025px",
+          marginTop: "-5px",
+          border: 3,
+          borderColor: "grey.300",
+          borderStyle: "solid",
+          p: 1,
+        }}
+      >
+        <Button
+          variant={getButtonVariant("newest")}
+          onClick={() => handleFilterChange("newest")}
+          sx={{
+            marginRight: 1,
+            color: "white", 
+            bgcolor: activeFilter === "newest" ? "black" : "grey",
+            "&:hover": {
+              bgcolor: "grey.700",
+              border:"none"
+            },
+            border:"none"
+          }}
+        >
+          Newest
+        </Button>
+
+        <Button
+          variant={getButtonVariant("active")}
+          onClick={() => handleFilterChange("active")}
+          sx={{
+            marginRight: 1,
+            color: "white",
+            bgcolor: activeFilter === "active" ? "black" : "grey",
+            "&:hover": {
+              bgcolor: "grey.700",
+              border:"none"
+            },
+            border:"none"
+          }}
+        >
+          Active
+        </Button>
+
+        <Button
+          variant={getButtonVariant("unanswered")}
+          onClick={() => handleFilterChange("unanswered")}
+          sx={{
+            marginRight: 1,
+            color: "white",
+            bgcolor: activeFilter === "unanswered" ? "black" : "grey",
+            "&:hover": {
+              bgcolor: "grey.700",
+              border:"none"
+            },
+            border:"none"
+          }}
+        >
+          Unanswered
+        </Button>
+      </Box>
     </Box>
   );
 };

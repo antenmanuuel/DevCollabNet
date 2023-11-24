@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import QuestionDetailTop from "./QuestionDetailTop";
 import QuestionDetail from "./QuestionDetail";
 import AnswersTable from "./AnswersTable";
-import AnswerButton from "./AnswerButton";
 import QuestionsForm from "../QuestionsForm/QuestionsForm";
 import AnswerForm from "../AnswerForm/AnswerForm";
 
@@ -37,8 +36,7 @@ const SelectedQuestionPage = ({ questionId }) => {
         onAskQuestionPress={handleAskQuestionPress} 
       />
       <QuestionDetail questionId={questionId} />
-      <AnswersTable questionId={questionId} />
-      <AnswerButton onPress={handleAnswerPress} questionId={questionId} />
+      <AnswersTable questionId={questionId} onAnswerPress={handleAnswerPress} />
     </div>
   );
 };
