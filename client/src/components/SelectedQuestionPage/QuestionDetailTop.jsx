@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import AskQuestionButton from "../QuestionsPage/AskQuestionButtonForSelectedPage";
 import axios from "axios";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 
 const QuestionDetailTop = ({ questionId, onAskQuestionPress }) => {
   const [question, setQuestion] = useState(null);
@@ -52,7 +51,20 @@ const QuestionDetailTop = ({ questionId, onAskQuestionPress }) => {
       >
         {question && question.title}
       </Typography>
-      <AskQuestionButton onPress={onAskQuestionPress} />
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={onAskQuestionPress}
+        sx={{
+          textTransform: "none",
+          width: 150,
+          padding: "10px",
+          marginLeft: "1450px",
+          marginTop:"-50px"
+        }}
+      >
+        Ask Question
+      </Button>
     </Box>
   );
 };

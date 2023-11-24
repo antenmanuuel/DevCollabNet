@@ -12,7 +12,7 @@ import {
   Button,
 } from "@mui/material";
 
-const AnswersTable = ({ questionId }) => {
+const AnswersTable = ({ questionId, onAnswerPress }) => {
   const [answers, setAnswers] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
   const answersPerPage = 5; // Number of answers to display per page
@@ -35,16 +35,14 @@ const AnswersTable = ({ questionId }) => {
   const handleNext = () => {
     setStartIndex((prev) => {
       const nextIndex = prev + answersPerPage;
-      return nextIndex < answers.length ? nextIndex : 0;
+      return nextIndex < answers.length ? nextIndex : prev;
     });
   };
 
   const handlePrev = () => {
     setStartIndex((prev) => {
       const prevIndex = prev - answersPerPage;
-      return prevIndex >= 0
-        ? prevIndex
-        : (Math.ceil(answers.length / answersPerPage) - 1) * answersPerPage;
+      return prevIndex >= 0 ? prevIndex : prev;
     });
   };
 
@@ -56,7 +54,7 @@ const AnswersTable = ({ questionId }) => {
   const isNextDisabled = startIndex + answersPerPage >= answers.length;
 
   return (
-    <Box sx={{ width: "91.66%", marginLeft: "210px", marginY: 6 }}>
+    <Box sx={{ width: "91.66%", marginY: 6, marginLeft:"200px" }}>
       <Box sx={{ overflow: "auto", height: "305px", mb: 2 }}>
         <Table sx={{ width: "100%", borderCollapse: "collapse" }}>
           <TableBody>
@@ -98,12 +96,28 @@ const AnswersTable = ({ questionId }) => {
         </Table>
       </Box>
 
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-        <Button onClick={handlePrev} disabled={isPrevDisabled}>
-          Prev
-        </Button>
-        <Button onClick={handleNext} disabled={isNextDisabled}>
-          Next
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+          <Button onClick={handlePrev} disabled={isPrevDisabled}>
+            Prev
+          </Button>
+          <Button onClick={handleNext} disabled={isNextDisabled}>
+            Next
+          </Button>
+        </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={onAnswerPress}
+          sx={{
+            width: 150,
+            padding: "10px",
+            textTransform: "none",
+            marginRight:"1450px",
+            marginTop:"50px"
+          }}
+        >
+          Answer Question
         </Button>
       </Box>
     </Box>
