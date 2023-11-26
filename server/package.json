@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "*",
+    "cors": "^2.8.5",
     "express": "*",
     "mongoose": "*",
     "mysql": "*"
