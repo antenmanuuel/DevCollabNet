@@ -1,39 +1,75 @@
 import React, { useState } from "react";
+import axios from 'axios';
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 
-function LoginForm() {
-
+function LoginForm({ onLoginSuccess }) {
   const [formData, setFormData] = useState({
-    emailaddy: "",
-    passwordtext: "",
+    email: "",
+    password: "",
   });
 
-  const [errors, setErrors] = useState({
-    emailaddyError: "",
-    passwordtextError: "",
+  const [hasError, setHasError] = useState({
+    emailError: "",
+    passwordError: "",
   });
 
+  const validate = () => {
+    let isValid = true;
+    let newErrors = { emailError: "", passwordError: "" };
 
+    if (!formData.email) {
+      newErrors.emailError = "Email is required";
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.emailError = "Email address is invalid";
+      isValid = false;
+    }
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        console.log({
-          email: data.get("email"),
-          password: data.get("password"),
-        });
+    if (!formData.password) {
+      newErrors.passwordError = "Password is required";
+      isValid = false;
+    }
+
+    setHasError(newErrors);
+    return isValid;
+  };
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
+    setHasError({ ...hasError, [name + "Error"]: "" });  // Clear specific field error
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (validate()) {
+      const user = {
+        email: formData.email,
+        password: formData.password
       };
 
-    return(
-        <Container component="main" maxWidth="xs">
+      axios.post('http://localhost:8000/users/login', user, {
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then((res) => {
+        if (res.data === 'success') {
+          onLoginSuccess();
+        } else {
+          setHasError(prevState => ({ ...prevState, passwordError: res.data }));
+        }
+      })
+      .catch((error) => {
+        console.error("Login error", error);
+      });
+    }
+  };
+
+  return (
+    <Container component="main" maxWidth="xs">
       <Box
         sx={{  
           marginTop: 8,
@@ -55,10 +91,10 @@ function LoginForm() {
             name="email"
             autoComplete="email"
             autoFocus
-            //value={formData.emailaddy}
-            //onChange={handleInputChange}
-            //error={Boolean(errors.emailaddyError)}
-            //helperText={errors.emailaddyError}
+            value={formData.email}
+            onChange={handleInputChange}
+            error={Boolean(hasError.emailError)}
+            helperText={hasError.emailError}
           />
           <TextField
             margin="normal"
@@ -69,10 +105,10 @@ function LoginForm() {
             type="password"
             id="password"
             autoComplete="current-password"
-            //value={formData.passwordtext}
-            //onChange={handleInputChange}
-            //error={Boolean(errors.passwordtextError)}
-            //helperText={errors.passwordtextError}
+            value={formData.password}
+            onChange={handleInputChange}
+            error={Boolean(hasError.passwordError)}
+            helperText={hasError.passwordError}
           />
           <Button
             type="submit"
@@ -85,7 +121,7 @@ function LoginForm() {
         </Box>
       </Box>
     </Container>
-    );
+  );
 }
 
 export default LoginForm;
