@@ -1,8 +1,20 @@
-import React from 'react';
-import { Box, Typography, TextField, InputAdornment, IconButton } from "@mui/material";
+import React from "react";
+import {
+  Box,
+  Typography,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Button,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-function Header({ setSearchTerm, currentPage }) {
+function Header({
+  setSearchTerm,
+  currentPage,
+  isLoggedIn,
+  onLoginLogout,
+}) {
   const handleSearch = (value) => {
     setSearchTerm(value.trim(), currentPage === "TagsPage");
   };
@@ -14,12 +26,19 @@ function Header({ setSearchTerm, currentPage }) {
   };
 
   const handleClick = () => {
-    const value = document.getElementById('search-field').value;
+    const value = document.getElementById("search-field").value;
     handleSearch(value);
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: 'column', width: "100%", overflow: "hidden" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        overflow: "hidden",
+      }}
+    >
       <Box
         sx={{
           border: 2,
@@ -28,19 +47,20 @@ function Header({ setSearchTerm, currentPage }) {
           height: "70px",
           display: "flex",
           alignItems: "center",
-          px: 2
+          px: 2,
         }}
       >
-        {/* Left Spacer */}
-        <Box sx={{ flex: 1 }} />
-        
+        <Button variant="contained" onClick={onLoginLogout} sx={{ mr: 30 }}>
+          {isLoggedIn ? "Logout" : "Login"}
+        </Button>
+
         <Typography
           variant="h3"
           sx={{
             fontWeight: "extrabold",
             fontSize: { xs: "2rem", md: "4rem", lg: "45px", xl: "60px" },
-            textAlign: "center", 
-            flex: 2 
+            textAlign: "center",
+            flex: 2,
           }}
         >
           Fake Stack OverFlow

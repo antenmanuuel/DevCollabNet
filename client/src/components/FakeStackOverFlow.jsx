@@ -2,16 +2,16 @@ import React, { useState } from "react";
 import Header from "./Header/Header";
 import SideNavbar from "./SideNavbar/SideNavbar";
 import MainContainer from "./MainPage/MainPage";
-import { Box } from '@mui/material';
+import { Box } from "@mui/material";
 
-function FakeStackOverflow() {
+function FakeStackOverflow({ goToWelcome, isLoggedIn, handleLoginLogout }) {
   const [currentPage, setCurrentPage] = useState("QuestionsPage");
   const [questionsKey, setQuestionsKey] = useState(0);
   const [searchTerm, setSearchTermState] = useState("");
 
   const handleSetQuestionsPage = () => {
     setCurrentPage("QuestionsPage");
-    setQuestionsKey(prevKey => prevKey + 1);
+    setQuestionsKey((prevKey) => prevKey + 1);
   };
 
   const handleSetTagsPage = () => {
@@ -24,13 +24,20 @@ function FakeStackOverflow() {
       setCurrentPage("QuestionsPage");
     } else {
       setCurrentPage("TagsPage");
-      setTimeout(() => setCurrentPage("QuestionsPage"), 1); // delay to ensure re-render
+      setTimeout(() => setCurrentPage("QuestionsPage"), 1);
     }
   };
 
+  
+
   return (
     <Box display="flex" flexDirection="column" height="100vh">
-      <Header setSearchTerm={handleSearch} currentPage={currentPage} />
+      <Header
+        setSearchTerm={handleSearch}
+        currentPage={currentPage}
+        isLoggedIn={isLoggedIn}
+        onLoginLogout={handleLoginLogout}
+      />
       <Box display="flex" flexGrow={1}>
         <SideNavbar
           setQuestionsPage={handleSetQuestionsPage}
