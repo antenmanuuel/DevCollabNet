@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 
-function SignupForm({ onSignupSuccess }) {
+function SignupForm({ onSignupSuccess , goToWelcome}) {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -165,7 +165,14 @@ function SignupForm({ onSignupSuccess }) {
           >
             Sign Up
           </Button>
-        </Box>
+        </Box>  
+        <Button
+            variant="contained"
+            sx={{ mt: 3, mb: 2 , bgcolor: 'text.primary' }}
+            onClick={goToWelcome}
+            >
+            Return to welcome page
+      </Button>
       </Box>
     </Container>
   );
