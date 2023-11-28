@@ -4,7 +4,7 @@ import SideNavbar from "./SideNavbar/SideNavbar";
 import MainContainer from "./MainPage/MainPage";
 import { Box } from "@mui/material";
 
-function FakeStackOverflow({ goToWelcome, isLoggedIn, handleLoginLogout }) {
+function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout }) {
   const [currentPage, setCurrentPage] = useState("QuestionsPage");
   const [questionsKey, setQuestionsKey] = useState(0);
   const [searchTerm, setSearchTermState] = useState("");
@@ -28,14 +28,12 @@ function FakeStackOverflow({ goToWelcome, isLoggedIn, handleLoginLogout }) {
     }
   };
 
-  
-
   return (
     <Box display="flex" flexDirection="column" height="100vh">
       <Header
         setSearchTerm={handleSearch}
         currentPage={currentPage}
-        isLoggedIn={isLoggedIn}
+        isLoggedIn={sessionData.loggedIn}
         onLoginLogout={handleLoginLogout}
       />
       <Box display="flex" flexGrow={1}>
