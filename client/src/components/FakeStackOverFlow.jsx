@@ -46,6 +46,7 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout }) {
           searchTerm={searchTerm}
           showQuestionsPage={currentPage === "QuestionsPage"}
           showTagsPage={currentPage === "TagsPage"}
+          sessionData={sessionData}
         />
       </Box>
     </Box>

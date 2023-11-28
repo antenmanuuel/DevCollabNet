@@ -5,7 +5,7 @@ import AnswersTable from "./AnswersTable";
 import QuestionsForm from "../QuestionsForm/QuestionsForm";
 import AnswerForm from "../AnswerForm/AnswerForm";
 
-const SelectedQuestionPage = ({ questionId }) => {
+const SelectedQuestionPage = ({ questionId, sessionData }) => {
   const [showQuestionsForm, setShowQuestionsForm] = useState(false);
   const [showAnswersForm, setShowAnswersForm] = useState(false);
 
@@ -34,9 +34,10 @@ const SelectedQuestionPage = ({ questionId }) => {
       <QuestionDetailTop 
         questionId={questionId} 
         onAskQuestionPress={handleAskQuestionPress} 
+        sessionData={sessionData}
       />
       <QuestionDetail questionId={questionId} />
-      <AnswersTable questionId={questionId} onAnswerPress={handleAnswerPress} />
+      <AnswersTable questionId={questionId} onAnswerPress={handleAnswerPress} sessionData={sessionData} />
     </div>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Box, Typography, Button } from "@mui/material";
 
-const QuestionDetailTop = ({ questionId, onAskQuestionPress }) => {
+const QuestionDetailTop = ({ questionId, onAskQuestionPress, sessionData }) => {
   const [question, setQuestion] = useState(null);
 
   useEffect(() => {
@@ -51,20 +51,22 @@ const QuestionDetailTop = ({ questionId, onAskQuestionPress }) => {
       >
         {question && question.title}
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={onAskQuestionPress}
-        sx={{
-          textTransform: "none",
-          width: 150,
-          padding: "10px",
-          marginLeft: "1450px",
-          marginTop:"-50px"
-        }}
-      >
-        Ask Question
-      </Button>
+      {sessionData.loggedIn && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={onAskQuestionPress}
+          sx={{
+            textTransform: "none",
+            width: 150,
+            padding: "10px",
+            marginLeft: "1450px",
+            marginTop: "-50px",
+          }}
+        >
+          Ask Question
+        </Button>
+      )}
     </Box>
   );
 };
