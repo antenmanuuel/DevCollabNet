@@ -48,9 +48,14 @@ function App() {
 
   switch (currentView) {
     case "signup":
-      return <SignupForm onSignupSuccess={onSignupSuccess} />;
+      return <SignupForm  
+                onSignupSuccess={onSignupSuccess}
+                goToWelcome={onWelcome} />;
     case "login":
-      return <LoginForm onLoginSuccess={onLoginSuccess} />;
+      return <LoginForm 
+                onLoginSuccess={onLoginSuccess} 
+                goToWelcome={onWelcome}
+                />;
     case "fakeStackOverflow":
       return (
         <FakeStackOverflow

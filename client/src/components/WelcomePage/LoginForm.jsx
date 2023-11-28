@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 
-function LoginForm({ onLoginSuccess }) {
+function LoginForm({ onLoginSuccess, goToWelcome }) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -119,6 +119,13 @@ function LoginForm({ onLoginSuccess }) {
             Log In
           </Button>
         </Box>
+        <Button
+            variant="contained"
+            sx={{ mt: 3, mb: 2 , bgcolor: 'text.primary' }}
+            onClick={goToWelcome}
+            >
+            Return to welcome page
+      </Button>
       </Box>
     </Container>
   );
