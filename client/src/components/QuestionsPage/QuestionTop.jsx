@@ -8,6 +8,7 @@ const QuestionTop = ({
   setFilter,
   searchTerm,
   selectedTag,
+  sessionData
 }) => {
   const [questionCount, setQuestionCount] = useState(0);
   const [activeFilter, setActiveFilter] = useState("newest");
@@ -72,20 +73,22 @@ const QuestionTop = ({
         {searchTerm ? "Search Results" : "All Questions"}
       </Typography>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={onAskQuestionPress}
-        sx={{
-          marginLeft: "1450px",
-          marginTop: "-50px",
-          width: 150,
-          padding: "10px",
-          textTransform: "none"
-        }}
-      >
-        Ask Question
-      </Button>
+      {sessionData.loggedIn && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={onAskQuestionPress}
+          sx={{
+            marginLeft: "1450px",
+            marginTop: "-50px",
+            width: 150,
+            padding: "10px",
+            textTransform: "none"
+          }}
+        >
+          Ask Question
+        </Button>
+      )}
 
       <Typography
         variant="h6"

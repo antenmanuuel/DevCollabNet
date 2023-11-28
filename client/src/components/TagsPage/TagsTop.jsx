@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Typography, Button } from "@mui/material";
 
-const TagsTop = ({ onAskQuestionPress }) => {
+const TagsTop = ({ onAskQuestionPress, sessionData }) => {
   const [numOfTags, setNumOfTags] = useState(0);
 
   useEffect(() => {
@@ -22,11 +22,11 @@ const TagsTop = ({ onAskQuestionPress }) => {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        marginTop:"-900px"
+        marginTop: "-900px",
       }}
     >
-      <Box sx={{marginLeft: "80px"}}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: "25px"}}>
+      <Box sx={{ marginLeft: "80px" }}>
+        <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: "25px" }}>
           {numOfTags} Tags
         </Typography>
       </Box>
@@ -36,25 +36,27 @@ const TagsTop = ({ onAskQuestionPress }) => {
         sx={{
           fontWeight: "bold",
           fontSize: "25px",
-          marginLeft: "200px", 
+          marginLeft: "200px",
         }}
       >
         All Tags
       </Typography>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={onAskQuestionPress}
-        sx={{
-          width: 150,
-          padding: "10px",
-          textTransform: "none",
-          marginLeft:"1000px"
-        }}
-      >
-        Ask Question
-      </Button>
+      {sessionData.loggedIn && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={onAskQuestionPress}
+          sx={{
+            width: 150,
+            padding: "10px",
+            textTransform: "none",
+            marginLeft: "1000px",
+          }}
+        >
+          Ask Question
+        </Button>
+      )}
     </Box>
   );
 };
