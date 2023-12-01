@@ -15,7 +15,7 @@ const TagsContainer = styled(Box)(({ theme }) => ({
   marginTop: "75px",
 }));
 
-const TagsPage = () => {
+const TagsPage = ({sessionData}) => {
   const [showQuestionsForm, setShowQuestionsForm] = useState(false);
   const [selectedTag, setSelectedTag] = useState(null);
   const [filteredQuestions, setFilteredQuestions] = useState([]);
@@ -49,19 +49,19 @@ const TagsPage = () => {
     if (selectedTag) {
       handleTagSelected(selectedTag);
     }
-  }, [selectedTag]);
+  }, [selectedTag, sessionData]);
 
   if (showQuestionsForm) {
     return <QuestionsForm />;
   }
 
   if (selectedTag && filteredQuestions.length > 0) {
-    return <QuestionsPage selectedTag={selectedTag} />;
+    return <QuestionsPage selectedTag={selectedTag} sessionData={sessionData} />;
   }
 
   return (
     <TagsContainer>
-      <TagsTop onAskQuestionPress={handleAskQuestionPress} />
+      <TagsTop onAskQuestionPress={handleAskQuestionPress} sessionData={sessionData} />
       <TagsTable onTagSelected={setSelectedTag} />
     </TagsContainer>
   );

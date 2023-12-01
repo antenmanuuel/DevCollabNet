@@ -12,7 +12,7 @@ import {
   Button,
 } from "@mui/material";
 
-const AnswersTable = ({ questionId, onAnswerPress }) => {
+const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
   const [answers, setAnswers] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
   const answersPerPage = 5; // Number of answers to display per page
@@ -54,7 +54,7 @@ const AnswersTable = ({ questionId, onAnswerPress }) => {
   const isNextDisabled = startIndex + answersPerPage >= answers.length;
 
   return (
-    <Box sx={{ width: "91.66%", marginY: 6, marginLeft:"200px" }}>
+    <Box sx={{ width: "91.66%", marginY: 6, marginLeft: "200px" }}>
       <Box sx={{ overflow: "auto", height: "305px", mb: 2 }}>
         <Table sx={{ width: "100%", borderCollapse: "collapse" }}>
           <TableBody>
@@ -96,7 +96,14 @@ const AnswersTable = ({ questionId, onAnswerPress }) => {
         </Table>
       </Box>
 
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", mt: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          mt: 2,
+        }}
+      >
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
           <Button onClick={handlePrev} disabled={isPrevDisabled}>
             Prev
@@ -105,20 +112,22 @@ const AnswersTable = ({ questionId, onAnswerPress }) => {
             Next
           </Button>
         </Box>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={onAnswerPress}
-          sx={{
-            width: 150,
-            padding: "10px",
-            textTransform: "none",
-            marginRight:"1450px",
-            marginTop:"50px"
-          }}
-        >
-          Answer Question
-        </Button>
+        {sessionData.loggedIn && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onAnswerPress}
+            sx={{
+              width: 150,
+              padding: "10px",
+              textTransform: "none",
+              marginRight: "1450px",
+              marginTop: "50px",
+            }}
+          >
+            Answer Question
+          </Button>
+        )}
       </Box>
     </Box>
   );

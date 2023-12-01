@@ -16,7 +16,7 @@ const QuestionContainer = styled(Box)(() => ({
   marginTop: "75px",
 }));
 
-const QuestionsPage = ({ selectedTag = null, searchTerm, setSearchTerm }) => {
+const QuestionsPage = ({ selectedTag = null, searchTerm, setSearchTerm, sessionData }) => {
   const [questions, setQuestions] = useState([]);
   const [numOfQuestions, setNumOfQuestions] = useState(0);
   const [updateKey, setUpdateKey] = useState(0);
@@ -70,7 +70,7 @@ const QuestionsPage = ({ selectedTag = null, searchTerm, setSearchTerm }) => {
       );
     }
     if (selectedQuestionId) {
-      return <SelectedQuestionPage questionId={selectedQuestionId} />;
+      return <SelectedQuestionPage questionId={selectedQuestionId} sessionData={sessionData} />;
     }
   }
 
@@ -82,6 +82,7 @@ const QuestionsPage = ({ selectedTag = null, searchTerm, setSearchTerm }) => {
         setFilter={handleFilterChange}
         selectedTag={selectedTag}
         searchTerm={searchTerm}
+        sessionData={sessionData}
       />
       <QuestionTable
         onQuestionTitleClick={handleQuestionTitleClick}
