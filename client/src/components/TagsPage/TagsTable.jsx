@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Box, Grid, Typography, Card } from "@mui/material";
 
-const TagsTable = ({ onTagSelected }) => {
+const TagsTable = ({ onTagSelected, sessionData }) => {
   const [tagsData, setTagsData] = useState([]);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const TagsTable = ({ onTagSelected }) => {
       .catch((error) => {
         console.error("Error fetching tags:", error);
       });
-  }, []);
+  }, [sessionData]);
 
   const handleTagClick = (tagName) => {
     if (onTagSelected) {

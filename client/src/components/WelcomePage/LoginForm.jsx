@@ -57,7 +57,7 @@ function LoginForm({ onLoginSuccess, goToWelcome }) {
       })
       .then((res) => {
         if (res.data === 'success') {
-          onLoginSuccess();
+          onLoginSuccess(res.data.username, res.data.email);
         } else {
           setHasError(prevState => ({ ...prevState, passwordError: res.data }));
         }
