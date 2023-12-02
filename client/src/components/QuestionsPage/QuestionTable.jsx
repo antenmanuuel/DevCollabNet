@@ -10,14 +10,16 @@ import {
   Typography,
   Chip,
   Button,
+  IconButton,
 } from "@mui/material";
+import { ThumbUp, ThumbDown } from "@mui/icons-material";
 
 const QuestionTable = ({
   filter,
   onQuestionTitleClick,
   selectedTag,
   searchTerm,
-  sessionData
+  sessionData,
 }) => {
   const [questionsData, setQuestionData] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -26,7 +28,6 @@ const QuestionTable = ({
   const fetchQuestions = useCallback(async () => {
     const helper = new Helper();
     let endpoint = "http://localhost:8000/posts/questions";
-    
 
     if (selectedTag) {
       endpoint = `http://localhost:8000/posts/tags/tag_id/${selectedTag}/questions`;
@@ -71,12 +72,11 @@ const QuestionTable = ({
         formattedDate: helper.formatDate(new Date(question.ask_date_time)),
       }));
 
-      
       setQuestionData(processedQuestions);
     } catch (error) {
       console.error("Error:", error);
     }
-  }, [filter, selectedTag, searchTerm, sessionData]);
+  }, [filter, selectedTag, searchTerm]);
 
   useEffect(() => {
     fetchQuestions();
@@ -124,12 +124,36 @@ const QuestionTable = ({
     startIndex + questionsPerPage
   );
 
+  const isUserLoggedIn = sessionData && sessionData.loggedIn;
+
+  const handleVote = async (questionId, voteType) => {
+    if (!isUserLoggedIn) {
+      return;
+    }
+    try {
+      const response = await axios.patch(
+        `http://localhost:8000/posts/questions/${voteType}/${questionId}`,
+        {
+          username: sessionData.username,
+        }
+      );
+
+      if (response.status === 200) {
+        setQuestionData((prevQuestions) =>
+          prevQuestions.map((question) =>
+            question._id === questionId
+              ? { ...question, votes: response.data.votes }
+              : question
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error voting:", error);
+    }
+  };
+
   return (
-    <Box
-      sx={{
-        width: "99%",
-      }}
-    >
+    <Box sx={{ width: "99%" }}>
       <Box
         sx={{
           width: "100%",
@@ -154,12 +178,43 @@ const QuestionTable = ({
                   }}
                 >
                   <TableCell align="left">
-                    <Typography color={"gray"}>
-                      {question.answers.length} answers
-                    </Typography>
-                    <Typography color={"gray"}>
-                      {question.views} views
-                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          marginRight: 2,
+                        }}
+                      >
+                        <IconButton
+                          onClick={() => handleVote(question._id, "upvote")}
+                          size="small"
+                          disabled={!isUserLoggedIn}
+
+                        >
+                          <ThumbUp />
+                        </IconButton>
+                        <Typography variant="body2">
+                          {question.votes}
+                        </Typography>
+                        <IconButton
+                          onClick={() => handleVote(question._id, "downvote")}
+                          size="small"
+                          disabled={!isUserLoggedIn}
+                        >
+                          <ThumbDown />
+                        </IconButton>
+                      </Box>
+                      <div>
+                        <Typography color={"gray"}>
+                          {question.answers.length} answers
+                        </Typography>
+                        <Typography color={"gray"}>
+                          {question.views} views
+                        </Typography>
+                      </div>
+                    </Box>
                   </TableCell>
                   <TableCell align="left">
                     <Typography
@@ -192,7 +247,9 @@ const QuestionTable = ({
                     </Box>
                   </TableCell>
                   <TableCell align="left">
-                    <Typography color="error">{question.asked_by.username}</Typography>
+                    <Typography color="error">
+                      {question.asked_by.username}
+                    </Typography>
                     <Typography
                       color={"gray"}
                     >{`asked ${question.formattedDate}`}</Typography>

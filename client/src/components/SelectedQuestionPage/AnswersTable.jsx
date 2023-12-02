@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Helper from "../../utils/Helper";
 import {
@@ -10,27 +10,57 @@ import {
   List,
   ListItem,
   Button,
+  IconButton,
+  Typography,
 } from "@mui/material";
+import { ThumbUp, ThumbDown } from "@mui/icons-material";
 
 const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
   const [answers, setAnswers] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
-  const answersPerPage = 5; // Number of answers to display per page
+  const answersPerPage = 5;
   const helper = new Helper();
 
   useEffect(() => {
     axios
       .get(`http://localhost:8000/posts/answers/${questionId}`)
       .then((response) => {
-        const sortedAnswers = response.data.sort(
-          (a, b) => new Date(b.ansDate) - new Date(a.ansDate)
-        );
-        setAnswers(sortedAnswers);
+        setAnswers(response.data);
       })
       .catch((error) => {
         console.error("Error fetching answers:", error);
       });
   }, [questionId]);
+
+  const isUserLoggedIn = sessionData && sessionData.loggedIn;
+
+  const handleVote = async (answerId, voteType) => {
+
+    if (!isUserLoggedIn) {
+      return;
+    }
+
+    try {
+      const response = await axios.patch(
+        `http://localhost:8000/posts/answers/${voteType}/${answerId}`,
+        {
+          username: sessionData.username,
+        }
+      );
+
+      if (response.status === 200) {
+        setAnswers((prevAnswers) =>
+          prevAnswers.map((answer) =>
+            answer._id === answerId
+              ? { ...answer, votes: response.data.votes }
+              : answer
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error voting:", error);
+    }
+  };
 
   const handleNext = () => {
     setStartIndex((prev) => {
@@ -50,6 +80,7 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
     startIndex,
     startIndex + answersPerPage
   );
+
   const isPrevDisabled = startIndex === 0;
   const isNextDisabled = startIndex + answersPerPage >= answers.length;
 
@@ -71,13 +102,33 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
               >
                 <TableCell
                   sx={{
-                    fontWeight: "bold",
-                    width: "50%",
-                    overflow: "auto",
+                    display: "flex",
+                    alignItems: "center",
                     padding: 4,
                   }}
                 >
-                  {helper.renderTextWithLinks(answer.text)}
+                  <Box sx={{ display: "flex", flexDirection: "column", mr: 2 }}>
+                    <IconButton
+                      onClick={() => handleVote(answer._id, "upvote")}
+                      size="small"
+                      disabled={!isUserLoggedIn}
+                    >
+                      <ThumbUp />
+                    </IconButton>
+                    <Typography variant="body2" sx={{ textAlign: "center" }}>
+                      {answer.votes}
+                    </Typography>
+                    <IconButton
+                      onClick={() => handleVote(answer._id, "downvote")}
+                      size="small"
+                      disabled={!isUserLoggedIn}
+                    >
+                      <ThumbDown />
+                    </IconButton>
+                  </Box>
+                  <Box sx={{ flexGrow: 1 }}>
+                    {helper.renderTextWithLinks(answer.text)}
+                  </Box>
                 </TableCell>
                 <TableCell sx={{ paddingLeft: 60 }}>
                   <List sx={{ listStyle: "none", padding: 0 }}>
