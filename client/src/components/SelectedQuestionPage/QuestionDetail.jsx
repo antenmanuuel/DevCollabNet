@@ -3,7 +3,7 @@ import axios from "axios";
 import Helper from "../../utils/Helper";
 import { Box, Typography, Chip } from "@mui/material";
 
-const QuestionDetail = ({ questionId }) => {
+const QuestionDetail = ({ questionId, sessionData }) => {
   const [question, setQuestion] = useState(null);
   const helper = new Helper();
 
@@ -48,7 +48,7 @@ const QuestionDetail = ({ questionId }) => {
           <Typography variant="subtitle2" color={"gray"}>
             asked by{" "}
             <Chip
-              label={question && question.asked_by}
+              label={question && question.asked_by.username}
               size="small"
               sx={{
                 border: "none",

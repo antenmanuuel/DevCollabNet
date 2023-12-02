@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import QuestionsPage from "../QuestionsPage/QuestionsPage";
 import axios from "axios";
 import { TextField, Button, Box, Typography, Container } from "@mui/material";
@@ -8,17 +8,25 @@ const QuestionsForm = (props) => {
     title: "",
     questionText: "",
     tags: "",
-    username: "",
+    askedBy:  props.sessionData.username
   });
 
   const [errors, setErrors] = useState({
     questionTitleError: "",
     questionTextError: "",
     tagsError: "",
-    usernameError: "",
   });
 
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+
+
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      askedBy: props.sessionData.username
+    }));
+  }, [props.sessionData.username]);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -32,7 +40,6 @@ const QuestionsForm = (props) => {
     let textError = "";
     let hyperlinkError = "";
     let tagsError = "";
-    let usernameError = "";
 
     if (formData.title.length === 0 || formData.title.length > 100) {
       titleError = "Title should be between 1 and 100 characters.";
@@ -87,27 +94,23 @@ const QuestionsForm = (props) => {
       tagsError = "Each tag should be 10 characters or less.";
     }
 
-    if (formData.username.trim() === "") {
-      usernameError = "Username cannot be empty.";
-    }
-
     setErrors({
       questionTitleError: titleError,
       questionTextError: error,
       tagsError: tagsError,
-      usernameError: usernameError,
     });
 
-    if (!titleError && !error && !tagsError && !usernameError) {
+    if (!titleError && !error && !tagsError) {
       const newQuestion = {
         title: formData.title,
         text: formData.questionText,
         tagIds: tags,
-        askedBy: formData.username,
+        askedBy: formData.askedBy,
         views: 0,
       };
 
       try {
+        console.log(newQuestion);
         await axios.post(
           "http://localhost:8000/posts/questions/askQuestion",
           newQuestion
@@ -119,7 +122,7 @@ const QuestionsForm = (props) => {
           title: "",
           questionText: "",
           tags: "",
-          username: "",
+          askedBy: props.sessionData.username
         });
         setIsFormSubmitted(true);
       } catch (error) {
@@ -129,7 +132,7 @@ const QuestionsForm = (props) => {
   };
 
   if (isFormSubmitted) {
-    return <QuestionsPage />;
+    return <QuestionsPage sessionData={props.sessionData} />;
   }
 
   return (
@@ -187,24 +190,11 @@ const QuestionsForm = (props) => {
             error={Boolean(errors.tagsError)}
             helperText={errors.tagsError}
           />
-          <Typography variant="h6" gutterBottom>
-            Username*
-          </Typography>
-          <TextField
-            required
-            fullWidth
-            id="usernameTextBox"
-            name="username"
-            value={formData.username}
-            onChange={handleInputChange}
-            error={Boolean(errors.usernameError)}
-            helperText={errors.usernameError}
-          />
           <Button
             type="submit"
             variant="contained"
             color="primary"
-            sx={{ mt: 3, mb: 2, padding:"10px" }}
+            sx={{ mt: 3, mb: 2, padding: "10px" }}
           >
             Submit Question
           </Button>

@@ -38,7 +38,7 @@ const QuestionTop = ({
         console.error("Error fetching questions count:", error);
       }
     },
-    [selectedTag, searchTerm]
+    [selectedTag, searchTerm, sessionData]
   );
 
   useEffect(() => {

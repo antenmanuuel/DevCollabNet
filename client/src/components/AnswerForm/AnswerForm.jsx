@@ -4,12 +4,11 @@ import axios from "axios";
 
 const AnswerForm = (props) => {
   const [formData, setFormData] = useState({
-    username: "",
     answerText: "",
+    ansBy: props.sessionData.userId
   });
 
   const [errors, setErrors] = useState({
-    usernameError: "",
     answerTextError: "",
   });
 
@@ -21,11 +20,6 @@ const AnswerForm = (props) => {
   const handleFormSubmit = (event) => {
     event.preventDefault();
 
-    const usernameError =
-      formData.username.trim() === "" ||
-      formData.username.match(/^\s*$/) !== null
-        ? "Username cannot be empty"
-        : "";
     const textError =
       formData.answerText.trim() === "" ||
       formData.answerText.match(/^\s*$/) !== null
@@ -70,9 +64,8 @@ const AnswerForm = (props) => {
 
     const error = hyperlinkError ? hyperlinkError : textError;
 
-    if (usernameError || error) {
+    if (error) {
       setErrors({
-        usernameError: usernameError,
         answerTextError: error,
       });
       return;
@@ -81,7 +74,7 @@ const AnswerForm = (props) => {
     axios
       .post("http://localhost:8000/posts/answers/answerQuestion", {
         text: formData.answerText,
-        ansBy: formData.username,
+        ansBy: props.sessionData.username,
         qid: props.questionId,
       })
       .then(() => {
@@ -89,8 +82,8 @@ const AnswerForm = (props) => {
           props.onAnswerAdded();
         }
         setFormData({
-          username: "",
           answerText: "",
+          ansBy: props.sessionData.username,
         });
       })
       .catch((error) => {
@@ -128,27 +121,21 @@ const AnswerForm = (props) => {
             error={Boolean(errors.answerTextError)}
             helperText={errors.answerTextError}
           />
-          <Typography component="h1" variant="h5">
-            Username*
+          <Typography variant="h6" gutterBottom>
+            Username
           </Typography>
           <TextField
-            variant="outlined"
-            margin="normal"
-            required
             fullWidth
-            id="usernameTextBoxForAnswer"
+            id="usernameTextBox"
             name="username"
-            autoComplete="username"
-            value={formData.username}
-            onChange={handleInputChange}
-            error={Boolean(errors.usernameError)}
-            helperText={errors.usernameError}
+            value={props.sessionData.username}
+            disabled
           />
           <Button
             type="submit"
             variant="contained"
             color="primary"
-            sx={{ mt: 3, mb: 2, padding:"10px" }}
+            sx={{ mt: 3, mb: 2, padding: "10px" }}
           >
             Submit Answer
           </Button>

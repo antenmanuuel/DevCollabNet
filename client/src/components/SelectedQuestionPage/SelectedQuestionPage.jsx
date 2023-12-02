@@ -22,11 +22,11 @@ const SelectedQuestionPage = ({ questionId, sessionData }) => {
   };
 
   if (showQuestionsForm) {
-    return <QuestionsForm />;
+    return <QuestionsForm sessionData={sessionData} />;
   }
 
   if(showAnswersForm) {
-    return <AnswerForm onAnswerAdded={handleAnswerAdded} questionId={questionId} />;
+    return <AnswerForm onAnswerAdded={handleAnswerAdded} questionId={questionId} sessionData={sessionData} />;
   }
 
   return (
@@ -36,7 +36,7 @@ const SelectedQuestionPage = ({ questionId, sessionData }) => {
         onAskQuestionPress={handleAskQuestionPress} 
         sessionData={sessionData}
       />
-      <QuestionDetail questionId={questionId} />
+      <QuestionDetail questionId={questionId} sessionData={sessionData}/>
       <AnswersTable questionId={questionId} onAnswerPress={handleAnswerPress} sessionData={sessionData} />
     </div>
   );
