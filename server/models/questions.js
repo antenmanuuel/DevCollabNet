@@ -11,7 +11,14 @@ let QuestionSchema = new Schema(
         answers : {type: [Schema.Types.ObjectId], ref : "Answer"},
         asked_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         ask_date_time: {type: Date, default: Date.now},
-        views: {type: Number, default : 0}
+        views: {type: Number, default : 0},
+        votes: { type: Number, default: 0 },
+        comments: { type: [Schema.Types.ObjectId], ref: 'Comment' },
+        voters: [{
+          userWhoVoted: {type: Schema.Types.ObjectId, ref: 'User'},
+          voteIncrement: { type: Number, default: 0}
+        }]
+
     }
 );
 
