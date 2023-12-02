@@ -66,6 +66,7 @@ const QuestionsPage = ({ selectedTag = null, searchTerm, setSearchTerm, sessionD
         <QuestionsForm
           onQuestionAdded={handleQuestionAdded}
           setSearchTerm={setSearchTerm}
+          sessionData={sessionData}
         />
       );
     }
@@ -89,6 +90,7 @@ const QuestionsPage = ({ selectedTag = null, searchTerm, setSearchTerm, sessionD
         filter={filter}
         selectedTag={selectedTag}
         searchTerm={searchTerm}
+        sessionData={sessionData}
       />
     </QuestionContainer>
   );

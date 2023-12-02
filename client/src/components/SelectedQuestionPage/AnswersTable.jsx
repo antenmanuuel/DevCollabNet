@@ -82,7 +82,7 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
                 <TableCell sx={{ paddingLeft: 60 }}>
                   <List sx={{ listStyle: "none", padding: 0 }}>
                     <ListItem sx={{ color: "error.main", paddingBottom: 0 }}>
-                      {answer.ans_by}
+                      {answer.ans_by.username}
                     </ListItem>
                     <ListItem sx={{ color: "text.secondary" }}>
                       answered{" "}

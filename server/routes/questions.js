@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 
 const Questions = require("../models/questions");
 const Tags = require("../models/tags");
 const Answers = require("../models/answers");
+const User = require("../models/users");
 
 // Error handling middleware
 const handleError = (err, res) => {
@@ -24,7 +26,9 @@ const createOrFetchTag = async (tagName) => {
 // Route to fetch all questions
 router.get("/", async (_, res) => {
   try {
-    const questions = await Questions.find().exec();
+    const questions = await Questions.find()
+      .populate("asked_by", "username")
+      .exec();
     res.send(questions);
   } catch (err) {
     handleError(err, res);
@@ -46,8 +50,11 @@ router.get("/unanswered/count", async (_, res) => {
 // Route to get the questions by newest filter
 router.get("/newest", async (req, res) => {
   try {
-    const result = await Questions.find().sort({ ask_date_time: -1 }).exec();
-    res.send(result);
+    const questions = await Questions.find()
+      .sort({ ask_date_time: -1 })
+      .populate("asked_by", "username")
+      .exec();
+    res.send(questions);
   } catch (err) {
     handleError(err, res);
   }
@@ -70,6 +77,7 @@ router.get("/active", async (req, res, next) => {
   try {
     const allQuestions = await Questions.find()
       .sort({ ask_date_time: -1 })
+      .populate("asked_by", "username")
       .lean()
       .exec();
     for (let question of allQuestions) {
@@ -84,7 +92,10 @@ router.get("/active", async (req, res, next) => {
     questionsWithAnswers.sort(
       (a, b) => b.latestAnswerDate - a.latestAnswerDate
     );
-    const sortedQuestions = [...questionsWithAnswers,...questionsWithoutAnswers,];
+    const sortedQuestions = [
+      ...questionsWithAnswers,
+      ...questionsWithoutAnswers,
+    ];
     res.send(sortedQuestions);
   } catch (err) {
     handleError(err, res);
@@ -92,12 +103,13 @@ router.get("/active", async (req, res, next) => {
 });
 
 // route to unanswered questions filter
-router.get("/unanswered", async (req, res, next) => {
+router.get("/unanswered", async (req, res) => {
   try {
-    const result = await Questions.find({ answers: { $size: 0 } }).sort({
-      ask_date_time: -1,
-    });
-    res.send(result);
+    const questions = await Questions.find({ answers: { $size: 0 } })
+      .sort({ ask_date_time: -1 })
+      .populate("asked_by", "username")
+      .exec();
+    res.send(questions);
   } catch (err) {
     handleError(err, res);
   }
@@ -106,28 +118,43 @@ router.get("/unanswered", async (req, res, next) => {
 // Route to fetch a question by its ID
 router.get("/:question", async (req, res) => {
   try {
-    const question = await Questions.findById(req.params.question).exec();
+    const question = await Questions.findById(req.params.question)
+      .populate('asked_by', 'username')
+      .exec();
     res.send(question);
   } catch (err) {
     handleError(err, res);
   }
 });
-
-// Route to post a new question
 router.post("/askQuestion", async (req, res) => {
-  try {
-    const tagIds = await Promise.all(req.body.tagIds.map(createOrFetchTag));
-    const newQuestion = new Questions({
-      title: req.body.title,
-      text: req.body.text,
-      tags: tagIds,
-      asked_by: req.body.askedBy,
-    });
-    await newQuestion.save();
-    res.send(newQuestion);
-  } catch (error) {
-    handleError(error, res);
+
+  const { title, text, tagIds, askedBy } = req.body;
+
+
+  if (!title || !text || !Array.isArray(tagIds) || !askedBy) {
+    console.log("Error: Missing required fields");
+
+    return res.status(400).send("Missing required fields");
   }
+
+  const user = await User.findOne({ username: askedBy });
+  if (!user) {
+    return res.status(404).send("User not found");
+  }
+
+  const validTagIds = await Promise.all(tagIds.map(createOrFetchTag));
+
+  const newQuestion = new Questions({
+    title,
+    text,
+    tags: validTagIds,
+    asked_by: user._id,
+    views: 0
+  });
+
+  await newQuestion.save();
+
+  res.status(201).send(newQuestion);
 });
 
 router.use((err, req, res, next) => {

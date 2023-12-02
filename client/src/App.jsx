@@ -9,20 +9,33 @@ axios.defaults.withCredentials = true;
 
 function App() {
   const [currentView, setCurrentView] = useState("welcome");
-  const [sessionData, setSessionData] = useState({ loggedIn: false, username: '', email: '' });
+  const [sessionData, setSessionData] = useState({
+    loggedIn: false,
+    username: "",
+    email: "",
+  });
 
+  // Fetch session data on component mount
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/users/session")
-      .then((response) => {
+    const fetchSessionData = async () => {
+      try {
+        const response = await axios.get("http://localhost:8000/users/session");
         setSessionData({
           loggedIn: response.data && response.data.loggedIn,
-          username: response.data ? response.data.username : '',
-          email: response.data ? response.data.email : ''
+          username: response.data ? response.data.username : "",
+          email: response.data ? response.data.email : "",
         });
-        setCurrentView(response.data && response.data.loggedIn ? "fakeStackOverflow" : "welcome");
-      })
-      .catch((error) => console.error("Error fetching session data:", error));
+        setCurrentView(
+          response.data && response.data.loggedIn
+            ? "fakeStackOverflow"
+            : "welcome"
+        );
+      } catch (error) {
+        console.error("Error fetching session data:", error);
+      }
+    };
+
+    fetchSessionData();
   }, []);
 
   const showSignup = () => setCurrentView("signup");
@@ -30,13 +43,14 @@ function App() {
   const onGuest = () => setCurrentView("fakeStackOverflow");
 
   const onSignupSuccess = () => setCurrentView("login");
-  const onLoginSuccess = () => {
-    setSessionData({ loggedIn: true, username: '', email:'' });
+
+  const onLoginSuccess = (username, email) => {
+    setSessionData({ loggedIn: true, username, email });
     setCurrentView("fakeStackOverflow");
   };
 
   const onWelcome = () => {
-    setSessionData({ loggedIn: false, username: '', email: '' });
+    setSessionData({ loggedIn: false, username: "", email: "" });
     setCurrentView("welcome");
   };
 
@@ -45,7 +59,7 @@ function App() {
       axios
         .post("http://localhost:8000/users/logout")
         .then(() => {
-          setSessionData({ loggedIn: false, username: '', email: '' });
+          setSessionData({ loggedIn: false, username: "", email: "" });
           setCurrentView("welcome");
         })
         .catch((error) => console.error("Error during logout:", error));
@@ -56,9 +70,13 @@ function App() {
 
   switch (currentView) {
     case "signup":
-      return <SignupForm onSignupSuccess={onSignupSuccess} goToWelcome={onWelcome} />;
+      return (
+        <SignupForm onSignupSuccess={onSignupSuccess} goToWelcome={onWelcome} />
+      );
     case "login":
-      return <LoginForm onLoginSuccess={onLoginSuccess} goToWelcome={onWelcome} />;
+      return (
+        <LoginForm onLoginSuccess={onLoginSuccess} goToWelcome={onWelcome} />
+      );
     case "fakeStackOverflow":
       return (
         <FakeStackOverflow
@@ -69,7 +87,13 @@ function App() {
       );
     case "welcome":
     default:
-      return <WelcomePage onLogin={showLogin} onSignup={showSignup} onGuest={onGuest} />;
+      return (
+        <WelcomePage
+          onLogin={showLogin}
+          onSignup={showSignup}
+          onGuest={onGuest}
+        />
+      );
   }
 }
 

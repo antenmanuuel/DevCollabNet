@@ -49,10 +49,10 @@ const TagsPage = ({sessionData}) => {
     if (selectedTag) {
       handleTagSelected(selectedTag);
     }
-  }, [selectedTag, sessionData]);
+  }, [selectedTag]);
 
   if (showQuestionsForm) {
-    return <QuestionsForm />;
+    return <QuestionsForm sessionData={sessionData} />;
   }
 
   if (selectedTag && filteredQuestions.length > 0) {
@@ -62,7 +62,7 @@ const TagsPage = ({sessionData}) => {
   return (
     <TagsContainer>
       <TagsTop onAskQuestionPress={handleAskQuestionPress} sessionData={sessionData} />
-      <TagsTable onTagSelected={setSelectedTag} />
+      <TagsTable onTagSelected={setSelectedTag} sessionData={sessionData} />
     </TagsContainer>
   );
 };
