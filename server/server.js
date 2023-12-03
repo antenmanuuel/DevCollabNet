@@ -54,11 +54,13 @@ const questionsRouter = require('./routes/questions.js');
 const answersRouter = require('./routes/answers.js');
 const tagsRouter = require('./routes/tags.js');
 const usersRouter = require('./routes/users.js');
+const commentsRouter = require('./routes/comments.js');
 
 app.use('/posts/questions', questionsRouter);
 app.use('/posts/answers', answersRouter);
 app.use('/posts/tags', tagsRouter);
 app.use('/users/', usersRouter);
+app.use('/posts/comments', commentsRouter);
 
 app.get('/posts', (req, res) => {
   res.redirect('/posts/questions');
