@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Drawer, List, ListItem, ListItemText, Box } from "@mui/material";
 
-function SideNavbar({ setQuestionsPage, setTagsPage }) {
+function SideNavbar({ setQuestionsPage, setTagsPage, setProfilePage }) {
   const [activeLink, setActiveLink] = useState("questions");
 
   const handleQuestionsLinkClick = () => {
@@ -15,6 +15,14 @@ function SideNavbar({ setQuestionsPage, setTagsPage }) {
     setTagsPage(false);
     setActiveLink("tags");
   };
+
+  const handleProfileLinkClick = () => {
+    setQuestionsPage(true);
+    setTagsPage(true);
+    setProfilePage(false);
+    setActiveLink("users");
+  };
+
 
   const getListItemStyle = (buttonName) => ({
     display: "flex",
@@ -45,6 +53,14 @@ function SideNavbar({ setQuestionsPage, setTagsPage }) {
     >
       <Box sx={{ width: 275 }}>
         <List>
+        <ListItem
+            button
+            sx={getListItemStyle("users")}
+            onClick={handleProfileLinkClick}
+          >
+            <ListItemText primary="Users" />
+          </ListItem>
+
           <ListItem
             button
             sx={getListItemStyle("questions")}
