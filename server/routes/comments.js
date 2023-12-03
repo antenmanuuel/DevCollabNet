@@ -87,7 +87,6 @@ router.get("/byQuestion/:questionId", async (req, res) => {
       return res.status(400).send("Invalid question ID");
     }
 
-    
     const question = await Question.findById(questionId).populate({
       path: "comments",
       populate: {
@@ -102,6 +101,68 @@ router.get("/byQuestion/:questionId", async (req, res) => {
 
     // Send back the populated comments
     res.status(200).json(question.comments);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+// Route to upvote a comment
+router.patch("/upvoteComment/:commentId", async (req, res) => {
+  try {
+    const { username } = req.body;
+    const commentId = req.params.commentId;
+
+    if (!mongoose.Types.ObjectId.isValid(commentId)) {
+      return res.status(400).send("Invalid comment ID");
+    }
+
+    const user = await User.findOne({ username });
+    const comment = await Comment.findById(commentId);
+
+    if (!comment || !user) {
+      return res.status(404).send("Comment or User not found.");
+    }
+
+    const hasVoted = comment.voters.some((voter) =>
+      voter.userWhoVoted.equals(user._id)
+    );
+
+    if (hasVoted) {
+      return res.status(400).send("User has already voted.");
+    }
+
+    comment.votes += 1;
+    comment.voters.push({ userWhoVoted: user._id });
+    await comment.save();
+
+    res.status(200).send({ votes: comment.votes });
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+// Route to get comments for a specific answer
+router.get("/byAnswer/:answerId", async (req, res) => {
+  try {
+    const { answerId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(answerId)) {
+      return res.status(400).send("Invalid answer ID");
+    }
+
+    const answer = await Answer.findById(answerId).populate({
+      path: "comments",
+      populate: {
+        path: "com_by",
+        select: "username",
+      },
+    });
+
+    if (!answer) {
+      return res.status(404).send("Answer not found");
+    }
+
+    res.status(200).json(answer.comments);
   } catch (error) {
     handleError(error, res);
   }
