@@ -120,6 +120,11 @@ const QuestionTable = ({
     }
   }, [questionsData]);
 
+  const isValidComment = (text) => {
+    const trimmedText = text.trim();
+    return trimmedText.length > 0 && trimmedText.length <= 140;
+  };
+
   const handleCommentChange = (e, questionId) => {
     setNewCommentText({
       ...newCommentText,
@@ -128,7 +133,11 @@ const QuestionTable = ({
   };
 
   const postComment = async (questionId) => {
-    if (!newCommentText[questionId] || !newCommentText[questionId].trim()) {
+    const commentText = newCommentText[questionId] || "";
+    if (!isValidComment(commentText)) {
+      alert(
+        "Comment must be between 1 and 140 characters and cannot be empty."
+      );
       return;
     }
 
@@ -214,6 +223,42 @@ const QuestionTable = ({
               : question
           )
         );
+      }
+    } catch (error) {
+      console.error("Error voting:", error);
+    }
+  };
+
+  const handleUpvoteComment = async (commentId) => {
+    if (!sessionData.loggedIn) {
+      console.log("User must be logged in to vote");
+      return;
+    }
+
+    try {
+      const response = await axios.patch(
+        `http://localhost:8000/posts/comments/upvoteComment/${commentId}`,
+        { username: sessionData.username }
+      );
+
+      if (response.status === 200) {
+        const questionId = Object.keys(commentsData).find((key) =>
+          commentsData[key].some((comment) => comment._id === commentId)
+        );
+
+        if (questionId) {
+          const updatedComments = commentsData[questionId].map((comment) => {
+            if (comment._id === commentId) {
+              return { ...comment, votes: response.data.votes };
+            }
+            return comment;
+          });
+
+          setCommentsData({
+            ...commentsData,
+            [questionId]: updatedComments,
+          });
+        }
       }
     } catch (error) {
       console.error("Error voting:", error);
@@ -363,29 +408,46 @@ const QuestionTable = ({
                           >
                             <CardContent>
                               <Box
-                                sx={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                }}
+                                sx={{ display: "flex", alignItems: "center" }}
                               >
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    marginRight: 2,
+                                  }}
+                                >
+                                  <IconButton
+                                    onClick={() =>
+                                      handleUpvoteComment(comment._id)
+                                    }
+                                    disabled={!sessionData.loggedIn}
+                                    size="small"
+                                  >
+                                    <ThumbUp />
+                                  </IconButton>
+                                  <Typography variant="body2">
+                                    {comment.votes}
+                                  </Typography>
+                                </Box>
                                 <Typography
                                   variant="body2"
                                   color="textSecondary"
+                                  sx={{ flexGrow: 1 }}
                                 >
                                   {comment.text}
                                 </Typography>
-                                <Box>
-                                  <Typography
-                                    variant="subtitle2"
-                                    color="gray"
-                                    sx={{
-                                      fontWeight: "bold",
-                                      textAlign: "right",
-                                    }}
-                                  >
-                                    commented by {comment.com_by.username}
-                                  </Typography>
-                                </Box>
+                                <Typography
+                                  variant="subtitle2"
+                                  color="gray"
+                                  sx={{
+                                    fontWeight: "bold",
+                                    textAlign: "right",
+                                  }}
+                                >
+                                  commented by {comment.com_by.username}
+                                </Typography>
                               </Box>
                             </CardContent>
                           </Card>
@@ -398,6 +460,18 @@ const QuestionTable = ({
                         placeholder="Write a comment..."
                         multiline
                         disabled={!sessionData.loggedIn}
+                        error={
+                          newCommentText[question._id] &&
+                          !isValidComment(newCommentText[question._id])
+                        }
+                        helperText={
+                          newCommentText[question._id] &&
+                          (!isValidComment(newCommentText[question._id])
+                            ? newCommentText[question._id].trim().length === 0
+                              ? "Comment cannot be empty"
+                              : "Comment must be between 1 and 140 characters"
+                            : "")
+                        }
                       />
                       <Button
                         variant="contained"
@@ -461,7 +535,6 @@ const QuestionTable = ({
           </TableBody>
         </Table>
       </Box>
-      {/* Pagination for questions */}
       <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
         <Button onClick={handlePrev} disabled={currentPage === 0}>
           Prev
