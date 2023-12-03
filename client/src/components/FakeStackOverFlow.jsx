@@ -18,14 +18,24 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout }) {
     setCurrentPage("TagsPage");
   };
 
+  const handleSetProfilePage = () => {
+    setCurrentPage("ProfilePage");
+  };
+
   const handleSearch = (term) => {
     setSearchTermState(term);
     if (currentPage === "TagsPage") {
       setCurrentPage("QuestionsPage");
-    } else {
+    } 
+    if (currentPage === "QuestionsPage") {
       setCurrentPage("TagsPage");
       setTimeout(() => setCurrentPage("QuestionsPage"), 1);
     }
+    //add if statement for UsersPage
+    if (currentPage === "ProfilePage") {
+      setCurrentPage("QuestionsPage");
+    } 
+
   };
 
   return (
@@ -40,12 +50,14 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout }) {
         <SideNavbar
           setQuestionsPage={handleSetQuestionsPage}
           setTagsPage={handleSetTagsPage}
+          setProfilePage={handleSetProfilePage}
         />
         <MainContainer
           key={questionsKey}
           searchTerm={searchTerm}
           showQuestionsPage={currentPage === "QuestionsPage"}
           showTagsPage={currentPage === "TagsPage"}
+          showProfilePage={currentPage === "ProfilePage"}
           sessionData={sessionData}
         />
       </Box>
