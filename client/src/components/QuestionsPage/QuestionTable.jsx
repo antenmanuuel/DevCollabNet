@@ -27,14 +27,16 @@ const QuestionTable = ({
   const [questionsData, setQuestionData] = useState([]);
   const [commentsData, setCommentsData] = useState({});
   const [newCommentText, setNewCommentText] = useState({});
+  const [commentError, setCommentError] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
   const [currentCommentPage, setCurrentCommentPage] = useState({});
 
   const questionsPerPage = 5;
   const commentsPerPage = 3;
-  const helper = new Helper();
 
   const fetchQuestions = useCallback(async () => {
+    const helper = new Helper();
+
     let endpoint = "http://localhost:8000/posts/questions";
 
     if (selectedTag) {
@@ -68,7 +70,7 @@ const QuestionTable = ({
       let filteredQuestions = questionResponse.data;
 
       if (searchTerm) {
-        filteredQuestions = helper.filterQuestionsBySearchTerm(
+        filteredQuestions = await helper.filterQuestionsBySearchTerm(
           searchTerm,
           filteredQuestions
         );
@@ -85,6 +87,10 @@ const QuestionTable = ({
       console.error("Error:", error);
     }
   }, [filter, selectedTag, searchTerm]);
+
+  useEffect(() => {
+    fetchQuestions();
+  }, [fetchQuestions]);
 
   // Fetch comments for all loaded questions
   const fetchCommentsForQuestions = async () => {
@@ -111,33 +117,35 @@ const QuestionTable = ({
   };
 
   useEffect(() => {
-    fetchQuestions();
-  }, [fetchQuestions]);
-
-  useEffect(() => {
     if (questionsData.length > 0) {
       fetchCommentsForQuestions();
     }
   }, [questionsData]);
-
-  const isValidComment = (text) => {
-    const trimmedText = text.trim();
-    return trimmedText.length > 0 && trimmedText.length <= 140;
-  };
 
   const handleCommentChange = (e, questionId) => {
     setNewCommentText({
       ...newCommentText,
       [questionId]: e.target.value,
     });
+
+    if (commentError[questionId]) {
+      setCommentError({ ...commentError, [questionId]: "" });
+    }
+  };
+
+  const isValidComment = (text) => {
+    const trimmedText = text.trim();
+    return trimmedText.length >= 1 && trimmedText.length <= 140;
   };
 
   const postComment = async (questionId) => {
     const commentText = newCommentText[questionId] || "";
     if (!isValidComment(commentText)) {
-      alert(
-        "Comment must be between 1 and 140 characters and cannot be empty."
-      );
+      const errorMessage =
+        commentText.trim().length === 0
+          ? "Comment cannot be empty"
+          : "Comment must be between 1 and 140 characters";
+      setCommentError({ ...commentError, [questionId]: errorMessage });
       return;
     }
 
@@ -146,7 +154,7 @@ const QuestionTable = ({
         "http://localhost:8000/posts/comments/commentQuestion",
         {
           text: newCommentText[questionId],
-          comBy: sessionData.userId,
+          username: sessionData.username,
           questionId: questionId,
         }
       );
@@ -164,7 +172,6 @@ const QuestionTable = ({
       console.error("Error posting comment:", error);
     }
   };
-
   const handleQuestionTitleClickLocal = (questionId) => {
     axios
       .patch(
@@ -460,18 +467,8 @@ const QuestionTable = ({
                         placeholder="Write a comment..."
                         multiline
                         disabled={!sessionData.loggedIn}
-                        error={
-                          newCommentText[question._id] &&
-                          !isValidComment(newCommentText[question._id])
-                        }
-                        helperText={
-                          newCommentText[question._id] &&
-                          (!isValidComment(newCommentText[question._id])
-                            ? newCommentText[question._id].trim().length === 0
-                              ? "Comment cannot be empty"
-                              : "Comment must be between 1 and 140 characters"
-                            : "")
-                        }
+                        error={!!commentError[question._id]}
+                        helperText={commentError[question._id]}
                       />
                       <Button
                         variant="contained"
