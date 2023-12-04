@@ -88,7 +88,7 @@ router.post("/commentQuestion", async (req, res) => {
 
     const newComment = new Comment({
       text,
-      com_by: user._id, // use the user's ObjectId here
+      com_by: user._id,
       com_date_time: new Date(),
     });
 
@@ -102,36 +102,40 @@ router.post("/commentQuestion", async (req, res) => {
   }
 });
 
-// Route to comment on an answer
 router.post("/commentAnswer", async (req, res) => {
-  const { text, comBy, answerId } = req.body;
+  const { text, username, answerId } = req.body;
 
-  if (!text || !comBy || !mongoose.Types.ObjectId.isValid(answerId)) {
+  if (!text || !username || !mongoose.Types.ObjectId.isValid(answerId)) {
     return res.status(400).send("Missing or invalid required fields");
   }
 
-  const user = await User.findById(comBy);
-  if (!user) {
-    return res.status(404).send("User not found");
+  try {
+    const user = await User.findOne({ username: username });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const answer = await Answer.findById(answerId);
+    if (!answer) {
+      return res.status(404).send("Answer not found");
+    }
+
+    const newComment = new Comment({
+      text,
+      com_by: user._id,
+      com_date_time: new Date(),
+    });
+
+    await newComment.save();
+    answer.comments.push(newComment._id);
+    await answer.save();
+
+    res.status(201).send(newComment);
+  } catch (error) {
+    handleError(error, res);
   }
-
-  const answer = await Answer.findById(answerId);
-  if (!answer) {
-    return res.status(404).send("Answer not found");
-  }
-
-  const newComment = new Comment({
-    text,
-    com_by: user._id,
-    com_date_time: new Date(),
-  });
-
-  await newComment.save();
-  answer.comments.push(newComment._id);
-  await answer.save();
-
-  res.status(201).send(newComment);
 });
+
 
 // Route to upvote a comment
 router.patch("/upvoteComment/:commentId", async (req, res) => {
