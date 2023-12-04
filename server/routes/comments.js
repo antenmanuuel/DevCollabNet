@@ -12,16 +12,71 @@ const handleError = (err, res) => {
   console.error(err);
   res.status(500).send("Internal Server Error");
 };
-// Route to comment on a question
-router.post("/commentQuestion", async (req, res) => {
-  const { text, comBy, questionId } = req.body;
 
-  if (!text || !comBy || !mongoose.Types.ObjectId.isValid(questionId)) {
+// Route to get comments for a specific question
+router.get("/byQuestion/:questionId", async (req, res) => {
+  try {
+    const { questionId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(questionId)) {
+      return res.status(400).send("Invalid question ID");
+    }
+
+    const question = await Question.findById(questionId).populate({
+      path: "comments",
+      populate: {
+        path: "com_by",
+        select: "username",
+      },
+    });
+
+    if (!question) {
+      return res.status(404).send("Question not found");
+    }
+
+    // Send back the populated comments
+    res.status(200).json(question.comments);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+// Route to get comments for a specific answer
+router.get("/byAnswer/:answerId", async (req, res) => {
+  try {
+    const { answerId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(answerId)) {
+      return res.status(400).send("Invalid answer ID");
+    }
+
+    const answer = await Answer.findById(answerId).populate({
+      path: "comments",
+      populate: {
+        path: "com_by",
+        select: "username",
+      },
+    });
+
+    if (!answer) {
+      return res.status(404).send("Answer not found");
+    }
+
+    res.status(200).json(answer.comments);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+router.post("/commentQuestion", async (req, res) => {
+  const { text, username, questionId } = req.body;
+
+  if (!text || !username || !mongoose.Types.ObjectId.isValid(questionId)) {
     return res.status(400).send("Missing or invalid required fields");
   }
 
   try {
-    const user = await User.findById(comBy);
+    const user = await User.findOne({ username: username });
     if (!user) {
       return res.status(404).send("User not found");
     }
@@ -33,7 +88,7 @@ router.post("/commentQuestion", async (req, res) => {
 
     const newComment = new Comment({
       text,
-      com_by: user._id,
+      com_by: user._id, // use the user's ObjectId here
       com_date_time: new Date(),
     });
 
@@ -78,34 +133,6 @@ router.post("/commentAnswer", async (req, res) => {
   res.status(201).send(newComment);
 });
 
-// Route to get comments for a specific question
-router.get("/byQuestion/:questionId", async (req, res) => {
-  try {
-    const { questionId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(questionId)) {
-      return res.status(400).send("Invalid question ID");
-    }
-
-    const question = await Question.findById(questionId).populate({
-      path: "comments",
-      populate: {
-        path: "com_by",
-        select: "username",
-      },
-    });
-
-    if (!question) {
-      return res.status(404).send("Question not found");
-    }
-
-    // Send back the populated comments
-    res.status(200).json(question.comments);
-  } catch (error) {
-    handleError(error, res);
-  }
-});
-
 // Route to upvote a comment
 router.patch("/upvoteComment/:commentId", async (req, res) => {
   try {
@@ -138,33 +165,6 @@ router.patch("/upvoteComment/:commentId", async (req, res) => {
     res.status(200).send({ votes: comment.votes });
   } catch (err) {
     handleError(err, res);
-  }
-});
-
-// Route to get comments for a specific answer
-router.get("/byAnswer/:answerId", async (req, res) => {
-  try {
-    const { answerId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(answerId)) {
-      return res.status(400).send("Invalid answer ID");
-    }
-
-    const answer = await Answer.findById(answerId).populate({
-      path: "comments",
-      populate: {
-        path: "com_by",
-        select: "username",
-      },
-    });
-
-    if (!answer) {
-      return res.status(404).send("Answer not found");
-    }
-
-    res.status(200).json(answer.comments);
-  } catch (error) {
-    handleError(error, res);
   }
 });
 
