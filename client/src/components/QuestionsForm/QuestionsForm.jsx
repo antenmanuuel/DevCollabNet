@@ -41,8 +41,8 @@ const QuestionsForm = (props) => {
     let hyperlinkError = "";
     let tagsError = "";
 
-    if (formData.title.length === 0 || formData.title.length > 100) {
-      titleError = "Title should be between 1 and 100 characters.";
+    if (formData.title.length === 0 || formData.title.length > 50) {
+      titleError = "Title should be between 1 and 50 characters.";
     }
 
     if (formData.questionText.trim() === "") {
@@ -154,11 +154,14 @@ const QuestionsForm = (props) => {
             fullWidth
             id="questionTitleBox"
             name="title"
-            label="Limit title to 100 characters or less"
+            label="Limit title to 50 characters or less"
             value={formData.title}
             onChange={handleInputChange}
             error={Boolean(errors.questionTitleError)}
             helperText={errors.questionTitleError}
+            inputProps={{
+              maxLength:50
+            }}
           />
           <Typography variant="h6" gutterBottom>
             Question Text*

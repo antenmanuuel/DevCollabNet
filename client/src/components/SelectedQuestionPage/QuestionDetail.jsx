@@ -35,15 +35,25 @@ const QuestionDetail = ({ questionId, sessionData }) => {
           width: "1750px",
         }}
       >
-        <Typography
-          variant="subtitle2"
-          sx={{ color: "gray.600", paddingLeft: 28, fontWeight: "bold" }}
-        >
-          {question && `${question.views} views`}
-        </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", paddingLeft: 28 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{ color: "gray.600", fontWeight: "bold" }}
+          >
+            {question && `${question.votes} votes`}
+          </Typography>
+          <Typography
+            variant="subtitle2"
+            sx={{ color: "gray.600", fontWeight: "bold" }}
+          >
+            {question && `${question.views} views`}
+          </Typography>
+        </Box>
+
         <Typography variant="body1" sx={{ flexGrow: 1, paddingLeft: 10 }}>
           {question && helper.renderTextWithLinks(question.text)}
         </Typography>
+
         <Box sx={{ color: "gray.500", paddingLeft: 10 }}>
           <Typography variant="subtitle2" color={"gray"}>
             asked by{" "}

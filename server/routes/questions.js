@@ -119,7 +119,7 @@ router.get("/unanswered", async (req, res) => {
 router.get("/:question", async (req, res) => {
   try {
     const question = await Questions.findById(req.params.question)
-      .populate('asked_by', 'username')
+      .populate("asked_by", "username")
       .exec();
     res.send(question);
   } catch (err) {
@@ -127,9 +127,7 @@ router.get("/:question", async (req, res) => {
   }
 });
 router.post("/askQuestion", async (req, res) => {
-
   const { title, text, tagIds, askedBy } = req.body;
-
 
   if (!title || !text || !Array.isArray(tagIds) || !askedBy) {
     console.log("Error: Missing required fields");
@@ -149,7 +147,7 @@ router.post("/askQuestion", async (req, res) => {
     text,
     tags: validTagIds,
     asked_by: user._id,
-    views: 0
+    views: 0,
   });
 
   await newQuestion.save();
@@ -172,5 +170,70 @@ router.patch("/incrementViews/:question", async (req, res) => {
     handleError(err, res);
   }
 });
+
+// Route to upvote a question
+router.patch("/upvote/:questionId", async (req, res) => {
+  try {
+    const { username } = req.body;
+    const questionId = req.params.questionId;
+
+    const user = await User.findOne({ username });
+    const question = await Questions.findById(questionId);
+
+    if (!question || !user) {
+      return res.status(404).send("Question or User not found.");
+    }
+
+    const hasVoted = question.voters.some((voter) =>
+      voter.userWhoVoted.equals(user._id)
+    );
+
+    if (hasVoted) {
+      return res.status(400).send("User has already voted.");
+    }
+
+    question.votes += 1;
+    question.voters.push({ userWhoVoted: user._id, voteIncrement: 1 });
+    await question.save();
+
+    res.status(200).send({ votes: question.votes });
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+
+// Route to downvote a question
+router.patch("/downvote/:questionId", async (req, res) => {
+  try {
+    const { username } = req.body;
+    const questionId = req.params.questionId;
+
+    const user = await User.findOne({ username });
+    const question = await Questions.findById(questionId);
+
+    if (!question || !user) {
+      return res.status(404).send("Question or User not found.");
+    }
+
+    const hasVoted = question.voters.some((voter) =>
+      voter.userWhoVoted.equals(user._id)
+    );
+
+    if (hasVoted) {
+      return res.status(400).send("User has already voted.");
+    }
+
+    question.votes -= 1;
+    question.voters.push({ userWhoVoted: user._id, voteIncrement: -1 });
+    await question.save();
+
+    res.status(200).send({ votes: question.votes });
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+
 
 module.exports = router;
