@@ -38,16 +38,30 @@ function App() {
     fetchSessionData();
   }, []);
 
+  const onLoginSuccess = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/users/session");
+      if (response.data && response.data.loggedIn) {
+        setSessionData({
+          loggedIn: true,
+          username: response.data.username,
+          email: response.data.email,
+        });
+        setCurrentView("fakeStackOverflow");
+      } else {
+
+        console.error("Login was successful, but session data is missing.");
+      }
+    } catch (error) {
+      console.error("Error fetching session data after login:", error);
+    }
+  };
+
   const showSignup = () => setCurrentView("signup");
   const showLogin = () => setCurrentView("login");
   const onGuest = () => setCurrentView("fakeStackOverflow");
 
   const onSignupSuccess = () => setCurrentView("login");
-
-  const onLoginSuccess = (username, email) => {
-    setSessionData({ loggedIn: true, username, email });
-    setCurrentView("fakeStackOverflow");
-  };
 
   const onWelcome = () => {
     setSessionData({ loggedIn: false, username: "", email: "" });
@@ -70,30 +84,14 @@ function App() {
 
   switch (currentView) {
     case "signup":
-      return (
-        <SignupForm onSignupSuccess={onSignupSuccess} goToWelcome={onWelcome} />
-      );
+      return <SignupForm onSignupSuccess={onSignupSuccess} goToWelcome={onWelcome} />;
     case "login":
-      return (
-        <LoginForm onLoginSuccess={onLoginSuccess} goToWelcome={onWelcome} />
-      );
+      return <LoginForm onLoginSuccess={onLoginSuccess} goToWelcome={onWelcome} />;
     case "fakeStackOverflow":
-      return (
-        <FakeStackOverflow
-          goToWelcome={onWelcome}
-          sessionData={sessionData}
-          handleLoginLogout={handleLoginLogout}
-        />
-      );
+      return <FakeStackOverflow goToWelcome={onWelcome} sessionData={sessionData} handleLoginLogout={handleLoginLogout} />;
     case "welcome":
     default:
-      return (
-        <WelcomePage
-          onLogin={showLogin}
-          onSignup={showSignup}
-          onGuest={onGuest}
-        />
-      );
+      return <WelcomePage onLogin={showLogin} onSignup={showSignup} onGuest={onGuest} />;
   }
 }
 

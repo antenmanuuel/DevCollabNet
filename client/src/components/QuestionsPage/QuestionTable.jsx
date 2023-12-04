@@ -92,13 +92,13 @@ const QuestionTable = ({
     fetchQuestions();
   }, [fetchQuestions]);
 
-  // Fetch comments for all loaded questions
   const fetchCommentsForQuestions = async () => {
     for (const question of questionsData) {
       try {
         const response = await axios.get(
           `http://localhost:8000/posts/comments/byQuestion/${question._id}`
         );
+        // Sort comments by com_date_time in descending order (newest first)
         const sortedComments = response.data.sort((a, b) => {
           return new Date(b.com_date_time) - new Date(a.com_date_time);
         });
@@ -160,11 +160,18 @@ const QuestionTable = ({
       );
 
       if (response.status === 201) {
-        const newComment = response.data;
-        setCommentsData((prevComments) => ({
-          ...prevComments,
-          [questionId]: [...(prevComments[questionId] || []), newComment],
-        }));
+        const newComment = {
+          ...response.data,
+          com_by: { username: sessionData.username },
+        };
+        setCommentsData((prevComments) => {
+          const updatedComments = [newComment, ...(prevComments[questionId] || [])];
+          updatedComments.sort((a, b) => new Date(b.com_date_time) - new Date(a.com_date_time));
+          return {
+              ...prevComments,
+              [questionId]: updatedComments,
+          };
+      });
 
         setNewCommentText({ ...newCommentText, [questionId]: "" });
       }
