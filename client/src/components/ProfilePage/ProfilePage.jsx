@@ -1,29 +1,21 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Box,
-  Typography,
-  Button,
-} from "@mui/material";
+import React from "react";
 import UsersPage from "./UsersPage";
 import AdminsPage from "./AdminsPage";
+import { Typography } from "@mui/material";
 
+const ProfilePage = ({ sessionData }) => {
+    // Check if the user is not logged in
+    if (!sessionData || !sessionData.username) {
+        return <Typography sx={{paddingLeft: "300px", paddingTop:"40px", color:"red", fontSize:"20px"}}>Error: You must be logged in to view this page.</Typography>;
+    }
 
-const ProfilePage = ({sessionData}) => {
+    // Check if the username is 'admin'
+    if (sessionData.username === 'admin') {
+        return <AdminsPage />;
+    }
 
+    // Default to UsersPage for other users
+    return <UsersPage />;
+};
 
-
-    return (
-      //<AdminsPage></AdminsPage>
-      <UsersPage></UsersPage>
-
-      );
-    };
-
-
-    
 export default ProfilePage;
