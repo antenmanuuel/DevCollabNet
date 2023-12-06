@@ -35,6 +35,30 @@ router.get("/", async (_, res) => {
   }
 });
 
+// Route to get questions asked by a specific user
+router.get("/byUsername/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Fetch the user ID based on the provided username
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Find questions asked by this user
+    const questions = await Questions.find({ asked_by: user._id })
+      .populate("asked_by", "username")
+      .sort({ ask_date_time: -1 })
+      .exec();
+
+    res.json(questions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 // Route to get the count of unanswered questions
 router.get("/unanswered/count", async (_, res) => {
   try {
@@ -159,6 +183,37 @@ router.use((err, req, res, next) => {
   handleError(err, res);
 });
 
+// Route to delete a question by its ID
+router.delete("/:questionId", async (req, res) => {
+  try {
+    const { questionId } = req.params;
+
+    const requestingUser = req.session.user;
+
+    if (!requestingUser) {
+      return res.status(401).send("User is not logged in.");
+    }
+
+    const question = await Questions.findById(questionId).exec();
+
+    if (!question) {
+      return res.status(404).send("Question not found.");
+    }
+
+    if (
+      !requestingUser.isAdmin &&
+      !question.asked_by.equals(requestingUser.userId)
+    ) {
+      return res.status(403).send("Unauthorized to delete this question.");
+    }
+
+    await Questions.findByIdAndRemove(questionId);
+    res.send({ message: "Question deleted successfully." });
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
 // Route to increment the view count for a question
 router.patch("/incrementViews/:question", async (req, res) => {
   try {
@@ -202,7 +257,6 @@ router.patch("/upvote/:questionId", async (req, res) => {
   }
 });
 
-
 // Route to downvote a question
 router.patch("/downvote/:questionId", async (req, res) => {
   try {
@@ -233,7 +287,5 @@ router.patch("/downvote/:questionId", async (req, res) => {
     handleError(err, res);
   }
 });
-
-
 
 module.exports = router;
