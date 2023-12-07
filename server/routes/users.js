@@ -112,90 +112,51 @@ router.get("/getUserData/:id", async (req, res) => {
     res.send("Internal Server Error occurred. Please try again.");
   }
 });
-
-router.delete("/deleteUserByEmail/:email", async (req, res) => {
-  // Check for admin permission
+router.delete("/deleteUser/:id", async (req, res) => {
   if (!req.session.user.isAdmin) {
-    return res.send("You do not have permission to delete users.");
+    console.log("Access denied: User is not an admin.");
+    return res.status(403).send("You do not have permission to delete users.");
   }
 
-  const userEmail = req.params.email;
-
   try {
-    const user = await User.findOne({ email: userEmail });
-    if (!user) {
-      return res.status(404).send("User with the given email not found.");
-    }
-    const userId = user._id;
+    const userId = req.params.id;
+    console.log(`Attempting to delete user with ID: ${userId}`);
 
-    // Delete user's questions, answers, and comments
-    await Question.deleteMany({ asked_by: userId });
-    await Answer.deleteMany({ ans_by: userId });
+    // Delete comments made by the user
     await Comment.deleteMany({ com_by: userId });
 
-    // Remove user's votes from Questions, Answers, and Comments
-    await Question.updateMany(
-      {},
-      { $pull: { voters: { userWhoVoted: userId } } }
-    );
-    await Answer.updateMany(
-      {},
-      { $pull: { voters: { userWhoVoted: userId } } }
-    );
-    await Comment.updateMany(
-      {},
-      { $pull: { voters: { userWhoVoted: userId } } }
-    );
+    // Delete answers made by the user and related comments
+    const userAnswers = await Answer.find({ ans_by: userId }).exec();
+    for (const answer of userAnswers) {
+      await Comment.deleteMany({ _id: { $in: answer.comments } });
+    }
+    await Answer.deleteMany({ ans_by: userId });
 
-    // Handle tags created by the user
-    const tags = await Tag.find({ created_By: userId }).exec();
+    // Delete questions asked by the user, and related answers and comments
+    const userQuestions = await Question.find({ asked_by: userId }).exec();
+    for (const question of userQuestions) {
+      await Answer.deleteMany({ _id: { $in: question.answers } });
+      await Comment.deleteMany({ _id: { $in: question.comments } });
+    }
+    await Question.deleteMany({ asked_by: userId });
+
+    // Check and delete tags if necessary
+    const tags = await Tag.find().exec();
     for (const tag of tags) {
-      const questionsUsingTag = await Question.find({
-        tags: tag._id.toString(),
-      }).exec();
-
-      let shouldDeleteTag = true;
-      for (const question of questionsUsingTag) {
-        if (question.asked_by.toString() !== userId.toString()) {
-          shouldDeleteTag = false;
-          break;
-        }
-      }
-
-      if (shouldDeleteTag) {
+      const questionsUsingTag = await Question.find({ tags: tag._id }).exec();
+      if (questionsUsingTag.length === 0) {
         await Tag.deleteOne({ _id: tag._id }).exec();
-      } else {
-        await Tag.updateOne(
-          { _id: tag._id },
-          { $set: { created_By: req.session.user.userId } }
-        ).exec();
       }
     }
 
-    // Delete the user
+    // Finally, delete the user
     await User.findByIdAndDelete(userId);
+    console.log(`User with ID: ${userId} successfully deleted.`);
 
-    // Invalidate session if the deleted user is the one in the current session
-    if (req.session.user && req.session.user.userId === userId.toString()) {
-      req.session.destroy((err) => {
-        if (err) {
-          console.error("Session destruction error:", err);
-          return res.status(500).send("Error in session destruction.");
-        }
-        res.send({
-          message: "Current user deleted, session destroyed",
-          sessionDestroyed: true,
-        });
-      });
-    } else {
-      res.send({
-        message: "User and all related content successfully deleted",
-        sessionDestroyed: false,
-      });
-    }
+    res.send("User successfully deleted.");
   } catch (err) {
-    console.log(err);
-    res.status(500).send("Internal Server Error occurred while deleting user.");
+    console.error("Error occurred in deleteUser route:", err);
+    res.status(500).send("Internal Server Error occurred. Please try again.");
   }
 });
 

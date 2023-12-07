@@ -4,14 +4,16 @@ import axios from "axios";
 import { TextField, Button, Box, Typography, Container } from "@mui/material";
 
 const QuestionsForm = (props) => {
-  const [formData, setFormData] = useState({
-    title: "",
-    questionText: "",
-    summary: "",
+  const isEditMode = props.editMode && props.existingQuestion;
+  const initialFormData = {
+    title: isEditMode ? props.existingQuestion.title : "",
+    questionText: isEditMode ? props.existingQuestion.text : "",
+    summary: isEditMode ? props.existingQuestion.summary : "",
     tags: "",
-    askedBy:  props.sessionData.username
-  });
+    askedBy: props.sessionData.username
+  };
 
+  const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState({
     questionTitleError: "",
     questionTextError: "",
@@ -21,18 +23,35 @@ const QuestionsForm = (props) => {
 
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
-
   useEffect(() => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      askedBy: props.sessionData.username
-    }));
-  }, [props.sessionData.username]);
+    const fetchTagNames = async (tagIds) => {
+      try {
+        const responses = await Promise.all(
+          tagIds.map(tagId => axios.get(`http://localhost:8000/posts/tags/tag_id/${tagId}`)) // Using the provided endpoint
+        );
+        return responses.map(response => response.data.name); // Assuming the response has a 'name' field
+      } catch (error) {
+        console.error("Error fetching tag names:", error);
+        return [];
+      }
+    };
 
+    if (isEditMode) {
+      fetchTagNames(props.existingQuestion.tags).then(tagNames => {
+        setFormData({
+          ...initialFormData,
+          title: props.existingQuestion.title,
+          questionText: props.existingQuestion.text,
+          summary: props.existingQuestion.summary,
+          tags: tagNames.join(" "),
+        });
+      });
+    }
+  }, [props.existingQuestion, isEditMode]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevState) => ({ ...prevState, [name]: value }));
+    setFormData(prevState => ({ ...prevState, [name]: value }));
   };
 
   const handleFormSubmit = async (event) => {
@@ -119,21 +138,15 @@ const QuestionsForm = (props) => {
       };
 
       try {
-        console.log(newQuestion);
-        await axios.post(
-          "http://localhost:8000/posts/questions/askQuestion",
-          newQuestion
-        );
+        if (isEditMode) {
+          const response = await axios.put(`http://localhost:8000/posts/questions/editQuestion/${props.existingQuestion._id}`, newQuestion);
+          console.log(response.data);
+        } else {
+          await axios.post("http://localhost:8000/posts/questions/askQuestion", newQuestion);
+        }
         if (props.onQuestionAdded) {
           props.onQuestionAdded();
         }
-        setFormData({
-          title: "",
-          summary: "",
-          questionText: "",
-          tags: "",
-          askedBy: props.sessionData.username
-        });
         setIsFormSubmitted(true);
       } catch (error) {
         console.error("Error submitting the question:", error);
