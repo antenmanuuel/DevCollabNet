@@ -18,6 +18,7 @@ const AdminsPage = () => {
     created_at: "",
     reputation: 0,
   });
+
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
@@ -49,15 +50,12 @@ const AdminsPage = () => {
     fetchData();
   }, []);
 
-  const handleDeleteUserByEmail = async (userEmail) => {
+  const handleDeleteUserById = async (userId) => {
     try {
       await axios.delete(
-        `http://localhost:8000/users/deleteUserByEmail/${userEmail}`
+        `http://localhost:8000/users/deleteUser/${userId}`
       );
-      setUsers(users.filter((user) => user.email !== userEmail));
-      if (onUserDeleted && typeof onUserDeleted === "function") {
-        onUserDeleted();
-      }
+      setUsers(users.filter((user) => user._id !== userId));
     } catch (error) {
       console.error("Error deleting user:", error);
     }
@@ -146,7 +144,7 @@ const AdminsPage = () => {
             borderStyle: "dotted",
           }}
         >
-          Member for : {memberSince}
+          Member for: {memberSince}
         </Typography>
 
         <Typography
@@ -193,7 +191,7 @@ const AdminsPage = () => {
               </TableCell>
               <TableCell sx={{ width: "17.5%", paddingLeft: "70px" }}>
                 <Button
-                  onClick={() => handleDeleteUserByEmail(user.email)}
+                  onClick={() => handleDeleteUserById(user._id)}
                   sx={{
                     backgroundColor: "red",
                     color: "common.white",

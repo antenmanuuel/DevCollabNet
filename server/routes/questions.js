@@ -184,6 +184,53 @@ router.use((err, req, res, next) => {
   handleError(err, res);
 });
 
+router.put("/editQuestion/:questionId", async (req, res) => {
+  const { questionId } = req.params;
+  const { title, summary, text, tagIds } = req.body;
+
+  if (!title || !summary || !text || !Array.isArray(tagIds)) {
+    return res.status(400).send("Missing required fields");
+  }
+
+  try {
+    const question = await Questions.findById(questionId).exec();
+    if (!question) {
+      return res.status(404).send("Question not found.");
+    }
+
+    const requestingUser = req.session.user;
+    if (!requestingUser) {
+      return res.status(401).send("User is not logged in.");
+    }
+
+    // Check if the user who asked the question is making the request or if the user is an admin
+    if (
+      !requestingUser.isAdmin &&
+      !question.asked_by.equals(requestingUser.userId)
+    ) {
+      return res.status(403).send("Unauthorized to edit this question.");
+    }
+
+    // Update the question fields
+    question.title = title;
+    question.summary = summary;
+    question.text = text;
+
+    // Handle tags: create new ones if they don't exist
+    const validTagIds = await Promise.all(tagIds.map(createOrFetchTag));
+    question.tags = validTagIds;
+
+    await question.save();
+
+    res
+      .status(200)
+      .send({ message: "Question updated successfully", question });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 // Route to delete a question by its ID
 router.delete("/:questionId", async (req, res) => {
   try {

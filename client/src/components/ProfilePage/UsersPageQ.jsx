@@ -9,6 +9,7 @@ import {
   Typography,
   Button,
 } from "@mui/material";
+import QuestionsForm from "../QuestionsForm/QuestionsForm";
 
 const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
 
@@ -21,6 +22,8 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
   });
 
   const [userQuestions, setUserQuestions] = useState([]);
+  const [editingQuestion, setEditingQuestion] = useState(null);
+
 
   useEffect(() => {
     const fetchSessionData = async () => {
@@ -59,6 +62,27 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
       fetchUserQuestions();
     }
   }, [sessionData.username]);
+
+  const handleQuestionClick = (question) => {
+    setEditingQuestion(question);
+  };
+
+  const handleQuestionEdited = () => {
+    setEditingQuestion(null);
+    // Optionally, refetch the user's questions here to update the list
+  };
+
+  if (editingQuestion) {
+    return (
+      <QuestionsForm
+        sessionData={sessionData}
+        existingQuestion={editingQuestion}
+        editMode={true}
+        onQuestionEdited={handleQuestionEdited}
+      />
+    );
+  }
+
 
   const formatDate = (postTime) => {
     const now = new Date();
@@ -181,7 +205,8 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
             <TableRow key={question._id} sx={{borderBottom:"3px", borderStyle:"dotted"}}>
               <TableCell sx={{ width: "65%" }}>
                 <Typography
-                  sx={{ cursor: "pointer", color: "black", fontSize: "large" }}
+                  onClick={() => handleQuestionClick(question)}
+                  sx={{ cursor: "pointer", color: "blue", fontSize: "large" }}
                 >
                   {question.title}
                 </Typography>
