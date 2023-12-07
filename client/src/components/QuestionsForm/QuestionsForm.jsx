@@ -7,6 +7,7 @@ const QuestionsForm = (props) => {
   const [formData, setFormData] = useState({
     title: "",
     questionText: "",
+    summary: "",
     tags: "",
     askedBy:  props.sessionData.username
   });
@@ -14,6 +15,7 @@ const QuestionsForm = (props) => {
   const [errors, setErrors] = useState({
     questionTitleError: "",
     questionTextError: "",
+    summaryError: "",
     tagsError: "",
   });
 
@@ -38,6 +40,7 @@ const QuestionsForm = (props) => {
 
     let titleError = "";
     let textError = "";
+    let summaryError = "";
     let hyperlinkError = "";
     let tagsError = "";
 
@@ -47,6 +50,10 @@ const QuestionsForm = (props) => {
 
     if (formData.questionText.trim() === "") {
       textError = "Question text cannot be empty.";
+    }
+
+    if (formData.summary.trim() === "") {
+      summaryError = "Question summary cannot be empty.";
     }
 
     const allHyperLinks =
@@ -97,12 +104,14 @@ const QuestionsForm = (props) => {
     setErrors({
       questionTitleError: titleError,
       questionTextError: error,
+      summaryError: summaryError,
       tagsError: tagsError,
     });
 
     if (!titleError && !error && !tagsError) {
       const newQuestion = {
         title: formData.title,
+        summary: formData.summary,
         text: formData.questionText,
         tagIds: tags,
         askedBy: formData.askedBy,
@@ -120,6 +129,7 @@ const QuestionsForm = (props) => {
         }
         setFormData({
           title: "",
+          summary: "",
           questionText: "",
           tags: "",
           askedBy: props.sessionData.username
@@ -161,6 +171,23 @@ const QuestionsForm = (props) => {
             helperText={errors.questionTitleError}
             inputProps={{
               maxLength:50
+            }}
+          />
+          <Typography variant="h6" gutterBottom>
+            Question Summary*
+          </Typography>
+          <TextField
+            required
+            fullWidth
+            id="summaryTextBox"
+            name="summary"
+            label="Limit title to 140 characters or less"
+            value={formData.summary}
+            onChange={handleInputChange}
+            error={Boolean(errors.summaryError)}
+            helperText={errors.summaryError}
+            inputProps={{
+              maxLength:140
             }}
           />
           <Typography variant="h6" gutterBottom>

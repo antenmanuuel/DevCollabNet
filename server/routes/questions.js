@@ -151,9 +151,9 @@ router.get("/:question", async (req, res) => {
   }
 });
 router.post("/askQuestion", async (req, res) => {
-  const { title, text, tagIds, askedBy } = req.body;
+  const { title, summary, text, tagIds, askedBy } = req.body;
 
-  if (!title || !text || !Array.isArray(tagIds) || !askedBy) {
+  if (!title || !summary || !text || !Array.isArray(tagIds) || !askedBy) {
     console.log("Error: Missing required fields");
 
     return res.status(400).send("Missing required fields");
@@ -169,6 +169,7 @@ router.post("/askQuestion", async (req, res) => {
   const newQuestion = new Questions({
     title,
     text,
+    summary,
     tags: validTagIds,
     asked_by: user._id,
     views: 0,

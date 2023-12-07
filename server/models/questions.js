@@ -5,8 +5,9 @@ let Schema = mongoose.Schema;
 
 let QuestionSchema = new Schema(
     {
-        title : {type: String , maxLength: 100, required: true},
-        text : {type: String , required: true},
+        title: { type: String, maxLength: 50, required: true },
+        summary: { type: String, maxLength: 140, required: true },
+        text: { type: String, required: true },
         tags : {type: [Schema.Types.ObjectId], ref : "Tag", required: true, validate: v => Array.isArray(v) && v.length > 0}, 
         answers : {type: [Schema.Types.ObjectId], ref : "Answer"},
         asked_by: { type: Schema.Types.ObjectId, ref: 'User', required: true },
