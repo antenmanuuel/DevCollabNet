@@ -173,9 +173,7 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
   const displayedAnswers = answers.slice(
     startIndex,
     startIndex + answersPerPage
-  ).filter(
-    (answer) => answer.asked_by
-  );;
+  );
 
   const isPrevDisabled = startIndex === 0;
   const isNextDisabled = startIndex + answersPerPage >= answers.length;
@@ -243,8 +241,7 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
                   </TableCell>
                 </TableRow>
                 {commentsData[answer._id]
-                  ?.filter(comment => comment.com_by)
-                  .slice(
+                  ?.slice(
                     (currentCommentPage[answer._id] || 0) * commentsPerPage,
                     ((currentCommentPage[answer._id] || 0) + 1) *
                       commentsPerPage
