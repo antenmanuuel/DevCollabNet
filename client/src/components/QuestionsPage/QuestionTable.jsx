@@ -165,13 +165,18 @@ const QuestionTable = ({
           com_by: { username: sessionData.username },
         };
         setCommentsData((prevComments) => {
-          const updatedComments = [newComment, ...(prevComments[questionId] || [])];
-          updatedComments.sort((a, b) => new Date(b.com_date_time) - new Date(a.com_date_time));
+          const updatedComments = [
+            newComment,
+            ...(prevComments[questionId] || []),
+          ];
+          updatedComments.sort(
+            (a, b) => new Date(b.com_date_time) - new Date(a.com_date_time)
+          );
           return {
-              ...prevComments,
-              [questionId]: updatedComments,
+            ...prevComments,
+            [questionId]: updatedComments,
           };
-      });
+        });
 
         setNewCommentText({ ...newCommentText, [questionId]: "" });
       }
@@ -298,10 +303,9 @@ const QuestionTable = ({
   };
 
   const startIndex = currentPage * questionsPerPage;
-  const displayedQuestions = questionsData.slice(
-    startIndex,
-    startIndex + questionsPerPage
-  );
+  const displayedQuestions = questionsData
+    .slice(startIndex, startIndex + questionsPerPage)
+    .filter((question) => question.asked_by);
 
   return (
     <Box sx={{ width: "99%" }}>
@@ -379,6 +383,15 @@ const QuestionTable = ({
                       >
                         {question.title}
                       </Typography>
+                      <Typography
+                        sx={{
+                          fontSize: "small",
+                          color: "gray",
+                          marginBottom: "20px",
+                          marginTop: "10px",
+                          marginLeft: "10px"
+                        }}
+                      >{question.summary}</Typography>
                       <Box>
                         {question.tagNames.map((tagName, id) => (
                           <Chip
@@ -408,7 +421,8 @@ const QuestionTable = ({
                   <TableRow>
                     <TableCell colSpan={6}>
                       {commentsData[question._id]
-                        ?.slice(
+                        ?.filter((comment) => comment.com_by)
+                        .slice(
                           (currentCommentPage[question._id] || 0) *
                             commentsPerPage,
                           ((currentCommentPage[question._id] || 0) + 1) *

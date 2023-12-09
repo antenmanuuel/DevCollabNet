@@ -35,8 +35,8 @@ async function createTag(name) {
   return tag.save();
 }
 
-async function createQuestion(title, text, tags, asked_by, votes, views) {
-  let question = new Question({ title, text, tags, asked_by, votes, views });
+async function createQuestion(title,summary, text, tags, asked_by, votes, views) {
+  let question = new Question({ title, summary, text, tags, asked_by, votes, views });
   return question.save();
 }
 
@@ -102,7 +102,7 @@ async function populateDatabase() {
       let questionTags = await getRandomTags(tags, numberOfTags);
       let questionVotes = getRandomVotes();
       let questionViews = Math.floor(Math.random() * 100);
-      let question = await createQuestion(`Question about ${frontendKeywords[i % frontendKeywords.length]}`, `This is a detailed description about ${frontendKeywords[i % frontendKeywords.length]}.`, questionTags, users[i % users.length], questionVotes, questionViews);
+      let question = await createQuestion(`Question about ${frontendKeywords[i % frontendKeywords.length]}`, `summary about ${frontendKeywords[i % frontendKeywords.length]}`, `This is a detailed description about ${frontendKeywords[i % frontendKeywords.length]}.`, questionTags, users[i % users.length], questionVotes, questionViews);
 
       await addCommentsToEntity(question, users);
 

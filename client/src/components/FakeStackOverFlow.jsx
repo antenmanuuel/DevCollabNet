@@ -26,7 +26,7 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout }) {
     setSearchTermState(term);
     if (currentPage === "TagsPage") {
       setCurrentPage("QuestionsPage");
-    } 
+    }
     if (currentPage === "QuestionsPage") {
       setCurrentPage("TagsPage");
       setTimeout(() => setCurrentPage("QuestionsPage"), 1);
@@ -34,7 +34,7 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout }) {
     //add if statement for UsersPage
     if (currentPage === "ProfilePage") {
       setCurrentPage("QuestionsPage");
-    } 
+    }
 
   };
 

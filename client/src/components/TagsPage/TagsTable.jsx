@@ -20,7 +20,8 @@ const TagsTable = ({ onTagSelected, sessionData }) => {
         });
 
         Promise.all(fetchCounts).then((preparedTags) => {
-          setTagsData(preparedTags);
+          const filteredTags = preparedTags.filter((tag) => tag.count > 0);
+          setTagsData(filteredTags);
         });
       })
       .catch((error) => {
