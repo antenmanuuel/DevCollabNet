@@ -5,7 +5,8 @@ let Schema = mongoose.Schema;
 
 let TagSchema = new Schema(
     {
-        name : {type: String , unique: true, required: true}
+        name : {type: String , unique: true, required: true},
+        created_by : { type: Schema.Types.ObjectId, ref: 'User', required: true}
     }
 );
 

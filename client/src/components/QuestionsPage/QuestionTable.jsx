@@ -304,9 +304,7 @@ const QuestionTable = ({
 
   const startIndex = currentPage * questionsPerPage;
   const displayedQuestions = questionsData
-    .slice(startIndex, startIndex + questionsPerPage)
-    .filter((question) => question.asked_by);
-
+    .slice(startIndex, startIndex + questionsPerPage);
   return (
     <Box sx={{ width: "99%" }}>
       <Box
@@ -421,8 +419,7 @@ const QuestionTable = ({
                   <TableRow>
                     <TableCell colSpan={6}>
                       {commentsData[question._id]
-                        ?.filter((comment) => comment.com_by)
-                        .slice(
+                        ?.slice(
                           (currentCommentPage[question._id] || 0) *
                             commentsPerPage,
                           ((currentCommentPage[question._id] || 0) + 1) *

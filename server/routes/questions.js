@@ -14,10 +14,22 @@ const handleError = (err, res) => {
 };
 
 // helper function to create or fetch a tag based on its name
-const createOrFetchTag = async (tagName) => {
+const createOrFetchTag = async (tagName, username) => {
   let tag = await Tags.findOne({ name: tagName }).exec();
   if (!tag) {
-    tag = new Tags({ name: tagName });
+    // Find the user based on the username
+    let user = await User.findOne({ username: username }).exec();
+
+    // If no user is found, handle accordingly
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    tag = new Tags({
+      name: tagName,
+      created_by: user._id,
+    });
+
     await tag.save();
   }
   return tag._id;
@@ -151,7 +163,7 @@ router.get("/:question", async (req, res) => {
   }
 });
 router.post("/askQuestion", async (req, res) => {
-  const { title, summary, text, tagIds, askedBy } = req.body;
+  const { title, summary, text, tagIds, askedBy } = req.body; // Continue using tagIds
 
   if (!title || !summary || !text || !Array.isArray(tagIds) || !askedBy) {
     console.log("Error: Missing required fields");
@@ -164,7 +176,10 @@ router.post("/askQuestion", async (req, res) => {
     return res.status(404).send("User not found");
   }
 
-  const validTagIds = await Promise.all(tagIds.map(createOrFetchTag));
+  // Process each tagName to create or fetch a tag, along with the username
+  const validTagIds = await Promise.all(
+    tagIds.map((tagName) => createOrFetchTag(tagName, askedBy))
+  );
 
   const newQuestion = new Questions({
     title,
@@ -211,13 +226,22 @@ router.put("/editQuestion/:questionId", async (req, res) => {
       return res.status(403).send("Unauthorized to edit this question.");
     }
 
+    // Fetch the username of the requesting user
+    const user = await User.findById(requestingUser.userId);
+    if (!user) {
+      return res.status(404).send("User not found.");
+    }
+    const username = user.username;
+
     // Update the question fields
     question.title = title;
     question.summary = summary;
     question.text = text;
 
     // Handle tags: create new ones if they don't exist
-    const validTagIds = await Promise.all(tagIds.map(createOrFetchTag));
+    const validTagIds = await Promise.all(
+      tagIds.map((tagName) => createOrFetchTag(tagName, username))
+    );
     question.tags = validTagIds;
 
     await question.save();
