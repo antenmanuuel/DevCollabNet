@@ -63,7 +63,7 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
     }
   }, [sessionData.username]);
 
-  const handleQuestionClick = (question) => {
+  const handleQuestionEdit = (question) => {
     setEditingQuestion(question);
   };
 
@@ -205,7 +205,7 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
             <TableRow key={question._id} sx={{borderBottom:"3px", borderStyle:"dotted"}}>
               <TableCell sx={{ width: "65%" }}>
                 <Typography
-                  onClick={() => handleQuestionClick(question)}
+                  onClick={() => handleQuestionEdit(question)}
                   sx={{ cursor: "pointer", color: "blue", fontSize: "large" }}
                 >
                   {question.title}
