@@ -187,7 +187,6 @@ router.post("/askQuestion", async (req, res) => {
     summary,
     tags: validTagIds,
     asked_by: user._id,
-    views: 0,
   });
 
   await newQuestion.save();
