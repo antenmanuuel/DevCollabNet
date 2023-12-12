@@ -79,7 +79,7 @@ router.patch("/upvote/:answerId", async (req, res) => {
     }
 
     const hasVoted = answer.voters.some((voter) =>
-      voter.userWhoVoted.equals(user._id)
+      voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
     );
 
     if (hasVoted) {
@@ -110,7 +110,7 @@ router.patch("/downvote/:answerId", async (req, res) => {
     }
 
     const hasVoted = answer.voters.some((voter) =>
-      voter.userWhoVoted.equals(user._id)
+      voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
     );
 
     if (hasVoted) {
@@ -126,6 +126,7 @@ router.patch("/downvote/:answerId", async (req, res) => {
     handleError(err, res);
   }
 });
+
 
 router.use((err, req, res, next) => {
   handleError(err, res);

@@ -155,7 +155,7 @@ router.patch("/upvoteComment/:commentId", async (req, res) => {
     }
 
     const hasVoted = comment.voters.some((voter) =>
-      voter.userWhoVoted.equals(user._id)
+      voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
     );
 
     if (hasVoted) {
@@ -171,5 +171,6 @@ router.patch("/upvoteComment/:commentId", async (req, res) => {
     handleError(err, res);
   }
 });
+
 
 module.exports = router;
