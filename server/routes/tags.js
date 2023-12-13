@@ -7,6 +7,8 @@ const Tags = require("../models/tags");
 const Answers = require("../models/answers");
 const Users = require("../models/users");
 
+const auth = require("../middleware/auth");
+
 // Error handling middleware
 const handleError = (err, res) => {
   console.error(err);
@@ -28,60 +30,6 @@ router.get("/tag_id/:tag_id", async (req, res) => {
   try {
     const tag = await Tags.findById(req.params.tag_id).exec();
     res.send(tag);
-  } catch (err) {
-    handleError(err, res);
-  }
-});
-
-// Route to edit a tag by its ID
-router.put("/tag_id/:tagId", async (req, res) => {
-  const { tagId } = req.params;
-  const { newName } = req.body;
-
-  if (!newName) {
-    return res.status(400).send("New tag name is required");
-  }
-
-  try {
-    const tag = await Tags.findById(tagId).exec();
-    if (!tag) {
-      return res.status(404).send("Tag not found.");
-    }
-
-    // Update the tag name
-    tag.name = newName.trim();
-    await tag.save();
-
-    res.status(200).send({ message: "Tag updated successfully", tag });
-  } catch (err) {
-    handleError(err, res);
-  }
-});
-
-// Route to delete a tag by its ID
-router.delete("/tag_id/:tag_id", async (req, res) => {
-  try {
-    const { tag_id } = req.params;
-    const requestingUser = req.session.user;
-
-    if (!requestingUser) {
-      return res.status(401).send("User is not logged in.");
-    }
-
-    // Find the tag to be deleted
-    const tag = await Tags.findById(tag_id).exec();
-    if (!tag) {
-      return res.status(404).send("Tag not found.");
-    }
-    // Delete the tag
-    await Tags.findByIdAndRemove(tag_id);
-
-    // Find all questions that have this tag and remove it from their tags array
-    await Questions.updateMany({ tags: tag_id }, { $pull: { tags: tag_id } });
-
-    res.send({
-      message: "Tag deleted successfully and removed from all questions.",
-    });
   } catch (err) {
     handleError(err, res);
   }
@@ -180,7 +128,9 @@ router.get("/:tag", async (req, res) => {
   }
 });
 
-// Route to fetch tags created by a specific user
+
+router.use(auth);
+// Route to fetch tags created by a specific user along with the count of questions for each tag
 router.get("/createdByUser/:username", async (req, res) => {
   try {
     const { username } = req.params;
@@ -193,14 +143,80 @@ router.get("/createdByUser/:username", async (req, res) => {
 
     // Find tags created by this user
     const tags = await Tags.find({ created_by: user._id })
-      .populate("created_by", "username") // If you want to include the username in the response
+      .populate("created_by", "username")
       .exec();
 
-    res.json(tags);
+    // For each tag, count the number of questions associated with it
+    const tagsWithQuestionCount = await Promise.all(
+      tags.map(async (tag) => {
+        const questionCount = await Questions.countDocuments({
+          tags: tag._id,
+        }).exec();
+        return {
+          ...tag.toObject(),
+          count: questionCount,
+        };
+      })
+    );
+
+    res.json(tagsWithQuestionCount);
   } catch (error) {
     console.error("Server error:", error);
     res.status(500).send("Internal Server Error");
   }
 });
 
+// Route to edit a tag by its ID
+router.put("/tag_id/:tagId", async (req, res) => {
+  const { tagId } = req.params;
+  const { newName } = req.body;
+
+  if (!newName) {
+    return res.status(400).send("New tag name is required");
+  }
+
+  try {
+    const tag = await Tags.findById(tagId).exec();
+    if (!tag) {
+      return res.status(404).send("Tag not found.");
+    }
+
+    // Update the tag name
+    tag.name = newName.trim();
+    await tag.save();
+
+    res.status(200).send({ message: "Tag updated successfully", tag });
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+// Route to delete a tag by its ID
+router.delete("/tag_id/:tag_id", async (req, res) => {
+  try {
+    const { tag_id } = req.params;
+    const requestingUser = req.session.user;
+
+    if (!requestingUser) {
+      return res.status(401).send("User is not logged in.");
+    }
+
+    // Find the tag to be deleted
+    const tag = await Tags.findById(tag_id).exec();
+    if (!tag) {
+      return res.status(404).send("Tag not found.");
+    }
+    // Delete the tag
+    await Tags.findByIdAndRemove(tag_id);
+
+    // Find all questions that have this tag and remove it from their tags array
+    await Questions.updateMany({ tags: tag_id }, { $pull: { tags: tag_id } });
+
+    res.send({
+      message: "Tag deleted successfully and removed from all questions.",
+    });
+  } catch (err) {
+    handleError(err, res);
+  }
+});
 module.exports = router;

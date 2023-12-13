@@ -6,33 +6,14 @@ const Questions = require("../models/questions");
 const Tags = require("../models/tags");
 const Answers = require("../models/answers");
 const User = require("../models/users");
+const Comments = require("../models/comments");
+
+const auth = require("../middleware/auth");
 
 // Error handling middleware
 const handleError = (err, res) => {
   console.error(err);
   res.status(500).send("Internal Server Error");
-};
-
-// helper function to create or fetch a tag based on its name
-const createOrFetchTag = async (tagName, username) => {
-  let tag = await Tags.findOne({ name: tagName }).exec();
-  if (!tag) {
-    // Find the user based on the username
-    let user = await User.findOne({ username: username }).exec();
-
-    // If no user is found, handle accordingly
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    tag = new Tags({
-      name: tagName,
-      created_by: user._id,
-    });
-
-    await tag.save();
-  }
-  return tag._id;
 };
 
 // Route to fetch all questions
@@ -162,18 +143,58 @@ router.get("/:question", async (req, res) => {
     handleError(err, res);
   }
 });
+
+// Route to increment the view count for a question
+router.patch("/incrementViews/:question", async (req, res) => {
+  try {
+    const question = await Questions.findById(req.params.question).exec();
+    question.views += 1;
+    await question.save();
+    res.send(question);
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+router.use(auth);
+// helper function to create or fetch a tag based on its name
+const createOrFetchTag = async (tagName, username) => {
+  let tag = await Tags.findOne({ name: tagName }).exec();
+  if (!tag) {
+    // Find the user based on the username
+    let user = await User.findOne({ username: username }).exec();
+
+    // If no user is found, handle accordingly
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    tag = new Tags({
+      name: tagName,
+      created_by: user._id,
+    });
+
+    await tag.save();
+  }
+  return tag._id;
+};
+
 router.post("/askQuestion", async (req, res) => {
-  const { title, summary, text, tagIds, askedBy } = req.body; // Continue using tagIds
+  const { title, summary, text, tagIds, askedBy } = req.body;
 
   if (!title || !summary || !text || !Array.isArray(tagIds) || !askedBy) {
     console.log("Error: Missing required fields");
-
     return res.status(400).send("Missing required fields");
   }
 
   const user = await User.findOne({ username: askedBy });
   if (!user) {
     return res.status(404).send("User not found");
+  }
+
+  // Check if user's reputation is at least 50 to allow posting of tags
+  if (user.reputation < 50) {
+    return res.status(403).send("Insufficient reputation to post tags.");
   }
 
   // Process each tagName to create or fetch a tag, along with the username
@@ -225,12 +246,17 @@ router.put("/editQuestion/:questionId", async (req, res) => {
       return res.status(403).send("Unauthorized to edit this question.");
     }
 
-    // Fetch the username of the requesting user
+    // Fetch the username and reputation of the requesting user
     const user = await User.findById(requestingUser.userId);
     if (!user) {
       return res.status(404).send("User not found.");
     }
     const username = user.username;
+
+    // Prevent users with less than 50 reputation from posting tags
+    if (user.reputation < 50) {
+      return res.status(403).send("Insufficient reputation to post tags.");
+    }
 
     // Update the question fields
     question.title = title;
@@ -258,7 +284,6 @@ router.put("/editQuestion/:questionId", async (req, res) => {
 router.delete("/:questionId", async (req, res) => {
   try {
     const { questionId } = req.params;
-
     const requestingUser = req.session.user;
 
     if (!requestingUser) {
@@ -278,20 +303,25 @@ router.delete("/:questionId", async (req, res) => {
       return res.status(403).send("Unauthorized to delete this question.");
     }
 
-    await Questions.findByIdAndRemove(questionId);
-    res.send({ message: "Question deleted successfully." });
-  } catch (err) {
-    handleError(err, res);
-  }
-});
+    // Delete all answers related to this question
+    const answerIds = question.answers;
+    await Answers.deleteMany({ _id: { $in: answerIds } });
 
-// Route to increment the view count for a question
-router.patch("/incrementViews/:question", async (req, res) => {
-  try {
-    const question = await Questions.findById(req.params.question).exec();
-    question.views += 1;
-    await question.save();
-    res.send(question);
+    // Delete all comments related to the answers of this question
+    await Comments.deleteMany({
+      _id: { $in: answerIds.map((a) => a.comments).flat() },
+    });
+
+    // Delete all comments directly related to this question
+    await Comments.deleteMany({ _id: { $in: question.comments } });
+
+    // Finally, delete the question
+    await Questions.findByIdAndRemove(questionId);
+
+    res.send({
+      message:
+        "Question and all related answers and comments deleted successfully.",
+    });
   } catch (err) {
     handleError(err, res);
   }
@@ -310,8 +340,8 @@ router.patch("/upvote/:questionId", async (req, res) => {
       return res.status(404).send("Question or User not found.");
     }
 
-    const hasVoted = question.voters.some((voter) =>
-      voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
+    const hasVoted = question.voters.some(
+      (voter) => voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
     );
 
     if (hasVoted) {
@@ -322,12 +352,16 @@ router.patch("/upvote/:questionId", async (req, res) => {
     question.voters.push({ userWhoVoted: user._id, voteIncrement: 1 });
     await question.save();
 
-    res.status(200).send({ votes: question.votes });
+    user.reputation += 5;
+    await user.save();
+
+    res
+      .status(200)
+      .send({ votes: question.votes, userReputation: user.reputation });
   } catch (err) {
     handleError(err, res);
   }
 });
-
 
 // Route to downvote a question
 router.patch("/downvote/:questionId", async (req, res) => {
@@ -342,8 +376,8 @@ router.patch("/downvote/:questionId", async (req, res) => {
       return res.status(404).send("Question or User not found.");
     }
 
-    const hasVoted = question.voters.some((voter) =>
-      voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
+    const hasVoted = question.voters.some(
+      (voter) => voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
     );
 
     if (hasVoted) {
@@ -354,11 +388,15 @@ router.patch("/downvote/:questionId", async (req, res) => {
     question.voters.push({ userWhoVoted: user._id, voteIncrement: -1 });
     await question.save();
 
-    res.status(200).send({ votes: question.votes });
+    user.reputation -= 10;
+    await user.save();
+
+    res
+      .status(200)
+      .send({ votes: question.votes, userReputation: user.reputation });
   } catch (err) {
     handleError(err, res);
   }
 });
-
 
 module.exports = router;
