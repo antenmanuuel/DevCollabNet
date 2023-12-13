@@ -4,9 +4,9 @@ const bcrypt = require("bcrypt");
 
 const User = require("../models/users");
 const Question = require("../models/questions");
-const Answer = require("../models/comments");
+const Answer = require("../models/answers");
 const Tag = require("../models/tags");
-const Comment = require("../models/answers");
+const Comment = require("../models/comments");
 
 router.post("/signup", async (req, res) => {
   let newUser = req.body;
