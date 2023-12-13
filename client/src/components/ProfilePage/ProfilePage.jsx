@@ -12,7 +12,7 @@ const ProfilePage = ({ sessionData }) => {
 
     // Check if the username is 'admin'
     if (sessionData.username === 'admin') {
-        return <AdminsPage />;
+        return <UsersPage />;
     }
 
     // Default to UsersPage for other users

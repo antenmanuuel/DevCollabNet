@@ -4,7 +4,7 @@ import SideNavbar from "./SideNavbar/SideNavbar";
 import MainContainer from "./MainPage/MainPage";
 import { Box } from "@mui/material";
 
-function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout }) {
+function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout ,isAdmin }) {
   const [currentPage, setCurrentPage] = useState("QuestionsPage");
   const [questionsKey, setQuestionsKey] = useState(0);
   const [searchTerm, setSearchTermState] = useState("");
@@ -22,6 +22,10 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout }) {
     setCurrentPage("ProfilePage");
   };
 
+  const handleSetAdminProfilePage = () => {
+    setCurrentPage("AdminsPage");
+  }
+
   const handleSearch = (term) => {
     setSearchTermState(term);
     if (currentPage === "TagsPage") {
@@ -33,6 +37,10 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout }) {
     }
     //add if statement for UsersPage
     if (currentPage === "ProfilePage") {
+      setCurrentPage("QuestionsPage");
+    }
+
+    if (currentPage === "AdminsPage") {
       setCurrentPage("QuestionsPage");
     }
 
@@ -51,6 +59,8 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout }) {
           setQuestionsPage={handleSetQuestionsPage}
           setTagsPage={handleSetTagsPage}
           setProfilePage={handleSetProfilePage}
+          setAdminPage={handleSetAdminProfilePage}
+          isAdmin={sessionData.isAdmin} 
         />
         <MainContainer
           key={questionsKey}
@@ -58,7 +68,9 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout }) {
           showQuestionsPage={currentPage === "QuestionsPage"}
           showTagsPage={currentPage === "TagsPage"}
           showProfilePage={currentPage === "ProfilePage"}
+          showAdminPage = {currentPage === "AdminsPage"}
           sessionData={sessionData}
+          isAdmin={sessionData.isAdmin}
         />
       </Box>
     </Box>

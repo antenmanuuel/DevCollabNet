@@ -13,6 +13,7 @@ function App() {
     loggedIn: false,
     username: "",
     email: "",
+    isAdmin: false,
   });
 
   // Fetch session data on component mount
@@ -24,6 +25,7 @@ function App() {
           loggedIn: response.data && response.data.loggedIn,
           username: response.data ? response.data.username : "",
           email: response.data ? response.data.email : "",
+          isAdmin: response.data ? response.data.isAdmin : false,
         });
         setCurrentView(
           response.data && response.data.loggedIn
@@ -46,6 +48,7 @@ function App() {
           loggedIn: true,
           username: response.data.username,
           email: response.data.email,
+          isAdmin: response.data ? response.data.isAdmin : false,
         });
         setCurrentView("fakeStackOverflow");
       } else {
@@ -88,7 +91,7 @@ function App() {
     case "login":
       return <LoginForm onLoginSuccess={onLoginSuccess} goToWelcome={onWelcome} />;
     case "fakeStackOverflow":
-      return <FakeStackOverflow goToWelcome={onWelcome} sessionData={sessionData} handleLoginLogout={handleLoginLogout} />;
+      return <FakeStackOverflow goToWelcome={onWelcome} sessionData={sessionData} handleLoginLogout={handleLoginLogout} isAdmin={sessionData.isAdmin} />;
     case "welcome":
     default:
       return <WelcomePage onLogin={showLogin} onSignup={showSignup} onGuest={onGuest} />;
