@@ -69,7 +69,6 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
 
   const handleQuestionEdited = () => {
     setEditingQuestion(null);
-    // Optionally, refetch the user's questions here to update the list
   };
 
   if (editingQuestion) {
@@ -220,7 +219,7 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
                 <Button
                   onClick={() => handleDeleteQuestion(question._id)}
                   sx={{
-                    color: "common.white",
+                    color: "black",
                     fontSize: "medium",
                     backgroundColor: "red",
                     border: 3,
