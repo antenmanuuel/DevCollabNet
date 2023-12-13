@@ -10,7 +10,7 @@ const QuestionsForm = (props) => {
     questionText: isEditMode ? props.existingQuestion.text : "",
     summary: isEditMode ? props.existingQuestion.summary : "",
     tags: "",
-    askedBy: props.sessionData.username
+    askedBy: props.sessionData.username,
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -27,9 +27,11 @@ const QuestionsForm = (props) => {
     const fetchTagNames = async (tagIds) => {
       try {
         const responses = await Promise.all(
-          tagIds.map(tagId => axios.get(`http://localhost:8000/posts/tags/tag_id/${tagId}`)) // Using the provided endpoint
+          tagIds.map((tagId) =>
+            axios.get(`http://localhost:8000/posts/tags/tag_id/${tagId}`)
+          ) 
         );
-        return responses.map(response => response.data.name); // Assuming the response has a 'name' field
+        return responses.map((response) => response.data.name);
       } catch (error) {
         console.error("Error fetching tag names:", error);
         return [];
@@ -37,7 +39,7 @@ const QuestionsForm = (props) => {
     };
 
     if (isEditMode) {
-      fetchTagNames(props.existingQuestion.tags).then(tagNames => {
+      fetchTagNames(props.existingQuestion.tags).then((tagNames) => {
         setFormData({
           ...initialFormData,
           title: props.existingQuestion.title,
@@ -51,7 +53,7 @@ const QuestionsForm = (props) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({ ...prevState, [name]: value }));
+    setFormData((prevState) => ({ ...prevState, [name]: value }));
   };
 
   const handleFormSubmit = async (event) => {
@@ -114,7 +116,12 @@ const QuestionsForm = (props) => {
     const tags = formData.tags.trim().toLowerCase().split(/\s+/);
     if (formData.tags.trim() === "") {
       tagsError = "Tags cannot be empty.";
-    } else if (tags.length > 5) {
+    }
+    else if (props.sessionData.reputation < 50) {
+      tagsError =
+        "Insufficient reputation to add tags. Minimum reputation required is 50.";
+    }
+    else if (tags.length > 5) {
       tagsError = "There can be at most 5 tags.";
     } else if (tags.some((tag) => tag.length > 10)) {
       tagsError = "Each tag should be 10 characters or less.";
@@ -139,10 +146,16 @@ const QuestionsForm = (props) => {
 
       try {
         if (isEditMode) {
-          const response = await axios.put(`http://localhost:8000/posts/questions/editQuestion/${props.existingQuestion._id}`, newQuestion);
+          const response = await axios.put(
+            `http://localhost:8000/posts/questions/editQuestion/${props.existingQuestion._id}`,
+            newQuestion
+          );
           console.log(response.data);
         } else {
-          await axios.post("http://localhost:8000/posts/questions/askQuestion", newQuestion);
+          await axios.post(
+            "http://localhost:8000/posts/questions/askQuestion",
+            newQuestion
+          );
         }
         if (props.onQuestionAdded) {
           props.onQuestionAdded();
@@ -183,7 +196,7 @@ const QuestionsForm = (props) => {
             error={Boolean(errors.questionTitleError)}
             helperText={errors.questionTitleError}
             inputProps={{
-              maxLength:50
+              maxLength: 50,
             }}
           />
           <Typography variant="h6" gutterBottom>
@@ -200,7 +213,7 @@ const QuestionsForm = (props) => {
             error={Boolean(errors.summaryError)}
             helperText={errors.summaryError}
             inputProps={{
-              maxLength:140
+              maxLength: 140,
             }}
           />
           <Typography variant="h6" gutterBottom>

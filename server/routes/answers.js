@@ -3,7 +3,11 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const Questions = require("../models/questions");
 const Answers = require("../models/answers");
-const User = require("../models/users");
+const Users = require("../models/users");
+const Comments = require("../models/comments");
+
+const auth = require('../middleware/auth');
+
 
 // Error handling middleware
 const handleError = (err, res) => {
@@ -28,6 +32,8 @@ router.get("/:qid", async (req, res) => {
   }
 });
 
+
+router.use(auth);
 router.post("/answerQuestion", async (req, res) => {
   const { text, ansBy, qid } = req.body;
 
@@ -44,7 +50,7 @@ router.post("/answerQuestion", async (req, res) => {
     return res.status(404).send("Question not found");
   }
 
-  const user = await User.findOne({ username: ansBy });
+  const user = await Users.findOne({ username: ansBy });
   if (!user) {
     return res.status(404).send("User not found");
   }
@@ -71,15 +77,15 @@ router.patch("/upvote/:answerId", async (req, res) => {
     const { username } = req.body;
     const answerId = req.params.answerId;
 
-    const user = await User.findOne({ username });
+    const user = await Users.findOne({ username });
     const answer = await Answers.findById(answerId);
 
     if (!answer || !user) {
       return res.status(404).send("Answer or User not found.");
     }
 
-    const hasVoted = answer.voters.some((voter) =>
-      voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
+    const hasVoted = answer.voters.some(
+      (voter) => voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
     );
 
     if (hasVoted) {
@@ -90,7 +96,13 @@ router.patch("/upvote/:answerId", async (req, res) => {
     answer.voters.push({ userWhoVoted: user._id, voteIncrement: 1 });
     await answer.save();
 
-    res.status(200).send({ votes: answer.votes });
+    // Increment the user's reputation by 5
+    user.reputation += 5;
+    await user.save();
+
+    res
+      .status(200)
+      .send({ votes: answer.votes, userReputation: user.reputation });
   } catch (err) {
     handleError(err, res);
   }
@@ -102,15 +114,15 @@ router.patch("/downvote/:answerId", async (req, res) => {
     const { username } = req.body;
     const answerId = req.params.answerId;
 
-    const user = await User.findOne({ username });
+    const user = await Users.findOne({ username });
     const answer = await Answers.findById(answerId);
 
     if (!answer || !user) {
       return res.status(404).send("Answer or User not found.");
     }
 
-    const hasVoted = answer.voters.some((voter) =>
-      voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
+    const hasVoted = answer.voters.some(
+      (voter) => voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
     );
 
     if (hasVoted) {
@@ -121,7 +133,12 @@ router.patch("/downvote/:answerId", async (req, res) => {
     answer.voters.push({ userWhoVoted: user._id, voteIncrement: -1 });
     await answer.save();
 
-    res.status(200).send({ votes: answer.votes });
+    user.reputation -= 10;
+    await user.save();
+
+    res
+      .status(200)
+      .send({ votes: answer.votes, userReputation: user.reputation });
   } catch (err) {
     handleError(err, res);
   }

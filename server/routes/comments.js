@@ -7,6 +7,8 @@ const Question = require("../models/questions");
 const Answer = require("../models/answers");
 const User = require("../models/users");
 
+const auth = require('../middleware/auth');
+
 // Error handling utility
 const handleError = (err, res) => {
   console.error(err);
@@ -68,6 +70,8 @@ router.get("/byAnswer/:answerId", async (req, res) => {
   }
 });
 
+
+router.use(auth);
 router.post("/commentQuestion", async (req, res) => {
   const { text, username, questionId } = req.body;
 

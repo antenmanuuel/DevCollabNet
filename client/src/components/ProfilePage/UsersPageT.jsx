@@ -8,9 +8,10 @@ import {
   Box,
   Typography,
   Button,
-  ButtonGroup,
   Modal,
   TextField,
+  Grid,
+  Card,
 } from "@mui/material";
 
 const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
@@ -168,6 +169,14 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
     }
   };
 
+  // Grouping tags into rows of three
+  const rows = [];
+  for (let i = 0; i < userTags.length; i += 3) {
+    rows.push(userTags.slice(i, i + 3));
+  }
+
+  const totalTagCount = userTags.length;
+
   const memberSince = sessionData.created_at
     ? formatDate(new Date(sessionData.created_at))
     : "Loading...";
@@ -194,11 +203,9 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
           flexDirection: "row",
           width: "100%",
           left: "275.5px",
-          border: 3,
           borderTop: 0,
           borderRight: 0,
           borderLeft: 0,
-          borderStyle: "dotted",
           height: "175px",
         }}
       >
@@ -238,65 +245,101 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
           Reputation Score:{" "}
           {sessionData.loggedIn ? sessionData.reputation : "Loading..."}
         </Typography>
-        <Typography
-          variant="h1"
+        <Box
           sx={{
-            position: "absolute",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
             top: "130px",
-            left: "550px",
-            fontSize: "18px",
-            fontWeight: "bolder",
+            position: "absolute",
+            width: "100%",
           }}
         >
-          All {current} created by {sessionData.username}
-        </Typography>
+          {/* Display Tag Count */}
+          <Typography
+            variant="h6"
+            sx={{
+              fontSize: "16px",
+              position: "absolute",
+              left:"40px",
+              fontSize: "18px",
+              fontWeight: "bolder",
+            }}
+          >
+            {totalTagCount} Tags
+          </Typography>
+
+          <Typography
+            variant="h1"
+            sx={{
+              fontSize: "18px",
+              fontWeight: "bolder",
+            }}
+          >
+            All {current} created by {sessionData.username}
+          </Typography>
+        </Box>
       </Box>
-      <Table sx={{ width: "100%" }}>
-        <TableBody>
-          {userTags.map((tag) => (
-            <TableRow
-              key={tag.tagId}
-              sx={{
-                borderBottom: "3px",
-                borderStyle: "dotted",
-              }}
-            >
-              <TableCell sx={{ width: "65%", cursor: "pointer" }}>
-                <Typography
-                  onClick={() => handleTagEdit(tag)}
-                  sx={{ color: "blue", fontSize: "large" }}
-                >
-                  {tag.name}
-                </Typography>
-              </TableCell>
-              <TableCell
+      {/* Grid layout for tags */}
+      <Box sx={{ marginTop: "80px", width: "90%", position: "absolute" }}>
+        <Grid container spacing={4} sx={{ paddingLeft: "100px" }}>
+          {userTags.map((tag, index) => (
+            <Grid item xs={12} sm={6} md={4} key={index}>
+              <Card
                 sx={{
-                  width: "35%",
+                  height: "100%",
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-end",
+                  flexDirection: "column",
+                  width: "55%",
                 }}
               >
-                <Button
-                  onClick={() => handleDeleteTag(tag._id)}
+                <Box
                   sx={{
-                    color: "black",
-                    fontSize: "medium",
-                    backgroundColor: "red",
-                    border: 3,
-                    borderRadius: "16px",
+                    padding: "25px",
                     textAlign: "center",
-                    borderColor: "red",
-                    marginleft: "20px",
+                    border: "2px dashed",
+                    borderColor: "gray",
                   }}
                 >
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
+                  <Typography variant="h6" color="primary">
+                    {tag.name}
+                  </Typography>
+                  <Typography variant="body2">{tag.count} Questions</Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      gap: 2,
+                      marginTop: "10px",
+                    }}
+                  >
+                    <Button
+                      onClick={() => handleTagEdit(tag)}
+                      sx={{
+                        backgroundColor: "blue",
+                        color: "white",
+                        "&:hover": { backgroundColor: "darkblue" },
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      onClick={() => handleDeleteTag(tag._id)}
+                      sx={{
+                        backgroundColor: "red",
+                        color: "white",
+                        "&:hover": { backgroundColor: "darkred" },
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </Box>
+                </Box>
+              </Card>
+            </Grid>
           ))}
-        </TableBody>
-      </Table>
+        </Grid>
+      </Box>
       <Modal open={editForm.visible} onClose={hideEditForm}>
         <Box sx={{ ...style }}>
           <TextField
