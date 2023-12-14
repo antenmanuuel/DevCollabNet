@@ -157,6 +157,31 @@ router.patch("/incrementViews/:question", async (req, res) => {
 });
 
 router.use(auth);
+
+router.get("/answers/byQuestion/:questionId", async (req, res) => {
+  try {
+    const { questionId } = req.params;
+    const question = await Questions.findById(questionId).exec();
+
+    if (!question) {
+      return res.status(404).send("Question not found");
+    }
+
+    const answers = await Answers.find({ _id: { $in: question.answers } })
+      .populate("ans_by", "username")
+      .populate({
+        path: 'comments',
+        populate: { path: 'com_by', select: 'username' }
+      })
+      .exec();
+
+    res.json(answers);
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+
 // helper function to create or fetch a tag based on its name
 const createOrFetchTag = async (tagName, username) => {
   let tag = await Tags.findOne({ name: tagName }).exec();

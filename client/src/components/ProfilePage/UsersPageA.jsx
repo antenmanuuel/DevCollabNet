@@ -8,16 +8,19 @@ import {
   Box,
   Typography,
   Button,
+  IconButton,
+  List,
+  ListItem
 } from "@mui/material";
+import { ThumbUp, ThumbDown } from "@mui/icons-material";
+import UserAnswersDetail from "./UserAnswerDetails";
 
 const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
-
   const [sessionData, setSessionData] = useState({
     loggedIn: false,
     username: "",
     email: "",
     created_at: "",
-    reputation: 0,
   });
 
   const [userQuestions, setUserQuestions] = useState([]);
@@ -60,6 +63,32 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
     }
   }, [sessionData.username]);
 
+  const [selectedQuestionId, setSelectedQuestionId] = useState(null);
+  const [answersData, setAnswersData] = useState([]);
+  const [currentAnswerPage, setCurrentAnswerPage] = useState(0);
+  const [currentCommentPage, setCurrentCommentPage] = useState({});
+
+  const answersPerPage = 5;
+  const commentsPerPage = 3;
+
+  const handleQuestionClick = async (questionId) => {
+    setSelectedQuestionId(questionId);
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/posts/questions/answers/byQuestion/${questionId}`
+      );
+      console.log("Fetched answers:", response.data);
+      setAnswersData(response.data);
+    } catch (error) {
+      console.error("Error fetching answers and comments:", error);
+    }
+  };
+
+  const handleBackToQuestions = () => {
+    setSelectedQuestionId(null);
+  };
+
+
   const formatDate = (postTime) => {
     const now = new Date();
     const diffInSeconds = (now - new Date(postTime)) / 1000;
@@ -83,16 +112,24 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
     ? formatDate(new Date(sessionData.created_at))
     : "Loading...";
 
-  const handleDeleteQuestion = async (questionId) => {
-    try {
-      await axios.delete(`http://localhost:8000/posts/questions/${questionId}`);
-      setUserQuestions(
-        userQuestions.filter((question) => question._id !== questionId)
-      );
-    } catch (error) {
-      console.error("Error deleting question:", error);
-    }
-  };
+
+   
+if (selectedQuestionId) {
+  return (
+    <UserAnswersDetail
+      answersData={answersData}
+      currentAnswerPage={currentAnswerPage}
+      setCurrentAnswerPage={setCurrentAnswerPage}
+      currentCommentPage={currentCommentPage}
+      setCurrentCommentPage={setCurrentCommentPage}
+      handleBackToQuestions={handleBackToQuestions}
+      sessionData={sessionData}
+    />
+  );
+}
+
+// ... rest of your UsersPageQ component ...
+
 
   return (
     <Box
@@ -125,6 +162,7 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
           height: "175px",
         }}
       >
+        {/* User Profile Information */}
         <Typography
           variant="h4"
           sx={{
@@ -155,7 +193,7 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
             position: "absolute",
             top: "90px",
             left: "30px",
-            fontSize: "15px",            
+            fontSize: "15px",
           }}
         >
           Reputation Score:{" "}
@@ -169,49 +207,75 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
             left: "550px",
             fontSize: "18px",
             fontWeight: "bolder",
-            
           }}
         >
           All Questions with {current} created by {sessionData.username}
         </Typography>
       </Box>
-      <Table sx={{ width: "100%" }}>
-        <TableBody>
-          {userQuestions.map((question) => (
-            <TableRow key={question._id} sx={{borderBottom:"3px", borderStyle:"dotted"}}>
-              <TableCell sx={{ width: "65%" }}>
-                <Typography
-                  sx={{ cursor: "pointer", color: "black", fontSize: "large" }}
-                >
-                  {question.title}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ width: "17.5%" }}>
-                <Typography sx={{ color: "gray", fontSize: "medium" }}>
-                  asked {formatDate(question.ask_date_time)}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ width: "17.5%", paddingLeft: "70px" }}>
-                <Button
-                  onClick={() => handleDeleteQuestion(question._id)}
-                  sx={{
-                    color: "common.white",
-                    fontSize: "medium",
-                    backgroundColor: "red",
-                    border: 3,
-                    borderRadius: "16px",
-                    textAlign: "center",
-                    borderColor: "red",
-                    width: "100px",
-                  }}
-                >
-                  ""
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+
+      {/* {selectedQuestionId ? (
+        // Render answers and comments for a selected question
+        <Box sx={{mt:4}}>
+          {renderAnswersAndComments()}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: 2,
+            }}
+          >
+            <Button
+              onClick={() =>
+                setCurrentAnswerPage(Math.max(0, currentAnswerPage - 1))
+              }
+              disabled={currentAnswerPage === 0}
+            >
+              Prev Answer
+            </Button>
+            <Button
+              onClick={() => setCurrentAnswerPage(currentAnswerPage + 1)}
+              disabled={
+                (currentAnswerPage + 1) * answersPerPage >= answersData.length
+              }
+            >
+              Next Answer
+            </Button>
+          </Box>
+          <Button onClick={handleBackToQuestions} sx={{ marginTop: 2 }}>
+            Back to Questions
+          </Button>
+        </Box> */}
+      {/* ) : ( */}
+        <Box mt={4}>
+        <Table sx={{ width: "100%" }}>
+          <TableBody>
+            {userQuestions.map((question) => (
+              <React.Fragment key={question._id}>
+                <TableRow sx={{ borderBottom: "3px dotted" }}>
+                  <TableCell sx={{ width: "65%" }}>
+                    <Typography
+                      sx={{
+                        cursor: "pointer",
+                        color: "blue",
+                        fontSize: "large",
+                      }}
+                      onClick={() => handleQuestionClick(question._id)}
+                    >
+                      {question.title}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "17.5%" }}>
+                    <Typography sx={{ color: "gray", fontSize: "medium" }}>
+                      asked {formatDate(question.ask_date_time)}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              </React.Fragment>
+            ))}
+          </TableBody>
+        </Table>
+        </Box>
+      {/* )} */}
       <Box
         sx={{
           width: "100%",
@@ -232,17 +296,24 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
           sx={{ marginTop: "5px", marginRight: "5px", left: "350px" }}
           onClick={goTags}
         >
-         All Tags Made by {sessionData.loggedIn ? sessionData.username : "Loading..."}
+          All Tags Made by{" "}
+          {sessionData.loggedIn ? sessionData.username : "Loading..."}
         </Button>
-        <Button variant="contained" sx={{ marginTop: "5px", left: "350px" }}
-        onClick={goAnswers}
+        <Button
+          variant="contained"
+          sx={{ marginTop: "5px", left: "350px" }}
+          onClick={goAnswers}
         >
-          Questions with Answers By {sessionData.loggedIn ? sessionData.username : "Loading..."}
+          Questions with Answers By{" "}
+          {sessionData.loggedIn ? sessionData.username : "Loading..."}
         </Button>
-        <Button variant="contained" sx={{ marginTop: "5px", left: "355px" }}
-        onClick={goQuestions}
+        <Button
+          variant="contained"
+          sx={{ marginTop: "5px", left: "355px" }}
+          onClick={goQuestions}
         >
-          Questions By {sessionData.loggedIn ? sessionData.username : "Loading..."}
+          Questions By{" "}
+          {sessionData.loggedIn ? sessionData.username : "Loading..."}
         </Button>
       </Box>
     </Box>
