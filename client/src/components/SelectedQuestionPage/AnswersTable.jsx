@@ -17,6 +17,7 @@ import {
   CardContent,
 } from "@mui/material";
 import { ThumbUp, ThumbDown } from "@mui/icons-material";
+import AnswerForm from "../AnswerForm/AnswerForm";
 
 const AnswersTable = ({
   questionId,
@@ -33,6 +34,7 @@ const AnswersTable = ({
   const commentsPerPage = 3;
   const [currentCommentPage, setCurrentCommentPage] = useState({});
   const [commentError, setCommentError] = useState({});
+  const [editingAnswerId, setEditingAnswerId] = useState(null);
 
   const helper = new Helper();
 
@@ -188,6 +190,24 @@ const AnswersTable = ({
     }
   };
 
+  const handleEditAnswer = (answerId) => {
+    setEditingAnswerId(answerId);
+  };
+
+  const handleDeleteAnswer = async (answerId) => {
+    try {
+      await axios.delete(
+        `http://localhost:8000/posts/answers/deleteAnswer/${answerId}`,
+        {
+          data: { questionId: questionId },
+        }
+      );
+      setAnswers(answers.filter((answer) => answer._id !== answerId));
+    } catch (error) {
+      console.error("Error deleting answer:", error);
+    }
+  };
+
   const handleNext = () => {
     setStartIndex((prev) => {
       const nextIndex = prev + answersPerPage;
@@ -209,6 +229,33 @@ const AnswersTable = ({
 
   const isPrevDisabled = startIndex === 0;
   const isNextDisabled = startIndex + answersPerPage >= answers.length;
+
+  const handleAnswerEditComplete = (answerId, newText) => {
+    setAnswers(
+      answers.map((answer) => {
+        if (answer._id === answerId) {
+          return { ...answer, text: newText };
+        }
+        return answer;
+      })
+    );
+  };
+
+  if (editingAnswerId) {
+    const existingAnswer = answers.find(
+      (answer) => answer._id === editingAnswerId
+    );
+    return (
+      <AnswerForm
+        sessionData={sessionData}
+        questionId={questionId}
+        editMode={true}
+        existingAnswer={existingAnswer}
+        onAnswerUpdated={() => setEditingAnswerId(null)}
+        onEditComplete={handleAnswerEditComplete} 
+      />
+    );
+  }
 
   return (
     <Box sx={{ width: "91.66%", marginY: 6, marginLeft: "200px" }}>

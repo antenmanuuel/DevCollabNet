@@ -9,6 +9,7 @@ Add design docs in *images/*
 
 - Make sure port 3000 and 8000 is not in use
 
+Step 1://///////////////
 Clone the repository
 
 ```bash
@@ -16,6 +17,8 @@ $ git clone git@github.com:sbu-ckane-f23-cse316-projectorg/projectfakeso-team_an
 $ cd projectfakeso-team_anten_christian
 ```
 
+
+Step 2://////////////////////////////////
 Install dependencies in Client and Server
 
 ```bash
@@ -25,6 +28,8 @@ $ cd ../server
 $ npm install
 ```
 
+
+Step 3:////////////////////////
 Initialize the database
 
 ```bash
@@ -33,7 +38,7 @@ $ node init.js <email_of_admin> <password_of_admin>
 
 # Example: node init.js admin@example.com password123
 ```
-
+Step 4: ///////////////////////
 Run the server
 
 ```bash
@@ -43,6 +48,8 @@ $ npm start <secret_key>
 # Example: npm start secret
 ```
 
+
+Step 5: ///////////////////////////////
 On a separate terminal, run the client
 
 ```bash
@@ -55,25 +62,51 @@ $ npm start
 Login Credentials
 
 ```
+Email: admin@example.com
+Password: admin123
+Reputation: 200
+
 Email: user1@example.com
 Password: pwd123
+Reputation: 30
 
 Email: user2example.com
 Password: pwd123
+Reputation: 55
 
 Email: user3@example.com
 Password: pwd123
+Reputation: 100
 
 Email: user4@example.com
 Password: pwd123
+Reputation: 75
 
 Email: user5@example.com
 Password: pwd123
+Reputation: 25
 ```
 
 ## Team Member 1 Contribution - Anten Manuuel
 
 ## Team Member 2 Contribution - Christian Montano
 
+ * Implemented Welcome page, Signup Page, and LoginPage
+ * Implemented Original User Schema
+ * Implemented Components for UserPage and UserP
+ * Implemented Format for UserPage Answers,Questions, and Tags
+ * Implemented commenting and voting to AnsTable via Frontend
+ * Implemented Updating Comments via Backend
+ * Implemented UserPage Answers Edit/Delete
+ * UserDelete bug Fixed
+ * UML designs 
+ * Routes associated with what is described above
+
+
+
+
 Please note that extension has been given to us from Monday to Thursday. Please contact Professor Kane regarding this
+I have also provided a screenshot of email below with Professor Kanes' response
+
+![extensionproof](./extensionproof/ExtensionImg.png 'ExtensionImg.png')
 
