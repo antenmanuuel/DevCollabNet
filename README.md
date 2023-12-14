@@ -75,5 +75,21 @@ Password: pwd123
 
 ## Team Member 2 Contribution - Christian Montano
 
+ * Implemented Welcome page, Signup Page, and LoginPage
+ * Implemented Original User Schema
+ * Implemented Components for UserPage and UserP
+ * Implemented Format for UserPage Answers,Questions, and Tags
+ * Implemented commenting and voting to AnsTable via Frontend
+ * Implemented Updating Comments via Backend
+ * UserDelete bug Fixed
+ * UML designs 
+ * Routes associated with what is described above
+
+
+
+
 Please note that extension has been given to us from Monday to Thursday. Please contact Professor Kane regarding this
+I have also provided a screenshot of email below with Professor Kanes' response
+
+![extensionproof](./extensionproof/ExtensionImg.png 'ExtensionImg.png')
 
