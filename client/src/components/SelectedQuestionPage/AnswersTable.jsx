@@ -210,6 +210,8 @@ const AnswersTable = ({
   const isPrevDisabled = startIndex === 0;
   const isNextDisabled = startIndex + answersPerPage >= answers.length;
 
+
+  
   return (
     <Box sx={{ width: "91.66%", marginY: 6, marginLeft: "200px" }}>
       <Box sx={{ overflow: "auto", height: "305px", mb: 2 }}>
