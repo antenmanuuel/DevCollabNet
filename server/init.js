@@ -188,7 +188,7 @@ async function populateDatabase() {
       let questionVoters = getRandomUsers(users);
 
       let question = await createQuestion(
-        `Question about ${frontendKeywords[i % frontendKeywords.length]}`,
+        `${frontendKeywords[i % frontendKeywords.length]}`,
         `Summary about ${frontendKeywords[i % frontendKeywords.length]}`,
         `This is a detailed description about ${frontendKeywords[i % frontendKeywords.length]}.`,
         questionTags,
