@@ -164,9 +164,12 @@ async function populateDatabase() {
     let tags = [];
     let users = [admin];
 
+    const fixedReputations = [30, 55, 100, 75, 25];
+
     for (let i = 1; i <= 5; i++) {
       const hashedPassword = await bcrypt.hash('pwd123', 10);
-      let user = await createUser(`user${i}`, `user${i}@example.com`, hashedPassword, false, new Date(), getRandomInt(0, 200));
+      let reputation = fixedReputations[i - 1];
+      let user = await createUser(`user${i}`, `user${i}@example.com`, hashedPassword, false, new Date(),reputation);
       users.push(user);
     }
 

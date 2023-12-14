@@ -4,9 +4,9 @@ const bcrypt = require("bcrypt");
 
 const User = require("../models/users");
 const Question = require("../models/questions");
-const Answer = require("../models/comments");
+const Answer = require("../models/answers");
 const Tag = require("../models/tags");
-const Comment = require("../models/answers");
+const Comment = require("../models/comments");
 
 router.post("/signup", async (req, res) => {
   let newUser = req.body;
@@ -94,24 +94,21 @@ router.get("/admin", async (req, res) => {
   }
 });
 
-router.get("/getUsername/:id", async (req, res) => {
+// New route to get user reputation
+router.get("/userReputation/:username", async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).exec();
-    res.send(user.username);
-  } catch (err) {
-    res.send("Internal Server Error occurred. Please try again.");
+    const username = req.params.username;
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    res.json({ reputation: user.reputation });
+  } catch (error) {
+    console.error("Error fetching user reputation:", error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
-router.get("/getUserData/:id", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).exec();
-    user.password = undefined;
-    res.send(user);
-  } catch (err) {
-    res.send("Internal Server Error occurred. Please try again.");
-  }
-});
 router.delete("/deleteUser/:id", async (req, res) => {
   if (!req.session.user.isAdmin) {
     console.log("Access denied: User is not an admin.");

@@ -18,7 +18,13 @@ import {
 } from "@mui/material";
 import { ThumbUp, ThumbDown } from "@mui/icons-material";
 
-const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
+const AnswersTable = ({
+  questionId,
+  onAnswerPress,
+  sessionData,
+  filteredAnswers,
+  onBack,
+}) => {
   const [answers, setAnswers] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
   const [commentsData, setCommentsData] = useState({});
@@ -26,20 +32,32 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
   const answersPerPage = 5;
   const commentsPerPage = 3;
   const [currentCommentPage, setCurrentCommentPage] = useState({});
+  const [commentError, setCommentError] = useState({});
 
   const helper = new Helper();
 
+  const isFilteredView = filteredAnswers && filteredAnswers.length > 0;
+
   useEffect(() => {
-    axios
-      .get(`http://localhost:8000/posts/answers/${questionId}`)
-      .then((response) => {
-        setAnswers(response.data);
-        fetchCommentsForAnswers(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching answers:", error);
+    if (filteredAnswers && filteredAnswers.length > 0) {
+      setAnswers(filteredAnswers);
+      const newCommentsData = {};
+      filteredAnswers.forEach((answer) => {
+        newCommentsData[answer._id] = answer.comments;
       });
-  }, [questionId]);
+      setCommentsData(newCommentsData);
+    } else {
+      axios
+        .get(`http://localhost:8000/posts/answers/${questionId}`)
+        .then((response) => {
+          setAnswers(response.data);
+          fetchCommentsForAnswers(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching answers:", error);
+        });
+    }
+  }, [questionId, filteredAnswers]);
 
   const fetchCommentsForAnswers = async (answers) => {
     for (const answer of answers) {
@@ -66,7 +84,20 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
 
   const postCommentOnAnswer = async (answerId) => {
     const commentText = newCommentText[answerId] || "";
+
+    if (sessionData.reputation < 50) {
+      setCommentError({
+        ...commentError,
+        [answerId]: "You need a reputation of at least 50 to post comments.",
+      });
+      return;
+    }
+
     if (!commentText.trim()) {
+      setCommentError({
+        ...commentError,
+        [answerId]: "Comment cannot be empty.",
+      });
       return;
     }
 
@@ -90,7 +121,8 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
           ...(commentsData[answerId] || []),
         ];
         setCommentsData({ ...commentsData, [answerId]: updatedComments });
-        setNewCommentText({ ...newCommentText, [answerId]: "" }); 
+        setNewCommentText({ ...newCommentText, [answerId]: "" });
+        setCommentError({ ...commentError, [answerId]: "" });
       }
     } catch (error) {
       console.error("Error posting comment:", error);
@@ -178,8 +210,6 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
   const isPrevDisabled = startIndex === 0;
   const isNextDisabled = startIndex + answersPerPage >= answers.length;
 
- 
-
   return (
     <Box sx={{ width: "91.66%", marginY: 6, marginLeft: "200px" }}>
       <Box sx={{ overflow: "auto", height: "305px", mb: 2 }}>
@@ -209,7 +239,7 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
                       <IconButton
                         onClick={() => handleVote(answer._id, "upvote")}
                         size="small"
-                        disabled={!isUserLoggedIn}
+                        disabled={!sessionData.loggedIn || isFilteredView}
                       >
                         <ThumbUp />
                       </IconButton>
@@ -219,7 +249,7 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
                       <IconButton
                         onClick={() => handleVote(answer._id, "downvote")}
                         size="small"
-                        disabled={!isUserLoggedIn}
+                        disabled={!sessionData.loggedIn || isFilteredView}
                       >
                         <ThumbDown />
                       </IconButton>
@@ -237,6 +267,25 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
                         answered{" "}
                         {helper.formatDate(new Date(answer.ans_date_time))}
                       </ListItem>
+                      {isFilteredView && (
+                        <Box>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => handleEditAnswer(answer._id)}
+                            sx={{ marginRight: 1 }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="secondary"
+                            onClick={() => handleDeleteAnswer(answer._id)}
+                          >
+                            Delete
+                          </Button>
+                        </Box>
+                      )}
                     </List>
                   </TableCell>
                 </TableRow>
@@ -264,7 +313,9 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
                                   onClick={() =>
                                     handleUpvoteComment(comment._id, answer._id)
                                   }
-                                  disabled={!sessionData.loggedIn}
+                                  disabled={
+                                    !sessionData.loggedIn || isFilteredView
+                                  }
                                   size="small"
                                 >
                                   <ThumbUp />
@@ -297,41 +348,43 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
                       </TableCell>
                     </TableRow>
                   ))}
-               
-                  <TableRow>
-                    <TableCell colSpan={6}>
-                      <TextField
-                        fullWidth
-                        variant="outlined"
-                        value={newCommentText[answer._id] || ""}
-                        onChange={(e) =>
-                          setNewCommentText({
-                            ...newCommentText,
-                            [answer._id]: e.target.value,
-                          })
-                        }
-                        placeholder="Write a comment..."
-                        multiline
-                        disabled={!sessionData.loggedIn}
-                      />
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => postCommentOnAnswer(answer._id)}
-                        sx={{ marginTop: "20px", marginLeft:"20px" }}
-                        disabled={!sessionData.loggedIn}
-                      >
-                        Post Comment
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+
+                <TableRow>
+                  <TableCell colSpan={6}>
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      error={!!commentError[answer._id]}
+                      helperText={commentError[answer._id]}
+                      value={newCommentText[answer._id] || ""}
+                      onChange={(e) =>
+                        setNewCommentText({
+                          ...newCommentText,
+                          [answer._id]: e.target.value,
+                        })
+                      }
+                      placeholder="Write a comment..."
+                      multiline
+                      disabled={!sessionData.loggedIn || isFilteredView}
+                    />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => postCommentOnAnswer(answer._id)}
+                      sx={{ marginTop: "20px", marginLeft: "20px" }}
+                      disabled={!sessionData.loggedIn || isFilteredView}
+                    >
+                      Post Comment
+                    </Button>
+                  </TableCell>
+                </TableRow>
                 <TableRow>
                   <TableCell
                     colSpan={6}
                     sx={{
                       display: "flex",
                       mt: 2,
-                      borderBottom: "none"
+                      borderBottom: "none",
                     }}
                   >
                     <Button
@@ -349,7 +402,7 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
                         (commentsData[answer._id]?.length || 0) <=
                           commentsPerPage
                       }
-                      sx={{paddingLeft: "775px"}}
+                      sx={{ paddingLeft: "775px" }}
                     >
                       Prev
                     </Button>
@@ -386,15 +439,31 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
         }}
       >
         <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-        <Button onClick={handlePrev} disabled={isPrevDisabled}>
+          <Button onClick={handlePrev} disabled={isPrevDisabled}>
             Prev
           </Button>
           <Button onClick={handleNext} disabled={isNextDisabled}>
             Next
           </Button>
-
         </Box>
-        {sessionData.loggedIn && (
+        {isFilteredView ? (
+          // Show 'Back' button in filtered view
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onBack}
+            sx={{
+              width: 150,
+              padding: "10px",
+              textTransform: "none",
+              marginTop: "20px",
+              marginRight: "1425px",
+            }}
+          >
+            Back
+          </Button>
+        ) : sessionData.loggedIn ? (
+          // Show 'Answer Question' button otherwise
           <Button
             variant="contained"
             color="primary"
@@ -403,14 +472,13 @@ const AnswersTable = ({ questionId, onAnswerPress, sessionData }) => {
               width: 150,
               padding: "10px",
               textTransform: "none",
-              marginRight: "1450px",
-              marginTop: "50px",
-              
+              marginTop: "20px",
+              marginRight: "1425px",
             }}
           >
             Answer Question
           </Button>
-        )}
+        ) : null}
       </Box>
     </Box>
   );
