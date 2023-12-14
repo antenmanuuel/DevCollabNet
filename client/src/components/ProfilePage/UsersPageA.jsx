@@ -8,12 +8,8 @@ import {
   Box,
   Typography,
   Button,
-  IconButton,
-  List,
-  ListItem
 } from "@mui/material";
-import { ThumbUp, ThumbDown } from "@mui/icons-material";
-import UserAnswersDetail from "./UserAnswerDetails";
+import AnswersTable from "../SelectedQuestionPage/AnswersTable";
 
 const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
   const [sessionData, setSessionData] = useState({
@@ -24,6 +20,8 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
   });
 
   const [userQuestions, setUserQuestions] = useState([]);
+  const [userReputation, setUserReputation] = useState(null);
+
 
   useEffect(() => {
     const fetchSessionData = async () => {
@@ -47,47 +45,50 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
   }, []);
 
   useEffect(() => {
-    const fetchUserQuestions = async () => {
+    if (sessionData.username) {
+      axios.get(`http://localhost:8000/users/userReputation/${sessionData.username}`)
+        .then((response) => {
+          setUserReputation(response.data.reputation);
+        })
+        .catch((error) => {
+          console.error("Error fetching user reputation:", error);
+        });
+    }
+  }, [sessionData.username]);
+
+  useEffect(() => {
+    const fetchUserAnsweredQuestions = async () => {
       try {
+       
         const response = await axios.get(
-          `http://localhost:8000/posts/questions/byUsername/${sessionData.username}`
+          `http://localhost:8000/posts/questions/questions-answered-by/${sessionData.username}`
         );
         setUserQuestions(response.data);
       } catch (error) {
-        console.error("Error fetching user's questions:", error);
+        console.error("Error fetching questions answered by the user:", error);
       }
     };
 
     if (sessionData.username) {
-      fetchUserQuestions();
+      fetchUserAnsweredQuestions();
     }
-  }, [sessionData.username]);
-
+  }, [sessionData.username]); 
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [answersData, setAnswersData] = useState([]);
-  const [currentAnswerPage, setCurrentAnswerPage] = useState(0);
-  const [currentCommentPage, setCurrentCommentPage] = useState({});
-
-  const answersPerPage = 5;
-  const commentsPerPage = 3;
 
   const handleQuestionClick = async (questionId) => {
     setSelectedQuestionId(questionId);
+
     try {
       const response = await axios.get(
-        `http://localhost:8000/posts/questions/answers/byQuestion/${questionId}`
+        `http://localhost:8000/posts/questions/answers/byQuestion/${questionId}/user/${sessionData.username}`
       );
-      console.log("Fetched answers:", response.data);
+      console.log("Fetched answers and comments by user:", response.data);
       setAnswersData(response.data);
     } catch (error) {
-      console.error("Error fetching answers and comments:", error);
+      console.error("Error fetching answers and comments by user:", error);
     }
   };
-
-  const handleBackToQuestions = () => {
-    setSelectedQuestionId(null);
-  };
-
 
   const formatDate = (postTime) => {
     const now = new Date();
@@ -112,25 +113,19 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
     ? formatDate(new Date(sessionData.created_at))
     : "Loading...";
 
-
-   
-if (selectedQuestionId) {
-  return (
-    <UserAnswersDetail
-      answersData={answersData}
-      currentAnswerPage={currentAnswerPage}
-      setCurrentAnswerPage={setCurrentAnswerPage}
-      currentCommentPage={currentCommentPage}
-      setCurrentCommentPage={setCurrentCommentPage}
-      handleBackToQuestions={handleBackToQuestions}
-      sessionData={sessionData}
-    />
-  );
-}
-
-// ... rest of your UsersPageQ component ...
-
-
+  const handleBackFromAnswers = () => {
+    setSelectedQuestionId(null);
+  };
+  if (selectedQuestionId) {
+    return (
+      <AnswersTable
+        questionId={selectedQuestionId}
+        sessionData={sessionData}
+        filteredAnswers={answersData}
+        onBack={handleBackFromAnswers}
+      />
+    );
+  }
   return (
     <Box
       sx={{
@@ -162,7 +157,6 @@ if (selectedQuestionId) {
           height: "175px",
         }}
       >
-        {/* User Profile Information */}
         <Typography
           variant="h4"
           sx={{
@@ -197,7 +191,7 @@ if (selectedQuestionId) {
           }}
         >
           Reputation Score:{" "}
-          {sessionData.loggedIn ? sessionData.reputation : "Loading..."}
+          {userReputation !== null ? userReputation : "Loading..."}
         </Typography>
         <Typography
           variant="h1"
@@ -212,41 +206,7 @@ if (selectedQuestionId) {
           All Questions with {current} created by {sessionData.username}
         </Typography>
       </Box>
-
-      {/* {selectedQuestionId ? (
-        // Render answers and comments for a selected question
-        <Box sx={{mt:4}}>
-          {renderAnswersAndComments()}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: 2,
-            }}
-          >
-            <Button
-              onClick={() =>
-                setCurrentAnswerPage(Math.max(0, currentAnswerPage - 1))
-              }
-              disabled={currentAnswerPage === 0}
-            >
-              Prev Answer
-            </Button>
-            <Button
-              onClick={() => setCurrentAnswerPage(currentAnswerPage + 1)}
-              disabled={
-                (currentAnswerPage + 1) * answersPerPage >= answersData.length
-              }
-            >
-              Next Answer
-            </Button>
-          </Box>
-          <Button onClick={handleBackToQuestions} sx={{ marginTop: 2 }}>
-            Back to Questions
-          </Button>
-        </Box> */}
-      {/* ) : ( */}
-        <Box mt={4}>
+      <Box mt={4}>
         <Table sx={{ width: "100%" }}>
           <TableBody>
             {userQuestions.map((question) => (
@@ -274,7 +234,7 @@ if (selectedQuestionId) {
             ))}
           </TableBody>
         </Table>
-        </Box>
+      </Box>
       {/* )} */}
       <Box
         sx={{
