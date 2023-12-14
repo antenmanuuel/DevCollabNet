@@ -140,6 +140,15 @@ const QuestionTable = ({
 
   const postComment = async (questionId) => {
     const commentText = newCommentText[questionId] || "";
+
+    if (sessionData.reputation < 50) {
+      setCommentError({
+        ...commentError,
+        [questionId]: "You need a reputation of at least 50 to post comments.",
+      });
+      return;
+    }
+
     if (!isValidComment(commentText)) {
       const errorMessage =
         commentText.trim().length === 0
@@ -303,8 +312,10 @@ const QuestionTable = ({
   };
 
   const startIndex = currentPage * questionsPerPage;
-  const displayedQuestions = questionsData
-    .slice(startIndex, startIndex + questionsPerPage);
+  const displayedQuestions = questionsData.slice(
+    startIndex,
+    startIndex + questionsPerPage
+  );
   return (
     <Box sx={{ width: "99%" }}>
       <Box
@@ -387,9 +398,11 @@ const QuestionTable = ({
                           color: "gray",
                           marginBottom: "20px",
                           marginTop: "10px",
-                          marginLeft: "10px"
+                          marginLeft: "10px",
                         }}
-                      >{question.summary}</Typography>
+                      >
+                        {question.summary}
+                      </Typography>
                       <Box>
                         {question.tagNames.map((tagName, id) => (
                           <Chip

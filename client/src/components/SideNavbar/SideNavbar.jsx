@@ -76,7 +76,7 @@ function SideNavbar({ setQuestionsPage, setTagsPage, setProfilePage, setAdminPag
             sx={getListItemStyle("users")}
             onClick={handleProfileLinkClick}
           >
-            <ListItemText primary="Users" />
+            <ListItemText primary="User" />
           </ListItem>
 
           <ListItem
