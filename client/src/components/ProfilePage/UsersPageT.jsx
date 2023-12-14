@@ -23,6 +23,8 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
     reputation: 0,
   });
 
+  
+
   const [userTags, setUserTags] = useState([]);
 
   const [editForm, setEditForm] = useState({
@@ -42,6 +44,24 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
     boxShadow: 24,
     p: 4,
   };
+
+  const [userReputation, setUserReputation] = useState(null);
+
+
+  useEffect(() => {
+    if (sessionData.username) {
+      axios
+        .get(
+          `http://localhost:8000/users/userReputation/${sessionData.username}`
+        )
+        .then((response) => {
+          setUserReputation(response.data.reputation);
+        })
+        .catch((error) => {
+          console.error("Error fetching user reputation:", error);
+        });
+    }
+  }, [sessionData.username]);
 
   useEffect(() => {
     const fetchSessionData = async () => {
@@ -243,7 +263,7 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
           }}
         >
           Reputation Score:{" "}
-          {sessionData.loggedIn ? sessionData.reputation : "Loading..."}
+          {userReputation !== null ? userReputation : "Loading..."}
         </Typography>
         <Box
           sx={{

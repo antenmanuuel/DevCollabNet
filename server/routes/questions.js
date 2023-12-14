@@ -157,6 +157,74 @@ router.patch("/incrementViews/:question", async (req, res) => {
 });
 
 router.use(auth);
+
+// Route to get questions answered by a specific user
+router.get("/questions-answered-by/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Fetch the user ID based on the provided username
+    const user = await User.findOne({ username }).exec();
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Find answers provided by this user
+    const answersByUser = await Answers.find({ ans_by: user._id }).exec();
+
+    // Extract answer IDs
+    const answerIds = answersByUser.map(answer => answer._id);
+
+    // Find and return questions that contain any of these answer IDs
+    const questions = await Questions.find({
+      answers: { $in: answerIds }
+    }).exec();
+
+    res.json(questions);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+
+
+
+// Route to get answers and comments by a specific user for a given question
+router.get("/answers/byQuestion/:questionId/user/:username", async (req, res) => {
+  try {
+    const { questionId, username } = req.params;
+
+    // Fetch the user ID based on the provided username
+    const user = await User.findOne({ username }).exec();
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Fetch the question to get its answers
+    const question = await Questions.findById(questionId).exec();
+    if (!question) {
+      return res.status(404).send("Question not found");
+    }
+
+    // Find answers by the user that are within the question's answers
+    const answersByUser = await Answers.find({ 
+      _id: { $in: question.answers },
+      ans_by: user._id 
+    })
+    .populate({
+      path: "comments",
+      match: { com_by: user._id },
+      populate: { path: "com_by", select: "username" }
+    })
+    .exec();
+
+    res.json(answersByUser);
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+
+
 // helper function to create or fetch a tag based on its name
 const createOrFetchTag = async (tagName, username) => {
   let tag = await Tags.findOne({ name: tagName }).exec();

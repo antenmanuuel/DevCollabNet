@@ -23,7 +23,24 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
 
   const [userQuestions, setUserQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
+  const [userReputation, setUserReputation] = useState(null);
 
+
+  useEffect(() => {
+    // Fetch user reputation when username is available
+    if (sessionData.username) {
+      axios
+        .get(
+          `http://localhost:8000/users/userReputation/${sessionData.username}`
+        )
+        .then((response) => {
+          setUserReputation(response.data.reputation);
+        })
+        .catch((error) => {
+          console.error("Error fetching user reputation:", error);
+        });
+    }
+  }, [sessionData.username]);
 
   useEffect(() => {
     const fetchSessionData = async () => {
@@ -182,7 +199,7 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
           }}
         >
           Reputation Score:{" "}
-          {sessionData.loggedIn ? sessionData.reputation : "Loading..."}
+          {userReputation !== null ? userReputation : "Loading..."}
         </Typography>
         <Typography
           variant="h1"
