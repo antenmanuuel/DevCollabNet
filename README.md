@@ -62,20 +62,29 @@ $ npm start
 Login Credentials
 
 ```
+Email: admin@example.com
+Password: admin123
+Reputation: 200
+
 Email: user1@example.com
 Password: pwd123
+Reputation: 30
 
 Email: user2example.com
 Password: pwd123
+Reputation: 55
 
 Email: user3@example.com
 Password: pwd123
+Reputation: 100
 
 Email: user4@example.com
 Password: pwd123
+Reputation: 75
 
 Email: user5@example.com
 Password: pwd123
+Reputation: 25
 ```
 
 ## Team Member 1 Contribution - Anten Manuuel
