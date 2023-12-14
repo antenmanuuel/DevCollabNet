@@ -144,6 +144,62 @@ router.patch("/downvote/:answerId", async (req, res) => {
   }
 });
 
+// route to edit an answer
+router.patch('/editAnswer/:answerId', async (req, res) => {
+  try {
+    const { answerId } = req.params;
+    const { newText } = req.body;
+
+    const updatedAnswer = await Answers.findByIdAndUpdate(
+      answerId,
+      { text: newText },
+      { new: true }
+    );
+
+    if (!updatedAnswer) {
+      return res.status(404).json({ message: 'Unable to locate the answer to update.' });
+    }
+
+    res.json({ message: 'Answer updated successfully', updatedAnswer });
+  } catch (error) {
+    console.error('Update Error:', error);
+    res.status(500).json({ message: 'Error encountered while updating answer.' });
+  }
+});
+
+//route to delete an answer
+router.delete('/deleteAnswer/:answerId', async (req, res) => {
+  const { answerId } = req.params;
+  const { questionId } = req.body;
+
+  try {
+      const answer = await Answers.findById(answerId);
+
+      if (!answer) {
+          return res.status(404).json({ error: 'No answer found with the provided ID.' });
+      }
+
+      const commentIds = answer.comments || [];
+      await Comments.deleteMany({ _id: { $in: commentIds } });
+
+      await Answers.findByIdAndDelete(answerId);
+
+      await Questions.findByIdAndUpdate(
+          questionId,
+          { $pull: { answers: answerId } },
+          { new: true }
+      );
+
+      res.status(200).json({ message: 'Successfully removed the answer and its related comments.' });
+  } catch (error) {
+      console.error('Deletion Error:', error);
+      res.status(500).json({ error: 'Failed to process deletion request due to a server issue.' });
+  }
+});
+
+
+
+
 
 router.use((err, req, res, next) => {
   handleError(err, res);
