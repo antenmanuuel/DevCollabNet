@@ -84,6 +84,18 @@ Reputation: 25
 ```
 
 ## Team Member 1 Contribution - Anten Manuuel
+ * Moved code from hw3 to final project
+ * Implemented voting and commenting for Questions on frontend
+ * Updated forms for Question and Answer Form to be from user who is logged in
+ * implemented Guest User View
+ * created and implemented init script
+ * implemented auth
+ * Implemented adminPage for both backend and frontend
+ * Implemented Tag Edit and Delete for UserPage for Tags for frontend and and corresponding backend
+ * implemnted Question Edit and Delete for UserPage for Question frontend and corresponding backend
+ * implement voting on comments on backend
+ * fixed bugs
+ * added client side and server side session handling
 
 ## Team Member 2 Contribution - Christian Montano
 
