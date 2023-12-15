@@ -432,7 +432,7 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
           sx={{ marginTop: "5px", left: "350px" }}
           onClick={goAnswers}
         >
-          Questions with Answers By{" "}
+          Questions Answered By{" "}
           {sessionData.loggedIn ? sessionData.username : "Loading..."}
         </Button>
         <Button

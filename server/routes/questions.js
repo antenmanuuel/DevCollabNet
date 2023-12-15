@@ -132,6 +132,63 @@ router.get("/unanswered", async (req, res) => {
   }
 });
 
+// Route to get questions answered by the currently logged-in user
+router.get("/questions-answered-by-current-user", async (req, res) => {
+  try {
+    if (!req.session || !req.session.user) {
+      return res.status(401).send("Unauthorized: No user logged in");
+    }
+
+    const userId = req.session.user.userId; // Or however you store the user's ID in the session
+
+    const answersByUser = await Answers.find({ ans_by: userId }).exec();
+    const answerIds = answersByUser.map((answer) => answer._id);
+    const questions = await Questions.find({
+      answers: { $in: answerIds },
+    })
+      .populate("asked_by", "username")
+      .exec();
+
+    res.json(questions);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+// Route to get answers and comments by the currently logged-in user for a given question
+router.get("/answers/byQuestion/:questionId/currentUser", async (req, res) => {
+  try {
+    // Check if a user is logged in using the 'loggedIn' property
+    if (!req.session.user || !req.session.user.loggedIn) {
+      return res.status(401).send("Unauthorized: No user logged in");
+    }
+
+    const { questionId } = req.params;
+    const userId = req.session.user.userId;
+
+    // Fetch the question to get its answers
+    const question = await Questions.findById(questionId).exec();
+    if (!question) {
+      return res.status(404).send("Question not found");
+    }
+
+    // Find answers by the current user that are within the question's answers
+    const answersByUser = await Answers.find({
+      _id: { $in: question.answers },
+      ans_by: userId,
+    })
+      .populate({
+        path: "comments",
+        match: { com_by: userId },
+        populate: { path: "com_by", select: "username" },
+      })
+      .exec();
+
+    res.json(answersByUser);
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
 // Route to fetch a question by its ID
 router.get("/:question", async (req, res) => {
   try {
@@ -158,72 +215,43 @@ router.patch("/incrementViews/:question", async (req, res) => {
 
 router.use(auth);
 
-// Route to get questions answered by a specific user
-router.get("/questions-answered-by/:username", async (req, res) => {
-  try {
-    const { username } = req.params;
-
-    // Fetch the user ID based on the provided username
-    const user = await User.findOne({ username }).exec();
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    // Find answers provided by this user
-    const answersByUser = await Answers.find({ ans_by: user._id }).exec();
-
-    // Extract answer IDs
-    const answerIds = answersByUser.map(answer => answer._id);
-
-    // Find and return questions that contain any of these answer IDs
-    const questions = await Questions.find({
-      answers: { $in: answerIds }
-    }).exec();
-
-    res.json(questions);
-  } catch (error) {
-    handleError(error, res);
-  }
-});
-
-
-
 // Route to get answers and comments by a specific user for a given question
-router.get("/answers/byQuestion/:questionId/user/:username", async (req, res) => {
-  try {
-    const { questionId, username } = req.params;
+router.get(
+  "/answers/byQuestion/:questionId/user/:username",
+  async (req, res) => {
+    try {
+      const { questionId, username } = req.params;
 
-    // Fetch the user ID based on the provided username
-    const user = await User.findOne({ username }).exec();
-    if (!user) {
-      return res.status(404).send("User not found");
+      // Fetch the user ID based on the provided username
+      const user = await User.findOne({ username }).exec();
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+
+      // Fetch the question to get its answers
+      const question = await Questions.findById(questionId).exec();
+      if (!question) {
+        return res.status(404).send("Question not found");
+      }
+
+      // Find answers by the user that are within the question's answers
+      const answersByUser = await Answers.find({
+        _id: { $in: question.answers },
+        ans_by: user._id,
+      })
+        .populate({
+          path: "comments",
+          match: { com_by: user._id },
+          populate: { path: "com_by", select: "username" },
+        })
+        .exec();
+
+      res.json(answersByUser);
+    } catch (err) {
+      handleError(err, res);
     }
-
-    // Fetch the question to get its answers
-    const question = await Questions.findById(questionId).exec();
-    if (!question) {
-      return res.status(404).send("Question not found");
-    }
-
-    // Find answers by the user that are within the question's answers
-    const answersByUser = await Answers.find({ 
-      _id: { $in: question.answers },
-      ans_by: user._id 
-    })
-    .populate({
-      path: "comments",
-      match: { com_by: user._id },
-      populate: { path: "com_by", select: "username" }
-    })
-    .exec();
-
-    res.json(answersByUser);
-  } catch (err) {
-    handleError(err, res);
   }
-});
-
-
+);
 
 // helper function to create or fetch a tag based on its name
 const createOrFetchTag = async (tagName, username) => {
@@ -408,19 +436,39 @@ router.patch("/upvote/:questionId", async (req, res) => {
       return res.status(404).send("Question or User not found.");
     }
 
-    const hasVoted = question.voters.some(
+    const voterIndex = question.voters.findIndex(
       (voter) => voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
     );
 
-    if (hasVoted) {
-      return res.status(400).send("User has already voted.");
+    if (voterIndex !== -1) {
+      const voter = question.voters[voterIndex];
+      if (voter.voteChanged) {
+        return res.status(400).send("You cannot change your vote again.");
+      }
+
+      if (voter.voteIncrement === -1) {
+        // Switch from downvote to upvote
+        question.votes += 1;
+        user.reputation += 15; // Remove downvote penalty and apply upvote gain
+      } else {
+        // If already upvoted, don't allow to upvote again
+        return res.status(400).send("You have already upvoted this question.");
+      }
+
+      voter.voteIncrement = 1;
+      voter.voteChanged = true; // Indicate that the user has changed their vote
+    } else {
+      // New upvote
+      question.votes += 1;
+      user.reputation += 5;
+      question.voters.push({
+        userWhoVoted: user._id,
+        voteIncrement: 1,
+        voteChanged: false,
+      });
     }
 
-    question.votes += 1;
-    question.voters.push({ userWhoVoted: user._id, voteIncrement: 1 });
     await question.save();
-
-    user.reputation += 5;
     await user.save();
 
     res
@@ -444,19 +492,41 @@ router.patch("/downvote/:questionId", async (req, res) => {
       return res.status(404).send("Question or User not found.");
     }
 
-    const hasVoted = question.voters.some(
+    const voterIndex = question.voters.findIndex(
       (voter) => voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
     );
 
-    if (hasVoted) {
-      return res.status(400).send("User has already voted.");
+    if (voterIndex !== -1) {
+      const voter = question.voters[voterIndex];
+      if (voter.voteChanged) {
+        return res.status(400).send("You cannot change your vote again.");
+      }
+
+      if (voter.voteIncrement === 1) {
+        // Switch from upvote to downvote
+        question.votes -= 1;
+        user.reputation -= 15; // Remove upvote gain and apply downvote penalty
+      } else {
+        // If already downvoted, don't allow to downvote again
+        return res
+          .status(400)
+          .send("You have already downvoted this question.");
+      }
+
+      voter.voteIncrement = -1;
+      voter.voteChanged = true; // Indicate that the user has changed their vote
+    } else {
+      // New downvote
+      question.votes -= 1;
+      user.reputation -= 10;
+      question.voters.push({
+        userWhoVoted: user._id,
+        voteIncrement: -1,
+        voteChanged: false,
+      });
     }
 
-    question.votes -= 1;
-    question.voters.push({ userWhoVoted: user._id, voteIncrement: -1 });
     await question.save();
-
-    user.reputation -= 10;
     await user.save();
 
     res

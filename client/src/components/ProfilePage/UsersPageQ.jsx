@@ -11,8 +11,7 @@ import {
 } from "@mui/material";
 import QuestionsForm from "../QuestionsForm/QuestionsForm";
 
-const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
-
+const UsersPageQ = ({ goTags, goQuestions, goAnswers, current }) => {
   const [sessionData, setSessionData] = useState({
     loggedIn: false,
     username: "",
@@ -24,7 +23,6 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
   const [userQuestions, setUserQuestions] = useState([]);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [userReputation, setUserReputation] = useState(null);
-
 
   useEffect(() => {
     // Fetch user reputation when username is available
@@ -98,7 +96,6 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
       />
     );
   }
-
 
   const formatDate = (postTime) => {
     const now = new Date();
@@ -195,7 +192,7 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
             position: "absolute",
             top: "90px",
             left: "30px",
-            fontSize: "15px",            
+            fontSize: "15px",
           }}
         >
           Reputation Score:{" "}
@@ -209,50 +206,54 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
             left: "550px",
             fontSize: "18px",
             fontWeight: "bolder",
-            
           }}
         >
           All {current} created by {sessionData.username}
         </Typography>
       </Box>
-      <Table sx={{ width: "100%" }}>
-        <TableBody>
-          {userQuestions.map((question) => (
-            <TableRow key={question._id} sx={{borderBottom:"3px", borderStyle:"dotted"}}>
-              <TableCell sx={{ width: "65%" }}>
-                <Typography
-                  onClick={() => handleQuestionEdit(question)}
-                  sx={{ cursor: "pointer", color: "blue", fontSize: "large" }}
-                >
-                  {question.title}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ width: "17.5%" }}>
-                <Typography sx={{ color: "gray", fontSize: "medium" }}>
-                  asked {formatDate(question.ask_date_time)}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ width: "17.5%", paddingLeft: "70px" }}>
-                <Button
-                  onClick={() => handleDeleteQuestion(question._id)}
-                  sx={{
-                    color: "black",
-                    fontSize: "medium",
-                    backgroundColor: "red",
-                    border: 3,
-                    borderRadius: "16px",
-                    textAlign: "center",
-                    borderColor: "red",
-                    width: "100px",
-                  }}
-                >
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <Box sx={{ maxHeight: "500px", overflowY: "auto" }}>
+        <Table sx={{ width: "100%" }}>
+          <TableBody>
+            {userQuestions.map((question) => (
+              <TableRow
+                key={question._id}
+                sx={{ borderBottom: "3px", borderStyle: "dotted" }}
+              >
+                <TableCell sx={{ width: "65%" }}>
+                  <Typography
+                    onClick={() => handleQuestionEdit(question)}
+                    sx={{ cursor: "pointer", color: "blue", fontSize: "large" }}
+                  >
+                    {question.title}
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ width: "17.5%" }}>
+                  <Typography sx={{ color: "gray", fontSize: "medium" }}>
+                    {question.asked_by.username} asked {formatDate(question.ask_date_time)}
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ width: "17.5%", paddingLeft: "70px" }}>
+                  <Button
+                    onClick={() => handleDeleteQuestion(question._id)}
+                    sx={{
+                      color: "black",
+                      fontSize: "medium",
+                      backgroundColor: "red",
+                      border: 3,
+                      borderRadius: "16px",
+                      textAlign: "center",
+                      borderColor: "red",
+                      width: "100px",
+                    }}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Box>
       <Box
         sx={{
           width: "100%",
@@ -273,17 +274,24 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers , current }) => {
           sx={{ marginTop: "5px", marginRight: "5px", left: "350px" }}
           onClick={goTags}
         >
-          All Tags Made by {sessionData.loggedIn ? sessionData.username : "Loading..."}
+          All Tags Made by{" "}
+          {sessionData.loggedIn ? sessionData.username : "Loading..."}
         </Button>
-        <Button variant="contained" sx={{ marginTop: "5px", left: "350px" }}
-        onClick={goAnswers}
+        <Button
+          variant="contained"
+          sx={{ marginTop: "5px", left: "350px" }}
+          onClick={goAnswers}
         >
-          Questions with Answers By {sessionData.loggedIn ? sessionData.username : "Loading..."}
+          Questions Answered By{" "}
+          {sessionData.loggedIn ? sessionData.username : "Loading..."}
         </Button>
-        <Button variant="contained" sx={{ marginTop: "5px", left: "355px" }}
-        onClick={goQuestions}
+        <Button
+          variant="contained"
+          sx={{ marginTop: "5px", left: "355px" }}
+          onClick={goQuestions}
         >
-          Questions By {sessionData.loggedIn ? sessionData.username : "Loading..."}
+          Questions By{" "}
+          {sessionData.loggedIn ? sessionData.username : "Loading..."}
         </Button>
       </Box>
     </Box>

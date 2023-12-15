@@ -182,39 +182,45 @@ const AdminsPage = () => {
           All Current Users
         </Typography>
       </Box>
-      <Table sx={{ width: "100%" }}>
-        <TableBody>
-          {users.map((user) => (
-            <TableRow key={user._id} sx={{ borderBottom: "3px dotted" }}>
-              <TableCell sx={{ width: "65%" }}>
-                <Typography
-                  sx={{ cursor: "pointer", color: "black", fontSize: "large" }}
-                >
-                  {user.username}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ width: "17.5%", paddingLeft: "70px" }}>
-                <Button
-                  onClick={() => handleDeleteUserById(user._id)}
-                  sx={{
-                    backgroundColor: "red",
-                    color: "common.white",
-                    fontSize: "medium",
-                    border: 3,
-                    borderRadius: "16px",
-                    textAlign: "center",
-                    borderColor: "red",
-                    width: "100px",
-                  }}
-                  disabled={user.email === sessionData.email}
-                >
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <Box sx={{ maxHeight: "420px", overflowY: "auto" }}>
+        <Table sx={{ width: "100%" }}>
+          <TableBody>
+            {users.map((user) => (
+              <TableRow key={user._id} sx={{ borderBottom: "3px dotted" }}>
+                <TableCell sx={{ width: "65%" }}>
+                  <Typography
+                    sx={{
+                      cursor: "pointer",
+                      color: "black",
+                      fontSize: "large",
+                    }}
+                  >
+                    {user.username}
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ width: "17.5%", paddingLeft: "70px" }}>
+                  <Button
+                    onClick={() => handleDeleteUserById(user._id)}
+                    sx={{
+                      backgroundColor: "red",
+                      color: "common.white",
+                      fontSize: "medium",
+                      border: 3,
+                      borderRadius: "16px",
+                      textAlign: "center",
+                      borderColor: "red",
+                      width: "100px",
+                    }}
+                    disabled={user.email === sessionData.email}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Box>
     </Box>
   );
 };

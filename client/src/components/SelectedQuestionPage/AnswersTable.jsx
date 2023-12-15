@@ -41,16 +41,23 @@ const AnswersTable = ({
   const isFilteredView = filteredAnswers && filteredAnswers.length > 0;
 
   useEffect(() => {
-    if (filteredAnswers && filteredAnswers.length > 0) {
-      setAnswers(filteredAnswers);
-      const newCommentsData = {};
-      filteredAnswers.forEach((answer) => {
-        newCommentsData[answer._id] = answer.comments;
-      });
-      setCommentsData(newCommentsData);
+    if (isFilteredView) {
+      // Fetch answers made by the current user for the specific question
+      axios.get(`http://localhost:8000/posts/answers/${questionId}/current-user-answers-comments`)
+        .then((response) => {
+          setAnswers(response.data);
+          const newCommentsData = {};
+          response.data.forEach((answer) => {
+            newCommentsData[answer._id] = answer.comments;
+          });
+          setCommentsData(newCommentsData);
+        })
+        .catch((error) => {
+          console.error("Error fetching filtered answers:", error);
+        });
     } else {
-      axios
-        .get(`http://localhost:8000/posts/answers/${questionId}`)
+      // Existing logic to fetch all answers for the question
+      axios.get(`http://localhost:8000/posts/answers/${questionId}`)
         .then((response) => {
           setAnswers(response.data);
           fetchCommentsForAnswers(response.data);
@@ -59,8 +66,8 @@ const AnswersTable = ({
           console.error("Error fetching answers:", error);
         });
     }
-  }, [questionId, filteredAnswers]);
-
+  }, [questionId, filteredAnswers, isFilteredView]);
+  
   const fetchCommentsForAnswers = async (answers) => {
     for (const answer of answers) {
       try {
@@ -252,7 +259,7 @@ const AnswersTable = ({
         editMode={true}
         existingAnswer={existingAnswer}
         onAnswerUpdated={() => setEditingAnswerId(null)}
-        onEditComplete={handleAnswerEditComplete} 
+        onEditComplete={handleAnswerEditComplete}
       />
     );
   }

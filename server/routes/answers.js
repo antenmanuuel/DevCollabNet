@@ -6,8 +6,7 @@ const Answers = require("../models/answers");
 const Users = require("../models/users");
 const Comments = require("../models/comments");
 
-const auth = require('../middleware/auth');
-
+const auth = require("../middleware/auth");
 
 // Error handling middleware
 const handleError = (err, res) => {
@@ -32,8 +31,46 @@ router.get("/:qid", async (req, res) => {
   }
 });
 
-
 router.use(auth);
+
+// Route to fetch all answers and comments associated with a specific question ID made by the current user
+router.get("/:qid/current-user-answers-comments", async (req, res) => {
+  try {
+    // Ensure there is a logged-in user
+    if (!req.session || !req.session.user) {
+      return res.status(401).send("Unauthorized: No user logged in.");
+    }
+
+    const questionId = req.params.qid;
+    const userId = req.session.user.userId; // Accessing user ID from session
+
+    const question = await Questions.findById(questionId).exec();
+    if (!question) {
+      return res.status(404).send("Question not found.");
+    }
+
+    const answers = await Answers.find({ 
+      _id: { $in: question.answers },
+      ans_by: userId // Filter answers by the logged-in user
+    })
+    .populate({
+      path: 'comments',
+      match: { com_by: userId }, // Filter comments by the logged-in user
+      populate: { path: 'com_by', select: 'username' }
+    })
+    .populate("ans_by", "username")
+    .sort({ ans_date_time: -1 })
+    .exec();
+
+    res.send(answers);
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+
+
+
 router.post("/answerQuestion", async (req, res) => {
   const { text, ansBy, qid } = req.body;
 
@@ -71,7 +108,6 @@ router.post("/answerQuestion", async (req, res) => {
     .send({ message: "Answer posted successfully", answerId: newAnswer._id });
 });
 
-// Route to upvote an answer
 router.patch("/upvote/:answerId", async (req, res) => {
   try {
     const { username } = req.body;
@@ -84,20 +120,27 @@ router.patch("/upvote/:answerId", async (req, res) => {
       return res.status(404).send("Answer or User not found.");
     }
 
-    const hasVoted = answer.voters.some(
+    const voter = answer.voters.find(
       (voter) => voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
     );
 
-    if (hasVoted) {
-      return res.status(400).send("User has already voted.");
+    if (voter) {
+      // Change from downvote to upvote
+      if (voter.voteIncrement === -1) {
+        voter.voteIncrement = 1;
+        answer.votes += 1; // Adjust vote count by 2
+        user.reputation += 15; // Gain 15 reputation (loss of 10 from downvote and gain of 5 from upvote)
+      } else {
+        return res.status(400).send("User has already upvoted.");
+      }
+    } else {
+      // First-time voting
+      answer.votes += 1;
+      answer.voters.push({ userWhoVoted: user._id, voteIncrement: 1 });
+      user.reputation += 5;
     }
 
-    answer.votes += 1;
-    answer.voters.push({ userWhoVoted: user._id, voteIncrement: 1 });
     await answer.save();
-
-    // Increment the user's reputation by 5
-    user.reputation += 5;
     await user.save();
 
     res
@@ -121,19 +164,27 @@ router.patch("/downvote/:answerId", async (req, res) => {
       return res.status(404).send("Answer or User not found.");
     }
 
-    const hasVoted = answer.voters.some(
+    const voter = answer.voters.find(
       (voter) => voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
     );
 
-    if (hasVoted) {
-      return res.status(400).send("User has already voted.");
+    if (voter) {
+      // Change from upvote to downvote
+      if (voter.voteIncrement === 1) {
+        voter.voteIncrement = -1;
+        answer.votes -= 1; // Adjust vote count by 2
+        user.reputation -= 15; 
+      } else {
+        return res.status(400).send("User has already downvoted.");
+      }
+    } else {
+      // First-time voting
+      answer.votes -= 1;
+      answer.voters.push({ userWhoVoted: user._id, voteIncrement: -1 });
+      user.reputation -= 10;
     }
 
-    answer.votes -= 1;
-    answer.voters.push({ userWhoVoted: user._id, voteIncrement: -1 });
     await answer.save();
-
-    user.reputation -= 10;
     await user.save();
 
     res
@@ -145,7 +196,7 @@ router.patch("/downvote/:answerId", async (req, res) => {
 });
 
 // route to edit an answer
-router.patch('/editAnswer/:answerId', async (req, res) => {
+router.patch("/editAnswer/:answerId", async (req, res) => {
   try {
     const { answerId } = req.params;
     const { newText } = req.body;
@@ -157,49 +208,55 @@ router.patch('/editAnswer/:answerId', async (req, res) => {
     );
 
     if (!updatedAnswer) {
-      return res.status(404).json({ message: 'Unable to locate the answer to update.' });
+      return res
+        .status(404)
+        .json({ message: "Unable to locate the answer to update." });
     }
 
-    res.json({ message: 'Answer updated successfully', updatedAnswer });
+    res.json({ message: "Answer updated successfully", updatedAnswer });
   } catch (error) {
-    console.error('Update Error:', error);
-    res.status(500).json({ message: 'Error encountered while updating answer.' });
+    console.error("Update Error:", error);
+    res
+      .status(500)
+      .json({ message: "Error encountered while updating answer." });
   }
 });
 
 //route to delete an answer
-router.delete('/deleteAnswer/:answerId', async (req, res) => {
+router.delete("/deleteAnswer/:answerId", async (req, res) => {
   const { answerId } = req.params;
   const { questionId } = req.body;
 
   try {
-      const answer = await Answers.findById(answerId);
+    const answer = await Answers.findById(answerId);
 
-      if (!answer) {
-          return res.status(404).json({ error: 'No answer found with the provided ID.' });
-      }
+    if (!answer) {
+      return res
+        .status(404)
+        .json({ error: "No answer found with the provided ID." });
+    }
 
-      const commentIds = answer.comments || [];
-      await Comments.deleteMany({ _id: { $in: commentIds } });
+    const commentIds = answer.comments || [];
+    await Comments.deleteMany({ _id: { $in: commentIds } });
 
-      await Answers.findByIdAndDelete(answerId);
+    await Answers.findByIdAndDelete(answerId);
 
-      await Questions.findByIdAndUpdate(
-          questionId,
-          { $pull: { answers: answerId } },
-          { new: true }
-      );
+    await Questions.findByIdAndUpdate(
+      questionId,
+      { $pull: { answers: answerId } },
+      { new: true }
+    );
 
-      res.status(200).json({ message: 'Successfully removed the answer and its related comments.' });
+    res.status(200).json({
+      message: "Successfully removed the answer and its related comments.",
+    });
   } catch (error) {
-      console.error('Deletion Error:', error);
-      res.status(500).json({ error: 'Failed to process deletion request due to a server issue.' });
+    console.error("Deletion Error:", error);
+    res.status(500).json({
+      error: "Failed to process deletion request due to a server issue.",
+    });
   }
 });
-
-
-
-
 
 router.use((err, req, res, next) => {
   handleError(err, res);

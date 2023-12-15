@@ -54,8 +54,8 @@ export default class Helper {
     const tags = parsedTerms.tags.map((tag) => tag.slice(1, -1).toLowerCase());
 
     return questions.filter((question) => {
-      const title = question.title.toLowerCase();
-      const text = question.text.toLowerCase();
+      const title = question.title;
+      const text = question.text;
       const tagNames = question.tags.map((tagId) => tagsMap[tagId] || "");
       const matchesSearchWords = parsedTerms.nonTags.some(
         (word) => title.includes(word) || text.includes(word)
