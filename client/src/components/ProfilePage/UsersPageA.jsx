@@ -9,18 +9,17 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-
+import SelectedQuestionPage from "../SelectedQuestionPage/SelectedQuestionPage";
 const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
-
   const [sessionData, setSessionData] = useState({
     loggedIn: false,
     username: "",
     email: "",
     created_at: "",
-    reputation: 0,
   });
 
   const [userQuestions, setUserQuestions] = useState([]);
+  const [userReputation, setUserReputation] = useState(null);
 
   useEffect(() => {
     const fetchSessionData = async () => {
@@ -44,21 +43,60 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
   }, []);
 
   useEffect(() => {
-    const fetchUserQuestions = async () => {
+    if (sessionData.username) {
+      axios
+        .get(
+          `http://localhost:8000/users/userReputation/${sessionData.username}`
+        )
+        .then((response) => {
+          setUserReputation(response.data.reputation);
+        })
+        .catch((error) => {
+          console.error("Error fetching user reputation:", error);
+        });
+    }
+  }, [sessionData.username]);
+
+  useEffect(() => {
+    const fetchUserAnsweredQuestions = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/posts/questions/byUsername/${sessionData.username}`
+          `http://localhost:8000/posts/questions/questions-answered-by-current-user`
         );
         setUserQuestions(response.data);
       } catch (error) {
-        console.error("Error fetching user's questions:", error);
+        console.error("Error fetching questions answered by the user:", error);
       }
     };
 
-    if (sessionData.username) {
-      fetchUserQuestions();
+    if (sessionData.loggedIn) {
+      fetchUserAnsweredQuestions();
     }
-  }, [sessionData.username]);
+  }, [sessionData.loggedIn]);
+
+  const [selectedQuestionId, setSelectedQuestionId] = useState(null);
+  const [answersData, setAnswersData] = useState([]);
+
+  const handleQuestionClick = async (questionId) => {
+    setSelectedQuestionId(questionId);
+
+    try {
+      // Updated to use the new route for the currently logged-in user
+      const response = await axios.get(
+        `http://localhost:8000/posts/questions/answers/byQuestion/${questionId}/currentUser`
+      );
+      console.log(
+        "Fetched answers and comments by current user:",
+        response.data
+      );
+      setAnswersData(response.data);
+    } catch (error) {
+      console.error(
+        "Error fetching answers and comments by current user:",
+        error
+      );
+    }
+  };
 
   const formatDate = (postTime) => {
     const now = new Date();
@@ -83,16 +121,19 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
     ? formatDate(new Date(sessionData.created_at))
     : "Loading...";
 
-  const handleDeleteQuestion = async (questionId) => {
-    try {
-      await axios.delete(`http://localhost:8000/posts/questions/${questionId}`);
-      setUserQuestions(
-        userQuestions.filter((question) => question._id !== questionId)
-      );
-    } catch (error) {
-      console.error("Error deleting question:", error);
-    }
+  const handleBackFromAnswers = () => {
+    setSelectedQuestionId(null);
   };
+  if (selectedQuestionId) {
+    return (
+      <SelectedQuestionPage
+        questionId={selectedQuestionId}
+        sessionData={sessionData}
+        filteredAnswers={answersData}
+        onBack={handleBackFromAnswers}
+      />
+    );
+  }
 
   return (
     <Box
@@ -155,11 +196,11 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
             position: "absolute",
             top: "90px",
             left: "30px",
-            fontSize: "15px",            
+            fontSize: "15px",
           }}
         >
           Reputation Score:{" "}
-          {sessionData.loggedIn ? sessionData.reputation : "Loading..."}
+          {userReputation !== null ? userReputation : "Loading..."}
         </Typography>
         <Typography
           variant="h1"
@@ -169,49 +210,41 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
             left: "550px",
             fontSize: "18px",
             fontWeight: "bolder",
-            
           }}
         >
-          All Questions with {current} created by {sessionData.username}
+          All Questions answered by {sessionData.username}
         </Typography>
       </Box>
-      <Table sx={{ width: "100%" }}>
-        <TableBody>
-          {userQuestions.map((question) => (
-            <TableRow key={question._id} sx={{borderBottom:"3px", borderStyle:"dotted"}}>
-              <TableCell sx={{ width: "65%" }}>
-                <Typography
-                  sx={{ cursor: "pointer", color: "black", fontSize: "large" }}
-                >
-                  {question.title}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ width: "17.5%" }}>
-                <Typography sx={{ color: "gray", fontSize: "medium" }}>
-                  asked {formatDate(question.ask_date_time)}
-                </Typography>
-              </TableCell>
-              <TableCell sx={{ width: "17.5%", paddingLeft: "70px" }}>
-                <Button
-                  onClick={() => handleDeleteQuestion(question._id)}
-                  sx={{
-                    color: "common.white",
-                    fontSize: "medium",
-                    backgroundColor: "red",
-                    border: 3,
-                    borderRadius: "16px",
-                    textAlign: "center",
-                    borderColor: "red",
-                    width: "100px",
-                  }}
-                >
-                  ""
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <Box mt={4} sx={{ maxHeight: "550px", overflowY: "auto" }}>
+        <Table sx={{ width: "100%" }}>
+          <TableBody>
+            {userQuestions.map((question) => (
+              <React.Fragment key={question._id}>
+                <TableRow sx={{ borderBottom: "3px dotted" }}>
+                  <TableCell sx={{ width: "65%" }}>
+                    <Typography
+                      sx={{
+                        cursor: "pointer",
+                        color: "blue",
+                        fontSize: "large",
+                      }}
+                      onClick={() => handleQuestionClick(question._id)}
+                    >
+                      {question.title}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "17.5%" }}>
+                    <Typography sx={{ color: "gray", fontSize: "medium" }}>
+                    {question.asked_by.username} asked {formatDate(question.ask_date_time)}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              </React.Fragment>
+            ))}
+          </TableBody>
+        </Table>
+      </Box>
+      {/* )} */}
       <Box
         sx={{
           width: "100%",
@@ -232,17 +265,24 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
           sx={{ marginTop: "5px", marginRight: "5px", left: "350px" }}
           onClick={goTags}
         >
-         All Tags Made by {sessionData.loggedIn ? sessionData.username : "Loading..."}
+          All Tags Made by{" "}
+          {sessionData.loggedIn ? sessionData.username : "Loading..."}
         </Button>
-        <Button variant="contained" sx={{ marginTop: "5px", left: "350px" }}
-        onClick={goAnswers}
+        <Button
+          variant="contained"
+          sx={{ marginTop: "5px", left: "350px" }}
+          onClick={goAnswers}
         >
-          Questions with Answers By {sessionData.loggedIn ? sessionData.username : "Loading..."}
+          Questions answered By{" "}
+          {sessionData.loggedIn ? sessionData.username : "Loading..."}
         </Button>
-        <Button variant="contained" sx={{ marginTop: "5px", left: "355px" }}
-        onClick={goQuestions}
+        <Button
+          variant="contained"
+          sx={{ marginTop: "5px", left: "355px" }}
+          onClick={goQuestions}
         >
-          Questions By {sessionData.loggedIn ? sessionData.username : "Loading..."}
+          Questions By{" "}
+          {sessionData.loggedIn ? sessionData.username : "Loading..."}
         </Button>
       </Box>
     </Box>

@@ -113,7 +113,7 @@ const QuestionsForm = (props) => {
 
     const error = hyperlinkError ? hyperlinkError : textError;
 
-    const tags = formData.tags.trim().toLowerCase().split(/\s+/);
+    const tags = formData.tags.trim().split(/\s+/);
     if (formData.tags.trim() === "") {
       tagsError = "Tags cannot be empty.";
     }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Box, Typography, Button } from "@mui/material";
 
-const QuestionDetailTop = ({ questionId, onAskQuestionPress, sessionData }) => {
+const QuestionDetailTop = ({ questionId, onAskQuestionPress, sessionData, isFilteredView }) => {
   const [question, setQuestion] = useState(null);
 
   useEffect(() => {
@@ -51,7 +51,7 @@ const QuestionDetailTop = ({ questionId, onAskQuestionPress, sessionData }) => {
       >
         {question && question.title}
       </Typography>
-      {sessionData.loggedIn && (
+      {sessionData.loggedIn && !isFilteredView && (
         <Button
           variant="contained"
           color="primary"

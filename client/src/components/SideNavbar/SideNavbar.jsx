@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Drawer, List, ListItem, ListItemText, Box } from "@mui/material";
 
-function SideNavbar({ setQuestionsPage, setTagsPage, setProfilePage }) {
+function SideNavbar({ setQuestionsPage, setTagsPage, setProfilePage, setAdminPage, isAdmin }) {
   const [activeLink, setActiveLink] = useState("questions");
 
   const handleQuestionsLinkClick = () => {
@@ -22,6 +22,15 @@ function SideNavbar({ setQuestionsPage, setTagsPage, setProfilePage }) {
     setProfilePage(false);
     setActiveLink("users");
   };
+
+  const handleAdminLink = () => {
+    setQuestionsPage(true);
+    setTagsPage(true);
+    setProfilePage(true);
+    setAdminPage(false);
+    setActiveLink("admins");
+
+  }
 
 
   const getListItemStyle = (buttonName) => ({
@@ -53,12 +62,21 @@ function SideNavbar({ setQuestionsPage, setTagsPage, setProfilePage }) {
     >
       <Box sx={{ width: 275 }}>
         <List>
+          {isAdmin  && (
+            <ListItem
+            button
+            sx={getListItemStyle("admin")}
+            onClick={handleAdminLink}
+          >
+            <ListItemText primary="Admin" />
+          </ListItem>
+          )}
         <ListItem
             button
             sx={getListItemStyle("users")}
             onClick={handleProfileLinkClick}
           >
-            <ListItemText primary="Users" />
+            <ListItemText primary="User" />
           </ListItem>
 
           <ListItem
