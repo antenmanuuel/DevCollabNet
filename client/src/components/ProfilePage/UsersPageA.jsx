@@ -9,8 +9,7 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import AnswersTable from "../SelectedQuestionPage/AnswersTable";
-
+import SelectedQuestionPage from "../SelectedQuestionPage/SelectedQuestionPage";
 const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
   const [sessionData, setSessionData] = useState({
     loggedIn: false,
@@ -21,7 +20,6 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
 
   const [userQuestions, setUserQuestions] = useState([]);
   const [userReputation, setUserReputation] = useState(null);
-
 
   useEffect(() => {
     const fetchSessionData = async () => {
@@ -46,7 +44,10 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
 
   useEffect(() => {
     if (sessionData.username) {
-      axios.get(`http://localhost:8000/users/userReputation/${sessionData.username}`)
+      axios
+        .get(
+          `http://localhost:8000/users/userReputation/${sessionData.username}`
+        )
         .then((response) => {
           setUserReputation(response.data.reputation);
         })
@@ -59,9 +60,8 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
   useEffect(() => {
     const fetchUserAnsweredQuestions = async () => {
       try {
-       
         const response = await axios.get(
-          `http://localhost:8000/posts/questions/questions-answered-by/${sessionData.username}`
+          `http://localhost:8000/posts/questions/questions-answered-by-current-user`
         );
         setUserQuestions(response.data);
       } catch (error) {
@@ -69,10 +69,11 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
       }
     };
 
-    if (sessionData.username) {
+    if (sessionData.loggedIn) {
       fetchUserAnsweredQuestions();
     }
-  }, [sessionData.username]); 
+  }, [sessionData.loggedIn]);
+
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [answersData, setAnswersData] = useState([]);
 
@@ -80,13 +81,20 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
     setSelectedQuestionId(questionId);
 
     try {
+      // Updated to use the new route for the currently logged-in user
       const response = await axios.get(
-        `http://localhost:8000/posts/questions/answers/byQuestion/${questionId}/user/${sessionData.username}`
+        `http://localhost:8000/posts/questions/answers/byQuestion/${questionId}/currentUser`
       );
-      console.log("Fetched answers and comments by user:", response.data);
+      console.log(
+        "Fetched answers and comments by current user:",
+        response.data
+      );
       setAnswersData(response.data);
     } catch (error) {
-      console.error("Error fetching answers and comments by user:", error);
+      console.error(
+        "Error fetching answers and comments by current user:",
+        error
+      );
     }
   };
 
@@ -118,7 +126,7 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
   };
   if (selectedQuestionId) {
     return (
-      <AnswersTable
+      <SelectedQuestionPage
         questionId={selectedQuestionId}
         sessionData={sessionData}
         filteredAnswers={answersData}
@@ -126,6 +134,7 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
       />
     );
   }
+
   return (
     <Box
       sx={{
@@ -203,10 +212,10 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
             fontWeight: "bolder",
           }}
         >
-          All Questions with {current} created by {sessionData.username}
+          All Questions answered by {sessionData.username}
         </Typography>
       </Box>
-      <Box mt={4}>
+      <Box mt={4} sx={{ maxHeight: "550px", overflowY: "auto" }}>
         <Table sx={{ width: "100%" }}>
           <TableBody>
             {userQuestions.map((question) => (
@@ -226,7 +235,7 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
                   </TableCell>
                   <TableCell sx={{ width: "17.5%" }}>
                     <Typography sx={{ color: "gray", fontSize: "medium" }}>
-                      asked {formatDate(question.ask_date_time)}
+                    {question.asked_by.username} asked {formatDate(question.ask_date_time)}
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -264,7 +273,7 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
           sx={{ marginTop: "5px", left: "350px" }}
           onClick={goAnswers}
         >
-          Questions with Answers By{" "}
+          Questions answered By{" "}
           {sessionData.loggedIn ? sessionData.username : "Loading..."}
         </Button>
         <Button
