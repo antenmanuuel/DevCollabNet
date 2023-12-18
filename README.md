@@ -9,8 +9,8 @@
 Step 1: Clone the repository
 
 ```bash
-$ git clone git@github.com:sbu-ckane-f23-cse316-projectorg/projectfakeso-team_anten_christian.git
-$ cd projectfakeso-team_anten_christian
+$ git clone git@github.com:antenmanuuel/FakeStackOverFlowClone.git
+$ cd FakeStackOverFlowClone
 ```
 
 
