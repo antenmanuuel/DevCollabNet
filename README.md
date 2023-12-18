@@ -83,31 +83,4 @@ Password: pwd123
 Reputation: 25
 ```
 
-## Team Member 1 Contribution - Anten Manuuel
- * Moved code from hw3 to final project
- * Implemented voting and commenting for Questions on frontend
- * Updated forms for Question and Answer Form to be from user who is logged in
- * implemented Guest User View
- * created and implemented init script
- * implemented auth
- * Implemented adminPage for both backend and frontend
- * Implemented Tag Edit and Delete for UserPage for Tags for frontend and and corresponding backend
- * implemnted Question Edit and Delete for UserPage for Question frontend and corresponding backend
- * implement voting on comments on backend
- * fixed bugs
- * added client side and server side session handling
-
-## Team Member 2 Contribution - Christian Montano
-
- * Implemented Welcome page, Signup Page, and LoginPage
- * Implemented Original User Schema
- * Implemented Components for UserPage and UserP
- * Implemented Format for UserPage Answers,Questions, and Tags
- * Implemented commenting and voting to AnsTable via Frontend
- * Implemented Updating Comments via Backend
- * Implemented UserPage Answers Edit/Delete
- * UserDelete bug Fixed
- * UML designs 
- * Routes associated with what is described above
-
 
