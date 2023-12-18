@@ -22,6 +22,8 @@ const QuestionsForm = (props) => {
   });
 
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [userReputation, setUserReputation] = useState(null);
+
 
   useEffect(() => {
     const fetchTagNames = async (tagIds) => {
@@ -50,6 +52,19 @@ const QuestionsForm = (props) => {
       });
     }
   }, [props.existingQuestion, isEditMode]);
+
+  useEffect(() => {
+    const fetchUserReputation = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8000/users/userReputation/${props.sessionData.username}`);
+        setUserReputation(response.data.reputation);
+      } catch (error) {
+        console.error("Error fetching user reputation:", error);
+      }
+    };
+
+    fetchUserReputation();
+  }, [props.sessionData.username]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -117,7 +132,7 @@ const QuestionsForm = (props) => {
     if (formData.tags.trim() === "") {
       tagsError = "Tags cannot be empty.";
     }
-    else if (props.sessionData.reputation < 50) {
+    else if (userReputation < 50) {
       tagsError =
         "Insufficient reputation to add tags. Minimum reputation required is 50.";
     }
@@ -163,6 +178,12 @@ const QuestionsForm = (props) => {
         setIsFormSubmitted(true);
       } catch (error) {
         console.error("Error submitting the question:", error);
+        if (error.response && error.response.data) {
+          setErrors(prevState => ({
+            ...prevState,
+            tagsError: error.response.data
+          }));
+        }
       }
     }
   };

@@ -35,6 +35,8 @@ const AnswersTable = ({
   const [currentCommentPage, setCurrentCommentPage] = useState({});
   const [commentError, setCommentError] = useState({});
   const [editingAnswerId, setEditingAnswerId] = useState(null);
+  const [userReputation, setUserReputation] = useState(null);
+
 
   const helper = new Helper();
 
@@ -91,10 +93,23 @@ const AnswersTable = ({
     }
   };
 
+  useEffect(() => {
+    const fetchUserReputation = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8000/users/userReputation/${sessionData.username}`);
+        setUserReputation(response.data.reputation);
+      } catch (error) {
+        console.error("Error fetching user reputation:", error);
+      }
+    };
+
+    fetchUserReputation();
+  }, [sessionData.username]);
+
   const postCommentOnAnswer = async (answerId) => {
     const commentText = newCommentText[answerId] || "";
 
-    if (sessionData.reputation < 50) {
+    if (userReputation < 50) {
       setCommentError({
         ...commentError,
         [answerId]: "You need a reputation of at least 50 to post comments.",
@@ -527,7 +542,7 @@ const AnswersTable = ({
               padding: "10px",
               textTransform: "none",
               marginTop: "20px",
-              marginRight: "1425px",
+              marginRight: "1470px",
             }}
           >
             Answer Question

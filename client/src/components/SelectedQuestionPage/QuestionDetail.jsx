@@ -5,9 +5,23 @@ import { Box, Typography, Chip } from "@mui/material";
 
 const QuestionDetail = ({ questionId, sessionData }) => {
   const [question, setQuestion] = useState(null);
+  const [tagMap, setTagMap] = useState({});
   const helper = new Helper();
 
   useEffect(() => {
+    // Fetch tags and create a tag map
+    axios
+      .get("http://localhost:8000/posts/tags")
+      .then((tagResponse) => {
+        const newTagMap = {};
+        tagResponse.data.forEach((tag) => {
+          newTagMap[tag._id] = tag.name;
+        });
+        setTagMap(newTagMap);
+      })
+      .catch((error) => {
+        console.error("Error fetching tags:", error);
+      });
     axios
       .get(`http://localhost:8000/posts/questions/${questionId}`)
       .then((response) => {
@@ -72,6 +86,30 @@ const QuestionDetail = ({ questionId, sessionData }) => {
             {question && helper.formatDate(new Date(question.ask_date_time))}
           </Typography>
         </Box>
+      </Box>
+      <Box
+        sx={{
+          paddingLeft: 45,
+          marginTop: 2,
+          display: "flex",
+          flexWrap: "wrap",
+        }}
+      >
+        {question &&
+          question.tags.map((tagId, index) => (
+            <Chip
+              key={index}
+              label={tagMap[tagId] || "Unknown Tag"}
+              sx={{
+                marginRight: "10px",
+                marginBottom: "10px",
+                backgroundColor: "grey",
+                color: "white",
+                borderRadius: "4px",
+                fontSize: "18px",
+              }}
+            />
+          ))}
       </Box>
     </Box>
   );

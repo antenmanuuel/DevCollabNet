@@ -81,7 +81,6 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
     setSelectedQuestionId(questionId);
 
     try {
-      // Updated to use the new route for the currently logged-in user
       const response = await axios.get(
         `http://localhost:8000/posts/questions/answers/byQuestion/${questionId}/currentUser`
       );
@@ -188,7 +187,7 @@ const UsersPageA = ({ goTags, goQuestions, goAnswers, current }) => {
             fontSize: "18px",
           }}
         >
-          Member for: {memberSince}
+          Member since: {memberSince}
         </Typography>
         <Typography
           variant="h2"
