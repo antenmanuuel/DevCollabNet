@@ -1,6 +1,3 @@
-
-Add design docs in *images/*
-
 ## Instructions to setup and run project
 
 - Pre-requisites: Node.js, npm, MongoDB installed
