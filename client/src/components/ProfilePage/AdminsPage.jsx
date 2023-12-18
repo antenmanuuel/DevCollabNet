@@ -8,6 +8,11 @@ import {
   Box,
   Typography,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 
 const AdminsPage = () => {
@@ -20,11 +25,12 @@ const AdminsPage = () => {
   });
 
   const [users, setUsers] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   const [userReputation, setUserReputation] = useState(null);
 
   useEffect(() => {
-    // Fetch user reputation when username is available
     if (sessionData.username) {
       axios
         .get(
@@ -68,13 +74,34 @@ const AdminsPage = () => {
     fetchData();
   }, []);
 
-  const handleDeleteUserById = async (userId) => {
+  const handleDeleteUserById = (userId) => {
+    setOpenDialog(true);
+    setSelectedUserId(userId);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      await axios.delete(`http://localhost:8000/users/deleteUser/${userId}`);
-      setUsers(users.filter((user) => user._id !== userId));
+      // Find the username corresponding to the selectedUserId
+      const selectedUser = users.find((user) => user._id === selectedUserId);
+      if (!selectedUser) {
+        throw new Error("User not found");
+      }
+      const selectedUsername = selectedUser.username;
+
+      await axios.delete(
+        `http://localhost:8000/users/deleteUser/${selectedUsername}`
+      );
+
+      setUsers(users.filter((user) => user._id !== selectedUserId));
+      setOpenDialog(false);
     } catch (error) {
       console.error("Error deleting user:", error);
+      setOpenDialog(false);
     }
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
   };
 
   const formatDate = (postTime) => {
@@ -100,6 +127,8 @@ const AdminsPage = () => {
     ? formatDate(new Date(sessionData.created_at))
     : "Loading...";
 
+  const isAdminOnlyUser = users.length === 1 && users[0].username === "admin";
+
   return (
     <Box
       sx={{
@@ -114,7 +143,7 @@ const AdminsPage = () => {
         borderLeft: 0,
         borderRight: 0,
         borderTop: 0,
-        borderbottom: 0,
+        borderBottom: 0,
       }}
     >
       <Box
@@ -143,7 +172,6 @@ const AdminsPage = () => {
         >
           User Profile: {sessionData.username}
         </Typography>
-
         <Typography
           variant="h6"
           sx={{
@@ -153,9 +181,8 @@ const AdminsPage = () => {
             fontSize: "18px",
           }}
         >
-          Member for: {memberSince}
+          Member since: {memberSince}
         </Typography>
-
         <Typography
           variant="h2"
           sx={{
@@ -168,7 +195,6 @@ const AdminsPage = () => {
           Reputation Score:{" "}
           {userReputation !== null ? userReputation : "Loading..."}
         </Typography>
-
         <Typography
           variant="h1"
           sx={{
@@ -182,45 +208,73 @@ const AdminsPage = () => {
           All Current Users
         </Typography>
       </Box>
+
       <Box sx={{ maxHeight: "420px", overflowY: "auto" }}>
-        <Table sx={{ width: "100%" }}>
-          <TableBody>
-            {users.map((user) => (
-              <TableRow key={user._id} sx={{ borderBottom: "3px dotted" }}>
-                <TableCell sx={{ width: "65%" }}>
-                  <Typography
-                    sx={{
-                      cursor: "pointer",
-                      color: "black",
-                      fontSize: "large",
-                    }}
-                  >
-                    {user.username}
-                  </Typography>
-                </TableCell>
-                <TableCell sx={{ width: "17.5%", paddingLeft: "70px" }}>
-                  <Button
-                    onClick={() => handleDeleteUserById(user._id)}
-                    sx={{
-                      backgroundColor: "red",
-                      color: "common.white",
-                      fontSize: "medium",
-                      border: 3,
-                      borderRadius: "16px",
-                      textAlign: "center",
-                      borderColor: "red",
-                      width: "100px",
-                    }}
-                    disabled={user.email === sessionData.email}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {isAdminOnlyUser ? (
+          <Typography variant="h6" align="left" sx={{color:"red", marginTop: "10px", marginLeft:"10px"}}>
+            There are no users except admin.
+          </Typography>
+        ) : (
+          <Table sx={{ width: "100%" }}>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user._id} sx={{ borderBottom: "3px dotted" }}>
+                  <TableCell sx={{ width: "65%" }}>
+                    <Typography
+                      sx={{
+                        cursor: "pointer",
+                        color: "black",
+                        fontSize: "large",
+                      }}
+                    >
+                      {user.username}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ width: "17.5%", paddingLeft: "70px" }}>
+                    <Button
+                      onClick={() => handleDeleteUserById(user._id)}
+                      sx={{
+                        backgroundColor: "red",
+                        color: "common.white",
+                        fontSize: "medium",
+                        border: 3,
+                        borderRadius: "16px",
+                        textAlign: "center",
+                        borderColor: "red",
+                        width: "100px",
+                      }}
+                      disabled={user.email === sessionData.email}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </Box>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Confirm Deletion"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this user?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

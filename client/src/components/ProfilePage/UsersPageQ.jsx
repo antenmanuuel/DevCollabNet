@@ -25,7 +25,6 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers, current }) => {
   const [userReputation, setUserReputation] = useState(null);
 
   useEffect(() => {
-    // Fetch user reputation when username is available
     if (sessionData.username) {
       axios
         .get(
@@ -184,7 +183,7 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers, current }) => {
             fontSize: "18px",
           }}
         >
-          Member for: {memberSince}
+          Member since: {memberSince}
         </Typography>
         <Typography
           variant="h2"

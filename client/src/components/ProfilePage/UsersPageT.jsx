@@ -88,7 +88,6 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
     const fetchUserTags = async () => {
       if (sessionData.loggedIn && sessionData.username) {
         try {
-          // Updated Axios call to match server route
           const response = await axios.get(
             `http://localhost:8000/posts/tags/createdByUser/${sessionData.username}`
           );
@@ -251,7 +250,7 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
             fontSize: "18px",
           }}
         >
-          Member for: {memberSince}
+          Member since: {memberSince}
         </Typography>
         <Typography
           variant="h2"

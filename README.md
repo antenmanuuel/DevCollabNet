@@ -62,10 +62,6 @@ $ npm start
 Login Credentials
 
 ```
-Email: admin@example.com
-Password: admin123
-Reputation: 200
-
 Email: user1@example.com
 Password: pwd123
 Reputation: 30

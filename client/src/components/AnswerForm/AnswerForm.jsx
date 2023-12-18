@@ -92,7 +92,7 @@ const AnswerForm = (props) => {
         await axios.post("http://localhost:8000/posts/answers/answerQuestion", {
           text: formData.answerText,
           ansBy: props.sessionData.username,
-          qid: questionId,
+          qid: props.questionId,
         });
         props.onAnswerAdded();
       } catch (error) {

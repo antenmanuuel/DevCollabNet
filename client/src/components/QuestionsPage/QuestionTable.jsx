@@ -30,6 +30,8 @@ const QuestionTable = ({
   const [commentError, setCommentError] = useState({});
   const [currentPage, setCurrentPage] = useState(0);
   const [currentCommentPage, setCurrentCommentPage] = useState({});
+  const [userReputation, setUserReputation] = useState(null);
+
 
   const questionsPerPage = 5;
   const commentsPerPage = 3;
@@ -122,6 +124,20 @@ const QuestionTable = ({
     }
   }, [questionsData]);
 
+
+  useEffect(() => {
+    const fetchUserReputation = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8000/users/userReputation/${sessionData.username}`);
+        setUserReputation(response.data.reputation);
+      } catch (error) {
+        console.error("Error fetching user reputation:", error);
+      }
+    };
+
+    fetchUserReputation();
+  }, [sessionData.username]);
+
   const handleCommentChange = (e, questionId) => {
     setNewCommentText({
       ...newCommentText,
@@ -141,7 +157,7 @@ const QuestionTable = ({
   const postComment = async (questionId) => {
     const commentText = newCommentText[questionId] || "";
 
-    if (sessionData.reputation < 50) {
+    if (userReputation < 50) {
       setCommentError({
         ...commentError,
         [questionId]: "You need a reputation of at least 50 to post comments.",
