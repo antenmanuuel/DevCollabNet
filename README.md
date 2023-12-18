@@ -9,8 +9,7 @@ Add design docs in *images/*
 
 - Make sure port 3000 and 8000 is not in use
 
-Step 1://///////////////
-Clone the repository
+Step 1: Clone the repository
 
 ```bash
 $ git clone git@github.com:sbu-ckane-f23-cse316-projectorg/projectfakeso-team_anten_christian.git
@@ -18,8 +17,7 @@ $ cd projectfakeso-team_anten_christian
 ```
 
 
-Step 2://////////////////////////////////
-Install dependencies in Client and Server
+Step 2: Install dependencies in Client and Server
 
 ```bash
 $ cd client
@@ -29,8 +27,7 @@ $ npm install
 ```
 
 
-Step 3:////////////////////////
-Initialize the database
+Step 3: Initialize the database
 
 ```bash
 # Make sure you are in the server directory
@@ -38,8 +35,7 @@ $ node init.js <email_of_admin> <password_of_admin>
 
 # Example: node init.js admin@example.com password123
 ```
-Step 4: ///////////////////////
-Run the server
+Step 4: Run the server
 
 ```bash
 # Make sure you are in the server directory if not # cd server
@@ -49,8 +45,7 @@ $ npm start <secret_key>
 ```
 
 
-Step 5: ///////////////////////////////
-On a separate terminal, run the client
+Step 5: On a separate terminal, run the client
 
 ```bash
 # Make sure you are in the client directory if not # cd client
