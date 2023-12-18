@@ -58,7 +58,7 @@ Email: user1@example.com
 Password: pwd123
 Reputation: 30
 
-Email: user2example.com
+Email: user2@example.com
 Password: pwd123
 Reputation: 55
 
