@@ -109,52 +109,90 @@ router.get("/userReputation/:username", async (req, res) => {
   }
 });
 
-router.delete("/deleteUser/:id", async (req, res) => {
-  if (!req.session.user.isAdmin) {
-    console.log("Access denied: User is not an admin.");
-    return res.status(403).send("You do not have permission to delete users.");
-  }
-
+router.delete('/deleteUser/:username', async (req, res) => {
   try {
-    const userId = req.params.id;
-    console.log(`Attempting to delete user with ID: ${userId}`);
-
-    // Delete comments made by the user
-    await Comment.deleteMany({ com_by: userId });
-
-    // Delete answers made by the user and related comments
-    const userAnswers = await Answer.find({ ans_by: userId }).exec();
-    for (const answer of userAnswers) {
-      await Comment.deleteMany({ _id: { $in: answer.comments } });
-    }
-    await Answer.deleteMany({ ans_by: userId });
-
-    // Delete questions asked by the user, and related answers and comments
-    const userQuestions = await Question.find({ asked_by: userId }).exec();
-    for (const question of userQuestions) {
-      await Answer.deleteMany({ _id: { $in: question.answers } });
-      await Comment.deleteMany({ _id: { $in: question.comments } });
-    }
-    await Question.deleteMany({ asked_by: userId });
-
-    // Check and delete tags if necessary
-    const tags = await Tag.find().exec();
-    for (const tag of tags) {
-      const questionsUsingTag = await Question.find({ tags: tag._id }).exec();
-      if (questionsUsingTag.length === 0) {
-        await Tag.deleteOne({ _id: tag._id }).exec();
+      const username = req.params.username;
+      const user = await User.findOne({ username: username });
+      if (!user) {
+          return res.status(404).send('User not found.');
       }
-    }
+      const userId = user._id;
 
-    // Finally, delete the user
-    await User.findByIdAndDelete(userId);
-    console.log(`User with ID: ${userId} successfully deleted.`);
+      // Update Answers: Decrement votes and remove user from voters array
+      await Answer.updateMany(
+          { 'voters.userWhoVoted': userId },
+          {
+              $inc: { votes: -1 },
+              $pull: { voters: { userWhoVoted: userId } }
+          }
+      );
 
-    res.send("User successfully deleted.");
-  } catch (err) {
-    console.error("Error occurred in deleteUser route:", err);
-    res.status(500).send("Internal Server Error occurred. Please try again.");
+      // Update Comments: Decrement votes and remove user from voters array
+      await Comment.updateMany(
+          { 'voters.userWhoVoted': userId },
+          {
+              $inc: { votes: -1 },
+              $pull: { voters: { userWhoVoted: userId } }
+          }
+      );
+
+      // Delete all comments by the user
+      const userComments = await Comment.find({ com_by: userId });
+      const userCommentIds = userComments.map(c => c._id);
+      await Comment.deleteMany({ com_by: userId });
+
+      // Remove user's comments from Answers and Questions
+      await Answer.updateMany(
+          {},
+          { $pull: { comments: { $in: userCommentIds } } }
+      );
+      await Question.updateMany(
+          {},
+          { $pull: { comments: { $in: userCommentIds } } }
+      );
+
+      // Find all answers by the user
+      const userAnswers = await Answer.find({ ans_by: userId });
+      const userAnswerIds = userAnswers.map(a => a._id);
+
+      // Delete these answers
+      await Answer.deleteMany({ ans_by: userId });
+
+      // Remove these answers from any questions they're a part of
+      await Question.updateMany(
+          {},
+          { $pull: { answers: { $in: userAnswerIds } } }
+      );
+
+      // Delete comments associated with these answers
+      await Comment.deleteMany({ _id: { $in: userAnswerIds } });
+
+      // Delete questions asked by the user
+      const userQuestions = await Question.find({ asked_by: userId });
+      const userQuestionIds = userQuestions.map(q => q._id);
+      await Question.deleteMany({ asked_by: userId });
+
+      // Delete comments associated with these questions
+      await Comment.deleteMany({ _id: { $in: userQuestionIds } });
+
+      // Update tags (remove tags with no associated questions)
+      const tags = await Tag.find();
+      for (const tag of tags) {
+          const questionCount = await Question.countDocuments({ tags: tag._id });
+          if (questionCount === 0) {
+              await Tag.deleteOne({ _id: tag._id });
+          }
+      }
+
+      // Finally, delete the user
+      await User.deleteOne({ _id: userId });
+
+      res.status(200).send('User and all associated data deleted successfully.');
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Error occurred while deleting the user.');
   }
 });
+
 
 module.exports = router;
