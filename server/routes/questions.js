@@ -1,9 +1,14 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 
 const Questions = require("../models/questions");
 const Tags = require("../models/tags");
 const Answers = require("../models/answers");
+const User = require("../models/users");
+const Comments = require("../models/comments");
+
+const auth = require("../middleware/auth");
 
 // Error handling middleware
 const handleError = (err, res) => {
@@ -11,23 +16,39 @@ const handleError = (err, res) => {
   res.status(500).send("Internal Server Error");
 };
 
-// helper function to create or fetch a tag based on its name
-const createOrFetchTag = async (tagName) => {
-  let tag = await Tags.findOne({ name: tagName }).exec();
-  if (!tag) {
-    tag = new Tags({ name: tagName });
-    await tag.save();
-  }
-  return tag._id;
-};
-
 // Route to fetch all questions
 router.get("/", async (_, res) => {
   try {
-    const questions = await Questions.find().exec();
+    const questions = await Questions.find()
+      .populate("asked_by", "username")
+      .exec();
     res.send(questions);
   } catch (err) {
     handleError(err, res);
+  }
+});
+
+// Route to get questions asked by a specific user
+router.get("/byUsername/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Fetch the user ID based on the provided username
+    const user = await User.findOne({ username: username }).exec();
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Find questions asked by this user
+    const questions = await Questions.find({ asked_by: user._id })
+      .populate("asked_by", "username")
+      .sort({ ask_date_time: -1 })
+      .exec();
+
+    res.json(questions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
   }
 });
 
@@ -46,8 +67,11 @@ router.get("/unanswered/count", async (_, res) => {
 // Route to get the questions by newest filter
 router.get("/newest", async (req, res) => {
   try {
-    const result = await Questions.find().sort({ ask_date_time: -1 }).exec();
-    res.send(result);
+    const questions = await Questions.find()
+      .sort({ ask_date_time: -1 })
+      .populate("asked_by", "username")
+      .exec();
+    res.send(questions);
   } catch (err) {
     handleError(err, res);
   }
@@ -70,6 +94,7 @@ router.get("/active", async (req, res, next) => {
   try {
     const allQuestions = await Questions.find()
       .sort({ ask_date_time: -1 })
+      .populate("asked_by", "username")
       .lean()
       .exec();
     for (let question of allQuestions) {
@@ -84,7 +109,10 @@ router.get("/active", async (req, res, next) => {
     questionsWithAnswers.sort(
       (a, b) => b.latestAnswerDate - a.latestAnswerDate
     );
-    const sortedQuestions = [...questionsWithAnswers,...questionsWithoutAnswers,];
+    const sortedQuestions = [
+      ...questionsWithAnswers,
+      ...questionsWithoutAnswers,
+    ];
     res.send(sortedQuestions);
   } catch (err) {
     handleError(err, res);
@@ -92,12 +120,70 @@ router.get("/active", async (req, res, next) => {
 });
 
 // route to unanswered questions filter
-router.get("/unanswered", async (req, res, next) => {
+router.get("/unanswered", async (req, res) => {
   try {
-    const result = await Questions.find({ answers: { $size: 0 } }).sort({
-      ask_date_time: -1,
-    });
-    res.send(result);
+    const questions = await Questions.find({ answers: { $size: 0 } })
+      .sort({ ask_date_time: -1 })
+      .populate("asked_by", "username")
+      .exec();
+    res.send(questions);
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+// Route to get questions answered by the currently logged-in user
+router.get("/questions-answered-by-current-user", async (req, res) => {
+  try {
+    if (!req.session || !req.session.user) {
+      return res.status(401).send("Unauthorized: No user logged in");
+    }
+
+    const userId = req.session.user.userId; // Or however you store the user's ID in the session
+
+    const answersByUser = await Answers.find({ ans_by: userId }).exec();
+    const answerIds = answersByUser.map((answer) => answer._id);
+    const questions = await Questions.find({
+      answers: { $in: answerIds },
+    })
+      .populate("asked_by", "username")
+      .exec();
+
+    res.json(questions);
+  } catch (error) {
+    handleError(error, res);
+  }
+});
+// Route to get answers and comments by the currently logged-in user for a given question
+router.get("/answers/byQuestion/:questionId/currentUser", async (req, res) => {
+  try {
+    // Check if a user is logged in using the 'loggedIn' property
+    if (!req.session.user || !req.session.user.loggedIn) {
+      return res.status(401).send("Unauthorized: No user logged in");
+    }
+
+    const { questionId } = req.params;
+    const userId = req.session.user.userId;
+
+    // Fetch the question to get its answers
+    const question = await Questions.findById(questionId).exec();
+    if (!question) {
+      return res.status(404).send("Question not found");
+    }
+
+    // Find answers by the current user that are within the question's answers
+    const answersByUser = await Answers.find({
+      _id: { $in: question.answers },
+      ans_by: userId,
+    })
+      .populate({
+        path: "comments",
+        match: { com_by: userId },
+        populate: { path: "com_by", select: "username" },
+      })
+      .exec();
+
+    res.json(answersByUser);
   } catch (err) {
     handleError(err, res);
   }
@@ -106,32 +192,13 @@ router.get("/unanswered", async (req, res, next) => {
 // Route to fetch a question by its ID
 router.get("/:question", async (req, res) => {
   try {
-    const question = await Questions.findById(req.params.question).exec();
+    const question = await Questions.findById(req.params.question)
+      .populate("asked_by", "username")
+      .exec();
     res.send(question);
   } catch (err) {
     handleError(err, res);
   }
-});
-
-// Route to post a new question
-router.post("/askQuestion", async (req, res) => {
-  try {
-    const tagIds = await Promise.all(req.body.tagIds.map(createOrFetchTag));
-    const newQuestion = new Questions({
-      title: req.body.title,
-      text: req.body.text,
-      tags: tagIds,
-      asked_by: req.body.askedBy,
-    });
-    await newQuestion.save();
-    res.send(newQuestion);
-  } catch (error) {
-    handleError(error, res);
-  }
-});
-
-router.use((err, req, res, next) => {
-  handleError(err, res);
 });
 
 // Route to increment the view count for a question
@@ -141,6 +208,330 @@ router.patch("/incrementViews/:question", async (req, res) => {
     question.views += 1;
     await question.save();
     res.send(question);
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+router.use(auth);
+
+// Route to get answers and comments by a specific user for a given question
+router.get(
+  "/answers/byQuestion/:questionId/user/:username",
+  async (req, res) => {
+    try {
+      const { questionId, username } = req.params;
+
+      // Fetch the user ID based on the provided username
+      const user = await User.findOne({ username }).exec();
+      if (!user) {
+        return res.status(404).send("User not found");
+      }
+
+      // Fetch the question to get its answers
+      const question = await Questions.findById(questionId).exec();
+      if (!question) {
+        return res.status(404).send("Question not found");
+      }
+
+      // Find answers by the user that are within the question's answers
+      const answersByUser = await Answers.find({
+        _id: { $in: question.answers },
+        ans_by: user._id,
+      })
+        .populate({
+          path: "comments",
+          match: { com_by: user._id },
+          populate: { path: "com_by", select: "username" },
+        })
+        .exec();
+
+      res.json(answersByUser);
+    } catch (err) {
+      handleError(err, res);
+    }
+  }
+);
+
+// helper function to create or fetch a tag based on its name
+const createOrFetchTag = async (tagName, username) => {
+  let tag = await Tags.findOne({ name: tagName }).exec();
+  if (!tag) {
+    // Find the user based on the username
+    let user = await User.findOne({ username: username }).exec();
+
+    // If no user is found, handle accordingly
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    tag = new Tags({
+      name: tagName,
+      created_by: user._id,
+    });
+
+    await tag.save();
+  }
+  return tag._id;
+};
+
+router.post("/askQuestion", async (req, res) => {
+  const { title, summary, text, tagIds, askedBy } = req.body;
+
+  if (!title || !summary || !text || !Array.isArray(tagIds) || !askedBy) {
+    console.log("Error: Missing required fields");
+    return res.status(400).send("Missing required fields");
+  }
+
+  const user = await User.findOne({ username: askedBy });
+  if (!user) {
+    return res.status(404).send("User not found");
+  }
+
+  // Check if user's reputation is at least 50 to allow posting of tags
+  if (user.reputation < 50) {
+    return res.status(403).send("Insufficient reputation to post tags.");
+  }
+
+  // Process each tagName to create or fetch a tag, along with the username
+  const validTagIds = await Promise.all(
+    tagIds.map((tagName) => createOrFetchTag(tagName, askedBy))
+  );
+
+  const newQuestion = new Questions({
+    title,
+    text,
+    summary,
+    tags: validTagIds,
+    asked_by: user._id,
+  });
+
+  await newQuestion.save();
+
+  res.status(201).send(newQuestion);
+});
+
+router.use((err, req, res, next) => {
+  handleError(err, res);
+});
+
+router.put("/editQuestion/:questionId", async (req, res) => {
+  const { questionId } = req.params;
+  const { title, summary, text, tagIds } = req.body;
+
+  if (!title || !summary || !text || !Array.isArray(tagIds)) {
+    return res.status(400).send("Missing required fields");
+  }
+
+  try {
+    const question = await Questions.findById(questionId).exec();
+    if (!question) {
+      return res.status(404).send("Question not found.");
+    }
+
+    const requestingUser = req.session.user;
+    if (!requestingUser) {
+      return res.status(401).send("User is not logged in.");
+    }
+
+    // Check if the user who asked the question is making the request or if the user is an admin
+    if (
+      !requestingUser.isAdmin &&
+      !question.asked_by.equals(requestingUser.userId)
+    ) {
+      return res.status(403).send("Unauthorized to edit this question.");
+    }
+
+    // Fetch the username and reputation of the requesting user
+    const user = await User.findById(requestingUser.userId);
+    if (!user) {
+      return res.status(404).send("User not found.");
+    }
+    const username = user.username;
+
+    // Prevent users with less than 50 reputation from posting tags
+    if (user.reputation < 50) {
+      return res.status(403).send("Insufficient reputation to post tags.");
+    }
+
+    // Update the question fields
+    question.title = title;
+    question.summary = summary;
+    question.text = text;
+
+    // Handle tags: create new ones if they don't exist
+    const validTagIds = await Promise.all(
+      tagIds.map((tagName) => createOrFetchTag(tagName, username))
+    );
+    question.tags = validTagIds;
+
+    await question.save();
+
+    res
+      .status(200)
+      .send({ message: "Question updated successfully", question });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Route to delete a question by its ID
+router.delete("/:questionId", async (req, res) => {
+  try {
+    const { questionId } = req.params;
+    const requestingUser = req.session.user;
+
+    if (!requestingUser) {
+      return res.status(401).send("User is not logged in.");
+    }
+
+    const question = await Questions.findById(questionId).exec();
+
+    if (!question) {
+      return res.status(404).send("Question not found.");
+    }
+
+    if (
+      !requestingUser.isAdmin &&
+      !question.asked_by.equals(requestingUser.userId)
+    ) {
+      return res.status(403).send("Unauthorized to delete this question.");
+    }
+
+    // Delete all answers related to this question
+    const answerIds = question.answers;
+    await Answers.deleteMany({ _id: { $in: answerIds } });
+
+    // Delete all comments related to the answers of this question
+    await Comments.deleteMany({
+      _id: { $in: answerIds.map((a) => a.comments).flat() },
+    });
+
+    // Delete all comments directly related to this question
+    await Comments.deleteMany({ _id: { $in: question.comments } });
+
+    // Finally, delete the question
+    await Questions.findByIdAndRemove(questionId);
+
+    res.send({
+      message:
+        "Question and all related answers and comments deleted successfully.",
+    });
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+// Route to upvote a question
+router.patch("/upvote/:questionId", async (req, res) => {
+  try {
+    const { username } = req.body;
+    const questionId = req.params.questionId;
+
+    const user = await User.findOne({ username });
+    const question = await Questions.findById(questionId);
+
+    if (!question || !user) {
+      return res.status(404).send("Question or User not found.");
+    }
+
+    const voterIndex = question.voters.findIndex(
+      (voter) => voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
+    );
+
+    if (voterIndex !== -1) {
+      const voter = question.voters[voterIndex];
+      if (voter.voteChanged) {
+        return res.status(400).send("You cannot change your vote again.");
+      }
+
+      if (voter.voteIncrement === -1) {
+        // Switch from downvote to upvote
+        question.votes += 1;
+        user.reputation += 15; // Remove downvote penalty and apply upvote gain
+      } else {
+        // If already upvoted, don't allow to upvote again
+        return res.status(400).send("You have already upvoted this question.");
+      }
+
+      voter.voteIncrement = 1;
+      voter.voteChanged = true; // Indicate that the user has changed their vote
+    } else {
+      // New upvote
+      question.votes += 1;
+      user.reputation += 5;
+      question.voters.push({
+        userWhoVoted: user._id,
+        voteIncrement: 1,
+        voteChanged: false,
+      });
+    }
+
+    await question.save();
+    await user.save();
+
+    res
+      .status(200)
+      .send({ votes: question.votes, userReputation: user.reputation });
+  } catch (err) {
+    handleError(err, res);
+  }
+});
+
+// Route to downvote a question
+router.patch("/downvote/:questionId", async (req, res) => {
+  try {
+    const { username } = req.body;
+    const questionId = req.params.questionId;
+
+    const user = await User.findOne({ username });
+    const question = await Questions.findById(questionId);
+
+    if (!question || !user) {
+      return res.status(404).send("Question or User not found.");
+    }
+
+    const voterIndex = question.voters.findIndex(
+      (voter) => voter.userWhoVoted && voter.userWhoVoted.equals(user._id)
+    );
+
+    if (voterIndex !== -1) {
+      const voter = question.voters[voterIndex];
+      if (voter.voteChanged) {
+        return res.status(400).send("You cannot change your vote again.");
+      }
+
+      if (voter.voteIncrement === 1) {
+        // Switch from upvote to downvote
+        question.votes -= 1;
+        user.reputation -= 15; // Remove upvote gain and apply downvote penalty
+      } else {
+        // If already downvoted, don't allow to downvote again
+        return res
+          .status(400)
+          .send("You have already downvoted this question.");
+      }
+
+      voter.voteIncrement = -1;
+      voter.voteChanged = true; // Indicate that the user has changed their vote
+    } else {
+      // New downvote
+      question.votes -= 1;
+      user.reputation -= 10;
+      question.voters.push({
+        userWhoVoted: user._id,
+        voteIncrement: -1,
+        voteChanged: false,
+      });
+    }
+
+    await question.save();
+    await user.save();
+
+    res
+      .status(200)
+      .send({ votes: question.votes, userReputation: user.reputation });
   } catch (err) {
     handleError(err, res);
   }
