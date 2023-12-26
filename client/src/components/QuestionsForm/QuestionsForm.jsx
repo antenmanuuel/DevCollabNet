@@ -3,14 +3,14 @@ import QuestionsPage from "../QuestionsPage/QuestionsPage";
 import axios from "axios";
 import { TextField, Button, Box, Typography, Container } from "@mui/material";
 
-const QuestionsForm = (props) => {
-  const isEditMode = props.editMode && props.existingQuestion;
+const QuestionsForm = ({editMode, existingQuestion, sessionData, }) => {
+  const isEditMode = editMode && existingQuestion;
   const initialFormData = {
-    title: isEditMode ? props.existingQuestion.title : "",
-    questionText: isEditMode ? props.existingQuestion.text : "",
-    summary: isEditMode ? props.existingQuestion.summary : "",
+    title: isEditMode ? existingQuestion.title : "",
+    questionText: isEditMode ? existingQuestion.text : "",
+    summary: isEditMode ? existingQuestion.summary : "",
     tags: "",
-    askedBy: props.sessionData.username,
+    askedBy: sessionData.username,
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -41,22 +41,22 @@ const QuestionsForm = (props) => {
     };
 
     if (isEditMode) {
-      fetchTagNames(props.existingQuestion.tags).then((tagNames) => {
+      fetchTagNames(existingQuestion.tags).then((tagNames) => {
         setFormData({
           ...initialFormData,
-          title: props.existingQuestion.title,
-          questionText: props.existingQuestion.text,
-          summary: props.existingQuestion.summary,
+          title: existingQuestion.title,
+          questionText: existingQuestion.text,
+          summary: existingQuestion.summary,
           tags: tagNames.join(" "),
         });
       });
     }
-  }, [props.existingQuestion, isEditMode]);
+  }, [existingQuestion, isEditMode]);
 
   useEffect(() => {
     const fetchUserReputation = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/users/userReputation/${props.sessionData.username}`);
+        const response = await axios.get(`http://localhost:8000/users/userReputation/${sessionData.username}`);
         setUserReputation(response.data.reputation);
       } catch (error) {
         console.error("Error fetching user reputation:", error);
@@ -64,7 +64,7 @@ const QuestionsForm = (props) => {
     };
 
     fetchUserReputation();
-  }, [props.sessionData.username]);
+  }, [sessionData.username]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -162,7 +162,7 @@ const QuestionsForm = (props) => {
       try {
         if (isEditMode) {
           const response = await axios.put(
-            `http://localhost:8000/posts/questions/editQuestion/${props.existingQuestion._id}`,
+            `http://localhost:8000/posts/questions/editQuestion/${existingQuestion._id}`,
             newQuestion
           );
           console.log(response.data);
@@ -172,8 +172,8 @@ const QuestionsForm = (props) => {
             newQuestion
           );
         }
-        if (props.onQuestionAdded) {
-          props.onQuestionAdded();
+        if (onQuestionAdded) {
+          onQuestionAdded();
         }
         setIsFormSubmitted(true);
       } catch (error) {
@@ -189,7 +189,7 @@ const QuestionsForm = (props) => {
   };
 
   if (isFormSubmitted) {
-    return <QuestionsPage sessionData={props.sessionData} />;
+    return <QuestionsPage sessionData={sessionData} />;
   }
 
   return (
