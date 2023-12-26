@@ -278,7 +278,6 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
           <Typography
             variant="h6"
             sx={{
-              fontSize: "16px",
               position: "absolute",
               left:"40px",
               fontSize: "18px",
