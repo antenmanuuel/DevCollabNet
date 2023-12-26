@@ -252,29 +252,6 @@ router.get(
     }
   }
 );
-
-// helper function to create or fetch a tag based on its name
-const createOrFetchTag = async (tagName, username) => {
-  let tag = await Tags.findOne({ name: tagName }).exec();
-  if (!tag) {
-    // Find the user based on the username
-    let user = await User.findOne({ username: username }).exec();
-
-    // If no user is found, handle accordingly
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    tag = new Tags({
-      name: tagName,
-      created_by: user._id,
-    });
-
-    await tag.save();
-  }
-  return tag._id;
-};
-
 router.post("/askQuestion", async (req, res) => {
   const { title, summary, text, tagIds, askedBy } = req.body;
 
@@ -288,20 +265,27 @@ router.post("/askQuestion", async (req, res) => {
     return res.status(404).send("User not found");
   }
 
-  // Check if user's reputation is at least 50 to allow posting of tags
   if (user.reputation < 50) {
     return res.status(403).send("Insufficient reputation to post tags.");
   }
 
-  // Process each tagName to create or fetch a tag, along with the username
-  const validTagIds = await Promise.all(
-    tagIds.map((tagName) => createOrFetchTag(tagName, askedBy))
-  );
+  let validTagIds = [];
+  for (const tagName of tagIds) {
+    let tag = await Tags.findOne({ name: tagName });
+
+    if (!tag) {
+      // Create a new tag
+      tag = new Tags({ name: tagName, created_by: user._id });
+      await tag.save();
+    }
+
+    validTagIds.push(tag._id);
+  }
 
   const newQuestion = new Questions({
     title,
-    text,
     summary,
+    text,
     tags: validTagIds,
     asked_by: user._id,
   });
@@ -317,7 +301,7 @@ router.use((err, req, res, next) => {
 
 router.put("/editQuestion/:questionId", async (req, res) => {
   const { questionId } = req.params;
-  const { title, summary, text, tagIds } = req.body;
+  const { title, summary, text, tagIds } = req.body; // tagIds are tag names
 
   if (!title || !summary || !text || !Array.isArray(tagIds)) {
     return res.status(400).send("Missing required fields");
@@ -334,47 +318,53 @@ router.put("/editQuestion/:questionId", async (req, res) => {
       return res.status(401).send("User is not logged in.");
     }
 
-    // Check if the user who asked the question is making the request or if the user is an admin
-    if (
-      !requestingUser.isAdmin &&
-      !question.asked_by.equals(requestingUser.userId)
-    ) {
+    if (!question.asked_by.equals(requestingUser.userId)) {
       return res.status(403).send("Unauthorized to edit this question.");
     }
 
-    // Fetch the username and reputation of the requesting user
-    const user = await User.findById(requestingUser.userId);
-    if (!user) {
-      return res.status(404).send("User not found.");
-    }
-    const username = user.username;
+    let validTagIds = [];
+    for (const tagName of tagIds) {
+      let tag = await Tags.findOne({ name: tagName });
 
-    // Prevent users with less than 50 reputation from posting tags
-    if (user.reputation < 50) {
-      return res.status(403).send("Insufficient reputation to post tags.");
+      if (!tag) {
+        // Create new tag
+        tag = new Tags({ name: tagName, created_by: requestingUser.userId });
+        await tag.save();
+      } else {
+        const isTagUsedByAnotherUser = await Questions.exists({
+          tags: tag._id,
+          asked_by: { $ne: requestingUser.userId },
+        });
+
+        const isTagCreatedByCurrentUser = tag.created_by.equals(requestingUser.userId);
+
+        if (!isTagUsedByAnotherUser && isTagCreatedByCurrentUser) {
+          // Update the tag name if it's not used by other users and created by the current user
+          tag.name = tagName;
+          await tag.save();
+        } else if (isTagUsedByAnotherUser && !requestingUser.isAdmin) {
+          return res.status(400).send(`Tag "${tagName}" is currently in use by another user and cannot be edited.`);
+        }
+      }
+
+      validTagIds.push(tag._id);
     }
 
-    // Update the question fields
+    // Update the question
     question.title = title;
     question.summary = summary;
     question.text = text;
-
-    // Handle tags: create new ones if they don't exist
-    const validTagIds = await Promise.all(
-      tagIds.map((tagName) => createOrFetchTag(tagName, username))
-    );
     question.tags = validTagIds;
 
     await question.save();
 
-    res
-      .status(200)
-      .send({ message: "Question updated successfully", question });
+    res.status(200).send({ message: "Question updated successfully", question });
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 // Route to delete a question by its ID
 router.delete("/:questionId", async (req, res) => {
@@ -412,7 +402,7 @@ router.delete("/:questionId", async (req, res) => {
     await Comments.deleteMany({ _id: { $in: question.comments } });
 
     // Finally, delete the question
-    await Questions.findByIdAndRemove(questionId);
+    await Questions.findByIdAndDelete(questionId);
 
     res.send({
       message:

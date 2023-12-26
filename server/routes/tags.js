@@ -68,7 +68,7 @@ router.get("/tag_id/:tag_id/questions/:filter?", async (req, res) => {
     }
 
     // Base query to fetch questions associated with this tag's ObjectId
-    let query = Questions.find({ tags: tag._id });
+    let query = Questions.find({ tags: tag._id }).populate('asked_by');
 
     let finalQuestions;
 
@@ -207,7 +207,7 @@ router.delete("/tag_id/:tag_id", async (req, res) => {
       return res.status(404).send("Tag not found.");
     }
     // Delete the tag
-    await Tags.findByIdAndRemove(tag_id);
+    await Tags.findByIdAndDelete(tag_id);
 
     // Find all questions that have this tag and remove it from their tags array
     await Questions.updateMany({ tags: tag_id }, { $pull: { tags: tag_id } });
