@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { TextField, Button, Box, Typography, Container } from "@mui/material";
 import axios from "axios";
 
-const AnswerForm = (props) => {
+const AnswerForm = ({sessionData, editMode, onAnswerAdded, onEditComplete, existingAnswer }) => {
   const [formData, setFormData] = useState({
-    answerText: props.editMode ? props.existingAnswer.text : "",
-    ansBy: props.sessionData.userId
+    answerText: editMode ? existingAnswer.text : "",
+    ansBy: sessionData.userId
   });
 
   const [errors, setErrors] = useState({
@@ -13,10 +13,10 @@ const AnswerForm = (props) => {
   });
 
   useEffect(() => {
-    if (props.editMode) {
-      setFormData({ answerText: props.existingAnswer.text, ansBy: props.sessionData.username });
+    if (editMode) {
+      setFormData({ answerText: existingAnswer.text, ansBy: sessionData.username });
     }
-  }, [props.editMode, props.existingAnswer, props.sessionData.username]);
+  }, [editMode, existingAnswer, sessionData.username]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -77,13 +77,13 @@ const AnswerForm = (props) => {
       return;
     }
 
-    if (props.editMode) {
+    if (editMode) {
       try {
-        await axios.patch(`http://localhost:8000/posts/answers/editAnswer/${props.existingAnswer._id}`, {
+        await axios.patch(`http://localhost:8000/posts/answers/editAnswer/${existingAnswer._id}`, {
           newText: formData.answerText,
         });
-        props.onAnswerUpdated();
-        props.onEditComplete(props.existingAnswer._id, formData.answerText);
+        onAnswerUpdated();
+        onEditComplete(existingAnswer._id, formData.answerText);
       } catch (error) {
         console.error("Error updating answer:", error);
       }
@@ -91,10 +91,10 @@ const AnswerForm = (props) => {
       try {
         await axios.post("http://localhost:8000/posts/answers/answerQuestion", {
           text: formData.answerText,
-          ansBy: props.sessionData.username,
-          qid: props.questionId,
+          ansBy: sessionData.username,
+          qid: questionId,
         });
-        props.onAnswerAdded();
+        onAnswerAdded();
       } catch (error) {
         console.error("Error posting answer:", error);
       }
@@ -138,7 +138,7 @@ const AnswerForm = (props) => {
             fullWidth
             id="usernameTextBox"
             name="username"
-            value={props.sessionData.username}
+            value={sessionData.username}
             disabled
           />
           <Button
