@@ -1,5 +1,4 @@
 import React from "react";
-import AdminsPage from "./AdminsPage";
 import { Typography } from "@mui/material";
 import UsersPage from "./UsersPage";
 
