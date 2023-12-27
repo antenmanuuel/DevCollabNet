@@ -44,7 +44,6 @@ const AnswersTable = ({
 
   useEffect(() => {
     if (isFilteredView) {
-      // Fetch answers made by the current user for the specific question
       axios.get(`http://localhost:8000/posts/answers/${questionId}/current-user-answers-comments`)
         .then((response) => {
           setAnswers(response.data);
@@ -58,7 +57,6 @@ const AnswersTable = ({
           console.error("Error fetching filtered answers:", error);
         });
     } else {
-      // Existing logic to fetch all answers for the question
       axios.get(`http://localhost:8000/posts/answers/${questionId}`)
         .then((response) => {
           setAnswers(response.data);
@@ -516,7 +514,6 @@ const AnswersTable = ({
           </Button>
         </Box>
         {isFilteredView ? (
-          // Show 'Back' button in filtered view
           <Button
             variant="contained"
             color="primary"
@@ -532,7 +529,6 @@ const AnswersTable = ({
             Back
           </Button>
         ) : sessionData.loggedIn ? (
-          // Show 'Answer Question' button otherwise
           <Button
             variant="contained"
             color="primary"

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Typography, Button } from "@mui/material";
 
-// Fix bug with Tag count after user deletion
 
 const TagsTop = ({ onAskQuestionPress, sessionData }) => {
   const [numOfTags, setNumOfTags] = useState(0);
