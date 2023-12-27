@@ -3,7 +3,7 @@ import axios from "axios";
 import Helper from "../../utils/Helper";
 import { Box, Typography, Chip } from "@mui/material";
 
-const QuestionDetail = ({ questionId, sessionData }) => {
+const QuestionDetail = ({ questionId }) => {
   const [question, setQuestion] = useState(null);
   const [tagMap, setTagMap] = useState({});
   const helper = new Helper();
