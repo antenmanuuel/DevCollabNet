@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Header from "./Header/Header";
 import SideNavbar from "./SideNavbar/SideNavbar";
-import MainContainer from "./MainPage/MainPage";
+import MainPage from "./MainPage/MainPage";
 import { Box } from "@mui/material";
 
 function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout ,isAdmin }) {
@@ -62,7 +62,7 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout ,isAdmi
           setAdminPage={handleSetAdminProfilePage}
           isAdmin={sessionData.isAdmin} 
         />
-        <MainContainer
+        <MainPage
           key={questionsKey}
           searchTerm={searchTerm}
           showQuestionsPage={currentPage === "QuestionsPage"}

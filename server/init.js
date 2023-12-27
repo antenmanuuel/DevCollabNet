@@ -173,7 +173,6 @@ async function populateDatabase() {
       users.push(user);
     }
 
-    // Randomly select a user to create each tag
     for (let keyword of frontendKeywords) {
       let tagCreator = users[getRandomInt(0, users.length - 1)];
       let tag = await createTag(keyword, tagCreator);
