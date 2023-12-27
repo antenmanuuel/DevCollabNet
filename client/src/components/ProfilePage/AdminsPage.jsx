@@ -81,7 +81,6 @@ const AdminsPage = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      // Find the username corresponding to the selectedUserId
       const selectedUser = users.find((user) => user._id === selectedUserId);
       if (!selectedUser) {
         throw new Error("User not found");

@@ -8,7 +8,6 @@ import AnswerForm from "../AnswerForm/AnswerForm";
 const SelectedQuestionPage = ({ questionId, sessionData, filteredAnswers, onBack }) => {
   const [showQuestionsForm, setShowQuestionsForm] = useState(false);
   const [showAnswersForm, setShowAnswersForm] = useState(false);
-  const [isEditingAnswer, setIsEditingAnswer] = useState(false);
 
   const handleAskQuestionPress = () => {
     setShowQuestionsForm(true);
@@ -43,7 +42,7 @@ const SelectedQuestionPage = ({ questionId, sessionData, filteredAnswers, onBack
         isFilteredView={isFilteredView}
 
       />
-      <QuestionDetail questionId={questionId} sessionData={sessionData}/>
+      <QuestionDetail questionId={questionId} />
       <AnswersTable questionId={questionId} onAnswerPress={handleAnswerPress} sessionData={sessionData} filteredAnswers={filteredAnswers} onBack={onBack} />
     </div>
   );

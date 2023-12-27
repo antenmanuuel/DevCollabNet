@@ -6,7 +6,7 @@ import TagsTable from "./TagsTable";
 import QuestionsPage from "../QuestionsPage/QuestionsPage";
 import { Box, styled } from "@mui/material";
 
-const TagsContainer = styled(Box)(({ theme }) => ({
+const TagsContainer = styled(Box)(({ }) => ({
   width: "89.21%",
   height: "100%",
   display: "flex",

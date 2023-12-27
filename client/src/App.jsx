@@ -16,7 +16,6 @@ function App() {
     isAdmin: false,
   });
 
-  // Fetch session data on component mount
   useEffect(() => {
     const fetchSessionData = async () => {
       try {
