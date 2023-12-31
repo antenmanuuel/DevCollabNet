@@ -299,7 +299,6 @@ router.use((err, req, res, next) => {
   handleError(err, res);
 });
 
-
 router.put("/editQuestion/:questionId", async (req, res) => {
   const { questionId } = req.params;
   const { title, summary, text, tagIds } = req.body; // tagIds are tag names
@@ -337,14 +336,20 @@ router.put("/editQuestion/:questionId", async (req, res) => {
           asked_by: { $ne: requestingUser.userId },
         });
 
-        const isTagCreatedByCurrentUser = tag.created_by.equals(requestingUser.userId);
+        const isTagCreatedByCurrentUser = tag.created_by.equals(
+          requestingUser.userId
+        );
 
         if (!isTagUsedByAnotherUser && isTagCreatedByCurrentUser) {
           // Update the tag name if it's not used by other users and created by the current user
           tag.name = tagName;
           await tag.save();
         } else if (isTagUsedByAnotherUser && !requestingUser.isAdmin) {
-          return res.status(400).send(`Tag "${tagName}" is currently in use by another user and cannot be edited.`);
+          return res
+            .status(400)
+            .send(
+              `Tag "${tagName}" is currently in use by another user and cannot be edited.`
+            );
         }
       }
 
@@ -359,13 +364,14 @@ router.put("/editQuestion/:questionId", async (req, res) => {
 
     await question.save();
 
-    res.status(200).send({ message: "Question updated successfully", question });
+    res
+      .status(200)
+      .send({ message: "Question updated successfully", question });
   } catch (err) {
     console.error(err);
     res.status(500).send("Internal Server Error");
   }
 });
-
 
 // Route to delete a question by its ID
 router.delete("/:questionId", async (req, res) => {
@@ -402,8 +408,7 @@ router.delete("/:questionId", async (req, res) => {
     // Delete all comments directly related to this question
     await Comments.deleteMany({ _id: { $in: question.comments } });
 
-     // Delete all Tags directly related to this question
-     await Tags.deleteMany({ _id: { $in: question.tags } });
+
 
     // Finally, delete the question
     await Questions.findByIdAndDelete(questionId);
