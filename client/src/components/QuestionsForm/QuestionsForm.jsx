@@ -3,7 +3,7 @@ import QuestionsPage from "../QuestionsPage/QuestionsPage";
 import axios from "axios";
 import { TextField, Button, Box, Typography, Container } from "@mui/material";
 
-const QuestionsForm = ({editMode, existingQuestion, sessionData, }) => {
+const QuestionsForm = ({editMode, existingQuestion, sessionData, onQuestionAdded }) => {
   const isEditMode = editMode && existingQuestion;
   const initialFormData = {
     title: isEditMode ? existingQuestion.title : "",

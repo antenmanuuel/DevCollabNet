@@ -221,7 +221,6 @@ const AdminsPage = () => {
                   <TableCell sx={{ width: "65%" }}>
                     <Typography
                       sx={{
-                        cursor: "pointer",
                         color: "black",
                         fontSize: "large",
                       }}
