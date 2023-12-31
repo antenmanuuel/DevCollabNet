@@ -402,6 +402,9 @@ router.delete("/:questionId", async (req, res) => {
     // Delete all comments directly related to this question
     await Comments.deleteMany({ _id: { $in: question.comments } });
 
+     // Delete all Tags directly related to this question
+     await Tags.deleteMany({ _id: { $in: question.tags } });
+
     // Finally, delete the question
     await Questions.findByIdAndDelete(questionId);
 
