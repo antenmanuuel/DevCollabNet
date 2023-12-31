@@ -20,7 +20,7 @@ const port = 8000;
 
 let mongoose = require('mongoose');
 let mongoDB = 'mongodb://127.0.0.1:27017/fake_so';
-mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(mongoDB);
 
 app.use(
   session({
