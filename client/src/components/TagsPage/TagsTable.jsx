@@ -11,16 +11,14 @@ const TagsTable = ({ onTagSelected, sessionData }) => {
       .then((response) => {
         const tags = response.data;
 
-        const fetchCounts = tags.map((tag) => {
-          return axios
-            .get(`http://localhost:8000/posts/tags/tag_id/${tag._id}/questions`)
-            .then((questionsResponse) => {
-              return { name: tag.name, count: questionsResponse.data.length };
-            });
+        const fetchCounts = tags.map(async (tag) => {
+          const questionsResponse = await axios
+            .get(`http://localhost:8000/posts/tags/tag_id/${tag._id}/questions`);
+          return { name: tag.name, count: questionsResponse.data.length };
         });
 
         Promise.all(fetchCounts).then((preparedTags) => {
-          const filteredTags = preparedTags.filter((tag) => tag.count > 0);
+          const filteredTags = preparedTags.filter((tag) => tag.count > 0 || tag.count == 0);
           setTagsData(filteredTags);
         });
       })
