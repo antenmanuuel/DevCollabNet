@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { TextField, Button, Box, Typography, Container } from "@mui/material";
 import axios from "axios";
 
-const AnswerForm = ({sessionData, editMode, onAnswerAdded, onEditComplete, existingAnswer, onAnswerUpdated }) => {
+const AnswerForm = ({sessionData, editMode, onAnswerAdded, onEditComplete, existingAnswer, onAnswerUpdated, questionId }) => {
   const [formData, setFormData] = useState({
     answerText: editMode ? existingAnswer.text : "",
     ansBy: sessionData.userId
