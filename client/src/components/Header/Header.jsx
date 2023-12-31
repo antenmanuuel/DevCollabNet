@@ -37,6 +37,7 @@ function Header({
         flexDirection: "column",
         width: "100%",
         overflow: "hidden",
+        position:"sticky"
       }}
     >
       <Box

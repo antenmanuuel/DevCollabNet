@@ -57,6 +57,7 @@ function SideNavbar({ setQuestionsPage, setTagsPage, setProfilePage, setAdminPag
           width: 275,
           borderRight: "1px dotted grey.400",
           top: 80,
+          position:"sticky"
         },
       }}
     >
