@@ -7,7 +7,7 @@ import AdminsPage from "../ProfilePage/AdminsPage";
 
 const MainPage = ({ showQuestionsPage, showTagsPage, searchTerm, sessionData , showProfilePage, showAdminPage}) => {
   return (
-    <Box sx={{ width: "100%", height: "100%", display: "block" }}>
+    <Box sx={{ width: "100%", height: "100%", display: "block", marginBottom:"-10px" }}>
       {showQuestionsPage && <QuestionsPage searchTerm={searchTerm} sessionData={sessionData} />}
       {showTagsPage && <TagsPage sessionData={sessionData} />}
       {showProfilePage && <ProfilePage sessionData={sessionData} />}
