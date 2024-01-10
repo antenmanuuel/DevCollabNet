@@ -79,11 +79,19 @@ const QuestionTop = ({
           color="primary"
           onClick={onAskQuestionPress}
           sx={{
-            marginLeft: "1450px",
-            marginTop: "-50px",
             width: 150,
             padding: "10px",
-            textTransform: "none"
+            textTransform: "none",
+
+            '@media (max-width: 1920px)': {
+              marginLeft: "1450px",
+              marginTop: "-50px",
+            },
+        
+            '@media (min-width: 1921px)': {
+              marginLeft: "2050px", 
+              marginTop: "-50px",
+            },
           }}
         >
           Ask Question
@@ -107,12 +115,22 @@ const QuestionTop = ({
           display: "flex",
           flexDirection: "row",
           width: 300,
-          marginLeft: "1025px",
-          marginTop: "-5px",
           border: 3,
           borderColor: "grey.300",
           borderStyle: "solid",
           p: 1,
+        
+          // Media query for screens up to 1920px (inclusive)
+          '@media (max-width: 1920px)': {
+            marginLeft: "1025px", // Adjust as needed for smaller screens
+            marginTop: "-5px",
+          },
+        
+          // Media query for screens larger than 1920px
+          '@media (min-width: 1921px)': {
+            marginLeft: "1500px", // Adjust for larger screens
+            marginTop: "-5px",
+          },
         }}
       >
         <Button

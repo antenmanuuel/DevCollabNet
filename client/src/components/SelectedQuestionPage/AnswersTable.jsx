@@ -327,7 +327,7 @@ const AnswersTable = ({
                   </TableCell>
                   <TableCell sx={{ paddingLeft: 60 }}>
                     <List sx={{ listStyle: "none", padding: 0 }}>
-                      <ListItem sx={{ color: "error.main", paddingBottom: 0 }}>
+                      <ListItem sx={{ color: "error.main", paddingBottom: 0, marginLeft:"0" }}>
                         {answer.ans_by.username}
                       </ListItem>
                       <ListItem sx={{ color: "text.secondary" }}>
@@ -537,8 +537,18 @@ const AnswersTable = ({
               width: 150,
               padding: "10px",
               textTransform: "none",
+
+              '@media (max-width: 1920px)': {
               marginTop: "20px",
               marginRight: "1470px",
+              },
+
+              '@media (min-width: 1921px)': {
+                marginTop: "20px",
+                marginRight: "2000px",
+                }
+
+              
             }}
           >
             Answer Question

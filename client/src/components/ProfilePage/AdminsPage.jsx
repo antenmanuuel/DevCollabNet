@@ -131,18 +131,10 @@ const AdminsPage = () => {
   return (
     <Box
       sx={{
-        width: "85.3%",
+        width: "100%",
         paddingBottom: 5,
-        position: "absolute",
-        border: 3,
-        borderColor: "black",
-        borderStyle: "dotted",
-        left: "275.5px",
-        height: "900px",
-        borderLeft: 0,
-        borderRight: 0,
-        borderTop: 0,
-        borderBottom: 0,
+        marginTop: "20px",
+        marginLeft: "-10px",
       }}
     >
       <Box
@@ -150,21 +142,18 @@ const AdminsPage = () => {
           display: "flex",
           flexDirection: "row",
           width: "100%",
-          left: "275.5px",
           border: 3,
           borderTop: 0,
           borderRight: 0,
           borderLeft: 0,
           borderStyle: "dotted",
           height: "175px",
+          marginLeft: "250px",
         }}
       >
         <Typography
           variant="h4"
           sx={{
-            position: "absolute",
-            top: "10px",
-            left: "30px",
             fontSize: "25px",
             fontWeight: "bolder",
           }}
@@ -174,9 +163,8 @@ const AdminsPage = () => {
         <Typography
           variant="h6"
           sx={{
-            position: "absolute",
-            top: "50px",
-            left: "30px",
+            marginTop: "50px",
+            marginLeft: "-230px",
             fontSize: "18px",
           }}
         >
@@ -185,9 +173,8 @@ const AdminsPage = () => {
         <Typography
           variant="h2"
           sx={{
-            position: "absolute",
-            top: "90px",
-            left: "30px",
+            marginTop: "100px",
+            marginLeft: "-220px",
             fontSize: "15px",
           }}
         >
@@ -197,9 +184,8 @@ const AdminsPage = () => {
         <Typography
           variant="h1"
           sx={{
-            position: "absolute",
-            top: "130px",
-            left: "550px",
+            marginTop: "130px",
+            marginLeft: "700px",
             fontSize: "18px",
             fontWeight: "bolder",
           }}
@@ -208,13 +194,24 @@ const AdminsPage = () => {
         </Typography>
       </Box>
 
-      <Box sx={{ maxHeight: "420px", overflowY: "auto" }}>
+      <Box
+        sx={{
+          maxHeight: "420px",
+          overflowY: "auto",
+          overflowX: "hidden",
+          marginLeft: "200px",
+        }}
+      >
         {isAdminOnlyUser ? (
-          <Typography variant="h6" align="left" sx={{color:"red", marginTop: "10px", marginLeft:"10px"}}>
+          <Typography
+            variant="h6"
+            align="left"
+            sx={{ color: "red", marginTop: "10px", marginLeft: "10px" }}
+          >
             There are no users except admin.
           </Typography>
         ) : (
-          <Table sx={{ width: "100%" }}>
+          <Table sx={{ width: "100%", marginLeft: "50px" }}>
             <TableBody>
               {users.map((user) => (
                 <TableRow key={user._id} sx={{ borderBottom: "3px dotted" }}>
@@ -228,7 +225,18 @@ const AdminsPage = () => {
                       {user.username}
                     </Typography>
                   </TableCell>
-                  <TableCell sx={{ width: "17.5%", paddingLeft: "70px" }}>
+                  <TableCell
+                    sx={{
+                      width: "17.5%",
+                      "@media (max-width: 1920px)": {
+                        paddingLeft: "300px",
+                      },
+
+                      "@media (min-width: 1921px)": {
+                        paddingLeft: "200px",
+                      },
+                    }}
+                  >
                     <Button
                       onClick={() => handleDeleteUserById(user._id)}
                       sx={{

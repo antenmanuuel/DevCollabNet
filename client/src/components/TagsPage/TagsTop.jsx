@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Typography, Button } from "@mui/material";
 
-
 const TagsTop = ({ onAskQuestionPress, sessionData }) => {
   const [numOfTags, setNumOfTags] = useState(0);
 
@@ -21,13 +20,33 @@ const TagsTop = ({ onAskQuestionPress, sessionData }) => {
     <Box
       sx={{
         display: "flex",
-        justifyContent: "space-between",
+        flexDirection: "row",
         alignItems: "center",
-        marginTop: "-900px",
+
+
+        "@media (max-width: 1920px)": {
+          marginTop: "-800px", 
+        },
+
+        "@media (min-width: 1921px)": {
+          marginTop: "-1200px", 
+        },
       }}
     >
-      <Box sx={{ marginLeft: "80px" }}>
-        <Typography variant="h5" sx={{ fontWeight: "bold", fontSize: "25px" }}>
+      <Box
+        sx={{
+          marginLeft: "80px",
+
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            fontSize: "25px",
+
+          }}
+        >
           {numOfTags} Tags
         </Typography>
       </Box>
@@ -37,7 +56,16 @@ const TagsTop = ({ onAskQuestionPress, sessionData }) => {
         sx={{
           fontWeight: "bold",
           fontSize: "25px",
-          marginLeft: "200px",
+
+
+          "@media (max-width: 1920px)": {
+            marginLeft: "100px",
+          },
+
+       
+          "@media (min-width: 1921px)": {
+            marginLeft: "200px", 
+          },
         }}
       >
         All Tags
@@ -52,7 +80,15 @@ const TagsTop = ({ onAskQuestionPress, sessionData }) => {
             width: 150,
             padding: "10px",
             textTransform: "none",
-            marginLeft: "1000px",
+
+           
+            "@media (max-width: 1920px)": {
+              marginLeft: "1000px", 
+            },
+
+            "@media (min-width: 1921px)": {
+              marginLeft: "1400px", 
+            },
           }}
         >
           Ask Question
