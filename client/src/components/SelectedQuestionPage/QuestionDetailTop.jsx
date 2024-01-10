@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Box, Typography, Button } from "@mui/material";
 
-const QuestionDetailTop = ({ questionId, onAskQuestionPress, sessionData, isFilteredView }) => {
+const QuestionDetailTop = ({
+  questionId,
+  onAskQuestionPress,
+  sessionData,
+  isFilteredView,
+}) => {
   const [question, setQuestion] = useState(null);
 
   useEffect(() => {
@@ -57,11 +62,19 @@ const QuestionDetailTop = ({ questionId, onAskQuestionPress, sessionData, isFilt
           color="primary"
           onClick={onAskQuestionPress}
           sx={{
-            textTransform: "none",
             width: 150,
             padding: "10px",
-            marginLeft: "1450px",
-            marginTop: "-50px",
+            textTransform: "none",
+
+            "@media (max-width: 1920px)": {
+              marginLeft: "1450px",
+              marginTop: "-50px",
+            },
+
+            "@media (min-width: 1921px)": {
+              marginLeft: "2050px",
+              marginTop: "-50px",
+            },
           }}
         >
           Ask Question

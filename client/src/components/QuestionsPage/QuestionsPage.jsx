@@ -7,16 +7,35 @@ import QuestionTop from "./QuestionTop";
 import QuestionTable from "./QuestionTable";
 import { styled } from "@mui/system";
 
+
 const QuestionContainer = styled(Box)(() => ({
-  width: "89.2%",
-  height: "100%",
-  display: "flex",
-  flexDirection: "row",
-  marginLeft: "200px",
-  marginTop: "75px",
+  // Media query for screens up to 1920px (inclusive)
+  '@media (max-width: 1920px)': {
+    width: "89.2%",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    marginLeft: "200px",
+    marginTop: "75px",
+  },
+
+  // Media query for screens larger than 1920px
+  '@media (min-width: 1921px)': {
+    width: "89.2%",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    marginLeft: "250px",
+    marginTop: "75px",
+  },
 }));
 
-const QuestionsPage = ({ selectedTag = null, searchTerm, setSearchTerm, sessionData }) => {
+const QuestionsPage = ({
+  selectedTag = null,
+  searchTerm,
+  setSearchTerm,
+  sessionData,
+}) => {
   const [questions, setQuestions] = useState([]);
   const [numOfQuestions, setNumOfQuestions] = useState(0);
   const [updateKey, setUpdateKey] = useState(0);
@@ -71,7 +90,12 @@ const QuestionsPage = ({ selectedTag = null, searchTerm, setSearchTerm, sessionD
       );
     }
     if (selectedQuestionId) {
-      return <SelectedQuestionPage questionId={selectedQuestionId} sessionData={sessionData} />;
+      return (
+        <SelectedQuestionPage
+          questionId={selectedQuestionId}
+          sessionData={sessionData}
+        />
+      );
     }
   }
 

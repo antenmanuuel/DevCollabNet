@@ -68,7 +68,7 @@ const QuestionDetail = ({ questionId }) => {
           {question && helper.renderTextWithLinks(question.text)}
         </Typography>
 
-        <Box sx={{ color: "gray.500", paddingLeft: 10 }}>
+        <Box sx={{ color: "gray.500" }}>
           <Typography variant="subtitle2" color={"gray"}>
             asked by{" "}
             <Chip
