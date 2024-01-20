@@ -18,7 +18,7 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "cd server && node init.js admin@mail.com password123 && cd .. && cd client && vite build",
+    "build": "cd .. && cd server && node init.js admin@mail.com password123 && cd .. && cd client && vite build",
     "serve": "vite preview",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

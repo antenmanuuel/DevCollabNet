@@ -37,14 +37,16 @@ const AnswersTable = ({
   const [editingAnswerId, setEditingAnswerId] = useState(null);
   const [userReputation, setUserReputation] = useState(null);
 
-
   const helper = new Helper();
 
   const isFilteredView = filteredAnswers && filteredAnswers.length > 0;
 
   useEffect(() => {
     if (isFilteredView) {
-      axios.get(`http://localhost:8000/posts/answers/${questionId}/current-user-answers-comments`)
+      axios
+        .get(
+          `http://localhost:8000/posts/answers/${questionId}/current-user-answers-comments`
+        )
         .then((response) => {
           setAnswers(response.data);
           const newCommentsData = {};
@@ -57,7 +59,8 @@ const AnswersTable = ({
           console.error("Error fetching filtered answers:", error);
         });
     } else {
-      axios.get(`http://localhost:8000/posts/answers/${questionId}`)
+      axios
+        .get(`http://localhost:8000/posts/answers/${questionId}`)
         .then((response) => {
           setAnswers(response.data);
           fetchCommentsForAnswers(response.data);
@@ -67,7 +70,7 @@ const AnswersTable = ({
         });
     }
   }, [questionId, filteredAnswers, isFilteredView]);
-  
+
   const fetchCommentsForAnswers = async (answers) => {
     for (const answer of answers) {
       try {
@@ -94,7 +97,9 @@ const AnswersTable = ({
   useEffect(() => {
     const fetchUserReputation = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/users/userReputation/${sessionData.username}`);
+        const response = await axios.get(
+          `http://localhost:8000/users/userReputation/${sessionData.username}`
+        );
         setUserReputation(response.data.reputation);
       } catch (error) {
         console.error("Error fetching user reputation:", error);
@@ -327,7 +332,13 @@ const AnswersTable = ({
                   </TableCell>
                   <TableCell sx={{ paddingLeft: 60 }}>
                     <List sx={{ listStyle: "none", padding: 0 }}>
-                      <ListItem sx={{ color: "error.main", paddingBottom: 0, marginLeft:"0" }}>
+                      <ListItem
+                        sx={{
+                          color: "error.main",
+                          paddingBottom: 0,
+                          marginLeft: "0",
+                        }}
+                      >
                         {answer.ans_by.username}
                       </ListItem>
                       <ListItem sx={{ color: "text.secondary" }}>
@@ -538,17 +549,15 @@ const AnswersTable = ({
               padding: "10px",
               textTransform: "none",
 
-              '@media (max-width: 1920px)': {
-              marginTop: "20px",
-              marginRight: "1470px",
+              "@media (max-width: 1920px)": {
+                marginTop: "20px",
+                marginRight: "1470px",
               },
 
-              '@media (min-width: 1921px)': {
+              "@media (min-width: 1921px)": {
                 marginTop: "20px",
                 marginRight: "2000px",
-                }
-
-              
+              },
             }}
           >
             Answer Question
