@@ -12,6 +12,7 @@
     "bcrypt": "*",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "dotenv": "^16.3.2",
     "express": "*",
     "express-session": "^1.17.3",
     "mongoose": "*",
