@@ -1,3 +1,4 @@
+require("dotenv").config();
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 const User = require("./models/users");
@@ -6,7 +7,7 @@ const Question = require("./models/questions");
 const Answer = require("./models/answers");
 const Comment = require("./models/comments");
 
-let mongoDB = "mongodb://127.0.0.1:27017/fake_so";
+let mongoDB = "mongodb+srv://antenmanuuel:anten2001@cluster1.tzxpxjc.mongodb.net/?retryWrites=true&w=majority";
 mongoose.connect(mongoDB);
 
 let db = mongoose.connection;
@@ -59,7 +60,14 @@ function getRandomNumberOfComments() {
   return Math.floor(Math.random() * 11);
 }
 
-async function createUser(username, email, password, isAdmin, created_at, reputation) {
+async function createUser(
+  username,
+  email,
+  password,
+  isAdmin,
+  created_at,
+  reputation
+) {
   let user = new User({
     username: username,
     email: email,
@@ -79,7 +87,19 @@ async function createTag(name, createdBy) {
   return tag.save();
 }
 
-async function createQuestion(title, summary, text, tags, answers, asked_by, ask_date_time, views, votes, comments, voters) {
+async function createQuestion(
+  title,
+  summary,
+  text,
+  tags,
+  answers,
+  asked_by,
+  ask_date_time,
+  views,
+  votes,
+  comments,
+  voters
+) {
   let question = new Question({
     title: title,
     summary: summary,
@@ -96,7 +116,14 @@ async function createQuestion(title, summary, text, tags, answers, asked_by, ask
   return question.save();
 }
 
-async function createAnswer(text, ans_by, ans_date_time, votes, comments, voters) {
+async function createAnswer(
+  text,
+  ans_by,
+  ans_date_time,
+  votes,
+  comments,
+  voters
+) {
   let answer = new Answer({
     text: text,
     ans_by: ans_by._id,
@@ -127,7 +154,7 @@ async function getRandomTags(tags, num) {
       randomTags.push(randomTag);
     }
   }
-  return randomTags.map(tag => tag._id);
+  return randomTags.map((tag) => tag._id);
 }
 
 function getRandomVotes() {
@@ -156,10 +183,15 @@ async function addCommentsToEntity(entity, users) {
 
 async function populateDatabase() {
   try {
-    await db.dropDatabase();
-
     const hashedPasswordAdmin = await bcrypt.hash(adminPassword, 10);
-    let admin = await createUser('admin', adminEmail, hashedPasswordAdmin, true, new Date(), 200);
+    let admin = await createUser(
+      "admin",
+      adminEmail,
+      hashedPasswordAdmin,
+      true,
+      new Date(),
+      200
+    );
 
     let tags = [];
     let users = [admin];
@@ -167,9 +199,16 @@ async function populateDatabase() {
     const fixedReputations = [30, 55, 100, 75, 25];
 
     for (let i = 1; i <= 5; i++) {
-      const hashedPassword = await bcrypt.hash('pwd123', 10);
+      const hashedPassword = await bcrypt.hash("pwd123", 10);
       let reputation = fixedReputations[i - 1];
-      let user = await createUser(`user${i}`, `user${i}@example.com`, hashedPassword, false, new Date(),reputation);
+      let user = await createUser(
+        `user${i}`,
+        `user${i}@example.com`,
+        hashedPassword,
+        false,
+        new Date(),
+        reputation
+      );
       users.push(user);
     }
 
@@ -189,7 +228,9 @@ async function populateDatabase() {
       let question = await createQuestion(
         `${frontendKeywords[i % frontendKeywords.length]}`,
         `Summary about ${frontendKeywords[i % frontendKeywords.length]}`,
-        `This is a detailed description about ${frontendKeywords[i % frontendKeywords.length]}.`,
+        `This is a detailed description about ${
+          frontendKeywords[i % frontendKeywords.length]
+        }.`,
         questionTags,
         [],
         questionUser,
@@ -210,7 +251,9 @@ async function populateDatabase() {
         let answerVoters = getRandomUsers(users);
 
         let answer = await createAnswer(
-          `Answer to Question about ${frontendKeywords[i % frontendKeywords.length]}`,
+          `Answer to Question about ${
+            frontendKeywords[i % frontendKeywords.length]
+          }`,
           answerUser,
           new Date(),
           answerVotes,
@@ -226,10 +269,10 @@ async function populateDatabase() {
       await question.save();
     }
 
-    console.log('Database populated successfully.');
+    console.log("Database populated successfully.");
     mongoose.connection.close();
   } catch (err) {
-    console.error('Error populating database:', err);
+    console.error("Error populating database:", err);
   }
 }
 

@@ -3,50 +3,43 @@ const app = express();
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const mongoose = require('mongoose');
 
-app.use(
-  cors({
-    origin: 'http://localhost:3000',
-    methods: ['POST', 'PUT', 'GET', 'DELETE', 'PATCH'],
-    credentials: true,
-  })
-);
+require('dotenv').config();
 
-app.use(express.json());
-
-let secretKey = process.argv.slice(2)[0];
-
-const port = 8000;
-
-let mongoose = require('mongoose');
-let mongoDB = 'mongodb://127.0.0.1:27017/fake_so';
-mongoose.connect(mongoDB);
-
-app.use(
-  session({
-    secret: secretKey,
-    cookie: { httpOnly: true, maxAge: 1000 * 60 * 5 * 60 },
-    resave: false,
-    saveUninitialized: false,
-  })
-);
-
-app.use(cookieParser());
+// MongoDB Atlas Connection
+let mongoDB = "mongodb+srv://antenmanuuel:anten2001@cluster1.tzxpxjc.mongodb.net/?retryWrites=true&w=majority";
+mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
 
 let db = mongoose.connection;
 db.on('error', (err) => console.log(`Error Connecting: ${err}`));
-db.on('connected', () => console.log('Connected to database'));
+db.on('connected', () => console.log('Connected to MongoDB Atlas'));
 
-process.on('SIGINT', async () => {
-  if (db) {
-    await db
-      .close()
-      .then(() => console.log('Server closed. Database instance disconnected'))
-      .catch((err) => console.log(err));
-  }
-  process.exit(0);
-});
+// CORS Configuration
+app.use(cors({
+    origin: 'http://localhost:3000', 
+    methods: ['POST', 'PUT', 'GET', 'DELETE', 'PATCH'],
+    credentials: true,
+}));
 
+app.use(express.json());
+app.use(cookieParser());
+
+// Session Configuration
+let secretKey = process.argv.slice(2)[0];
+if (!secretKey) {
+    console.error('Session secret key is missing!');
+    process.exit(1); 
+}
+
+app.use(session({
+    secret: secretKey,
+    cookie: { httpOnly: true, maxAge: 1000 * 60 * 60 * 5 }, 
+    resave: false,
+    saveUninitialized: false,
+}));
+
+// Router Setup
 const questionsRouter = require('./routes/questions.js');
 const answersRouter = require('./routes/answers.js');
 const tagsRouter = require('./routes/tags.js');
@@ -63,4 +56,19 @@ app.get('/posts', (req, res) => {
   res.redirect('/posts/questions');
 });
 
-app.listen(port, () => console.log(`listening on port ${port}`));
+// 404 Not Found Middleware
+app.use((req, res, next) => {
+    res.status(404).send('Sorry, page not found');
+});
+
+// Server Setup
+const port = 8000;
+app.listen(port, () => console.log(`Listening on port ${port}`));
+
+// Graceful Shutdown Handling
+process.on('SIGINT', async () => {
+    await db.close()
+        .then(() => console.log('Server closed. Database instance disconnected'))
+        .catch((err) => console.log(err));
+    process.exit(0);
+});
