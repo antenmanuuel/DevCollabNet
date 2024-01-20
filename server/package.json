@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node init.js admin@mail.com password123"
+    "publish": "node init.js admin@mail.com password123"
   },
   "author": "",
   "license": "ISC",
