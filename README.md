@@ -9,7 +9,7 @@
 Step 1: Clone the repository
 
 ```bash
-$ git clone git@github.com:antenmanuuel/FakeStackOverFlowClone.git
+$ git clone git@github.com:antenmanuuel/DevCollabNet.git
 $ cd FakeStackOverFlowClone
 ```
 
