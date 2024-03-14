@@ -64,7 +64,7 @@ function Header({
             flex: 2,
           }}
         >
-          Fake Stack OverFlow
+          DevCollabNet
         </Typography>
 
         <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
