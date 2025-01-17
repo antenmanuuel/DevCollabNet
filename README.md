@@ -19,7 +19,6 @@ This project leverages the following technologies to deliver a performant and re
 Ensure the following are installed on your machine:
 - Node.js
 - npm (Node Package Manager)
-- MongoDB (running on the default port 27017 and localhost)
 
 Additionally, confirm that ports 3000 and 8000 are not in use.
 
