@@ -1,5 +1,9 @@
 import React, { useState } from "react";
-import { Drawer, List, ListItem, ListItemText, Box } from "@mui/material";
+import { Drawer, List, ListItem, ListItemIcon, ListItemText, Box } from "@mui/material";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import TagIcon from "@mui/icons-material/Tag";
+import PersonIcon from "@mui/icons-material/Person";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 
 function SideNavbar({ setQuestionsPage, setTagsPage, setProfilePage, setAdminPage, isAdmin }) {
   const [activeLink, setActiveLink] = useState("questions");
@@ -29,22 +33,20 @@ function SideNavbar({ setQuestionsPage, setTagsPage, setProfilePage, setAdminPag
     setProfilePage(true);
     setAdminPage(false);
     setActiveLink("admins");
-
-  }
-
+  };
 
   const getListItemStyle = (buttonName) => ({
     display: "flex",
-    flexDirection: "column",
     alignItems: "center",
     width: "100%",
-    padding: "16px",
+    padding: "12px 16px",
     height: "56px",
     cursor: "pointer",
-    color: "blue",
-    backgroundColor: activeLink === buttonName ? "grey.200" : "inherit",
+    color: activeLink === buttonName ? "white" : "#333",
+    backgroundColor: activeLink === buttonName ? "#007FFF" : "inherit",
+    borderRadius: "8px",
     "&:hover": {
-      backgroundColor: "grey.100",
+      backgroundColor: "#f0f0f0",
     },
   });
 
@@ -52,47 +54,81 @@ function SideNavbar({ setQuestionsPage, setTagsPage, setProfilePage, setAdminPag
     <Drawer
       variant="permanent"
       sx={{
-        width: 60,
+        width: 100,
         "& .MuiDrawer-paper": {
           width: 275,
-          borderRight: "1px dotted grey.400",
+          borderRight: "1px solid #ccc",
           top: 80,
-          position:"sticky"
+          position: "sticky",
+          backgroundColor: "#fff",
+          paddingTop: 2,
+          paddingBottom: 2,
         },
       }}
     >
       <Box sx={{ width: 275 }}>
         <List>
-          {isAdmin  && (
+          {isAdmin && (
             <ListItem
-            button
-            sx={getListItemStyle("admin")}
-            onClick={handleAdminLink}
-          >
-            <ListItemText primary="Admin" />
-          </ListItem>
+              button
+              sx={getListItemStyle("admins")}
+              onClick={handleAdminLink}
+            >
+              <ListItemIcon sx={{ color: activeLink === "admins" ? "white" : "#555" }}>
+                <AdminPanelSettingsIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary="Admin"
+                primaryTypographyProps={{
+                  fontWeight: activeLink === "admins" ? "bold" : "normal",
+                }}
+              />
+            </ListItem>
           )}
-        <ListItem
+          <ListItem
             button
             sx={getListItemStyle("users")}
             onClick={handleProfileLinkClick}
           >
-            <ListItemText primary="User" />
+            <ListItemIcon sx={{ color: activeLink === "users" ? "white" : "#555" }}>
+              <PersonIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="User"
+              primaryTypographyProps={{
+                fontWeight: activeLink === "users" ? "bold" : "normal",
+              }}
+            />
           </ListItem>
-
           <ListItem
             button
             sx={getListItemStyle("questions")}
             onClick={handleQuestionsLinkClick}
           >
-            <ListItemText primary="Questions" />
+            <ListItemIcon sx={{ color: activeLink === "questions" ? "white" : "#555" }}>
+              <HelpOutlineIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Questions"
+              primaryTypographyProps={{
+                fontWeight: activeLink === "questions" ? "bold" : "normal",
+              }}
+            />
           </ListItem>
           <ListItem
             button
             sx={getListItemStyle("tags")}
             onClick={handleTagsLinkClick}
           >
-            <ListItemText primary="Tags" />
+            <ListItemIcon sx={{ color: activeLink === "tags" ? "white" : "#555" }}>
+              <TagIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Tags"
+              primaryTypographyProps={{
+                fontWeight: activeLink === "tags" ? "bold" : "normal",
+              }}
+            />
           </ListItem>
         </List>
       </Box>
