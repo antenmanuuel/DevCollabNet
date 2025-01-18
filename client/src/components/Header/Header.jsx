@@ -8,13 +8,10 @@ import {
   Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import LoginIcon from "@mui/icons-material/Login";
+import LogoutIcon from "@mui/icons-material/Logout";
 
-function Header({
-  setSearchTerm,
-  currentPage,
-  isLoggedIn,
-  onLoginLogout,
-}) {
+function Header({ setSearchTerm, currentPage, isLoggedIn, onLoginLogout }) {
   const handleSearch = (value) => {
     setSearchTerm(value.trim(), currentPage === "TagsPage");
   };
@@ -36,47 +33,68 @@ function Header({
         display: "flex",
         flexDirection: "column",
         width: "100%",
-        overflow: "hidden",
-        position:"sticky"
+        position: "sticky",
+        top: 0,
+        zIndex: 1000,
+        backgroundColor: "#F4F6F8",
+        borderBottom: "1px solid #ddd",
+        boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
       }}
     >
       <Box
         sx={{
-          border: 2,
-          borderColor: "black",
-          backgroundColor: "grey.300",
           height: "70px",
           display: "flex",
           alignItems: "center",
-          px: 2,
+          justifyContent: "space-between",
+          px: 3,
         }}
       >
-        <Button variant="contained" onClick={onLoginLogout} sx={{ mr: 30 }}>
+        {/* Login/Logout Button */}
+        <Button
+          variant="contained"
+          color={isLoggedIn ? "error" : "primary"}
+          startIcon={isLoggedIn ? <LogoutIcon /> : <LoginIcon />}
+          onClick={onLoginLogout}
+          sx={{ fontWeight: "bold", textTransform: "capitalize" }}
+        >
           {isLoggedIn ? "Logout" : "Login"}
         </Button>
 
+        {/* Title */}
         <Typography
-          variant="h3"
+          variant="h4"
           sx={{
-            fontWeight: "extrabold",
-            fontSize: { xs: "2rem", md: "4rem", lg: "45px", xl: "60px" },
+            fontWeight: "bold",
+            fontSize: { xs: "1.5rem", md: "2rem", lg: "2.5rem" },
             textAlign: "center",
-            flex: 2,
+            flex: 1,
+            color: "#333",
           }}
         >
-          Fake Stack OverFlow
+          DevCollabNet
         </Typography>
 
-        <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+        {/* Search Bar */}
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+          }}
+        >
           <TextField
             id="search-field"
             type="text"
             variant="outlined"
             size="small"
-            placeholder="Search ..."
+            placeholder="Search..."
             onKeyPress={handleKeyPress}
             sx={{
               backgroundColor: "white",
+              borderRadius: "4px",
+              width: { xs: "200px", md: "300px", lg: "400px" },
             }}
             InputProps={{
               startAdornment: (
