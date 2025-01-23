@@ -32,42 +32,13 @@ Step 1: Clone the repository
 $ git clone git@github.com:antenmanuuel/DevCollabNet.git
 $ cd DevCollabNet
 ```
-
-
-Step 2: Install dependencies in Client and Server
+Step 2: run setup script
 
 ```bash
-$ cd client
-$ npm install
-$ cd ../server
-$ npm install
+$ python setup.py
 ```
 
 
-Step 3: Initialize the database
-
-```bash
-# Make sure you are in the server directory
-$ node init.js <email_of_admin> <password_of_admin>
-
-# Example: node init.js admin@example.com password123
-```
-Step 4: Run the server
-
-```bash
-# Make sure you are in the server directory if not # cd server
-$ npm start <secret_key>
-
-# Example: npm start secret
-```
-
-
-Step 5: On a separate terminal, run the client
-
-```bash
-# Make sure you are in the client directory if not # cd client
-$ npm start
-```
 
 ## Other Information
 
