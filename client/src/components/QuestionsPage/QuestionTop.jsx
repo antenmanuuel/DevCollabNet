@@ -1,14 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Helper from "../../utils/Helper";
-import { Box, Typography, Button } from "@mui/material";
 
 const QuestionTop = ({
   onAskQuestionPress,
   setFilter,
   searchTerm,
   selectedTag,
-  sessionData
+  sessionData,
 }) => {
   const [questionCount, setQuestionCount] = useState(0);
   const [activeFilter, setActiveFilter] = useState("newest");
@@ -25,7 +24,9 @@ const QuestionTop = ({
       }
 
       try {
-        const response = await axios.get(endpoint);
+        const response = await axios.get(endpoint, {
+          withCredentials: true
+        });
         let filteredQuestions = response.data;
         if (searchTerm) {
           filteredQuestions = await helper.filterQuestionsBySearchTerm(
@@ -54,137 +55,55 @@ const QuestionTop = ({
     [setFilter, fetchQuestionCount]
   );
 
-  const getButtonVariant = (filterName) => {
-    return activeFilter === filterName ? "contained" : "outlined";
+  const isActiveButton = (filterName) => activeFilter === filterName;
+  const getButtonClasses = (filterName) => {
+    return `mr-2 px-4 py-2 text-white rounded border-none transition-colors ${
+      isActiveButton(filterName)
+        ? "bg-black hover:bg-gray-700"
+        : "bg-gray-500 hover:bg-gray-700"
+    }`;
   };
 
   return (
-    <Box sx={{ width: "100%", paddingBottom: 5, position: "absolute" }}>
-      <Typography
-        variant="h4"
-        sx={{
-          position: "absolute",
-          top: "-40px",
-          left: "30px",
-          fontSize: "25px",
-          fontWeight: "bolder",
-        }}
-      >
+    <div className="relative w-full pb-5">
+      <h1 className="absolute top-[-40px] left-[30px] text-[25px] font-bold">
         {searchTerm ? "Search Results" : "All Questions"}
-      </Typography>
+      </h1>
 
       {sessionData.loggedIn && (
-        <Button
-          variant="contained"
-          color="primary"
+        <button
           onClick={onAskQuestionPress}
-          sx={{
-            width: 150,
-            padding: "10px",
-            textTransform: "none",
-
-            '@media (max-width: 1920px)': {
-              marginLeft: "1450px",
-              marginTop: "-50px",
-            },
-        
-            '@media (min-width: 1921px)': {
-              marginLeft: "2050px", 
-              marginTop: "-50px",
-            },
-          }}
+          className="absolute top-[-50px] right-10 bg-blue-600 text-white font-medium px-4 py-2 rounded hover:bg-blue-700"
         >
           Ask Question
-        </Button>
+        </button>
       )}
 
-      <Typography
-        variant="h6"
-        sx={{
-          position: "absolute",
-          top: "20px",
-          left: "30px",
-          fontSize: "20px",
-        }}
-      >
+      <p className="absolute top-[20px] left-[30px] text-lg">
         {`${questionCount} Questions`}
-      </Typography>
+      </p>
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          width: 300,
-          border: 3,
-          borderColor: "grey.300",
-          borderStyle: "solid",
-          p: 1,
-        
-          // Media query for screens up to 1920px (inclusive)
-          '@media (max-width: 1920px)': {
-            marginLeft: "1025px", // Adjust as needed for smaller screens
-            marginTop: "-5px",
-          },
-        
-          // Media query for screens larger than 1920px
-          '@media (min-width: 1921px)': {
-            marginLeft: "1500px", // Adjust for larger screens
-            marginTop: "-5px",
-          },
-        }}
-      >
-        <Button
-          variant={getButtonVariant("newest")}
+      <div className="flex flex-row w-[300px] border-2 border-gray-300 p-1 absolute top-[20px] right-10">
+        <button
+          className={getButtonClasses("newest")}
           onClick={() => handleFilterChange("newest")}
-          sx={{
-            marginRight: 1,
-            color: "white", 
-            bgcolor: activeFilter === "newest" ? "black" : "grey",
-            "&:hover": {
-              bgcolor: "grey.700",
-              border:"none"
-            },
-            border:"none"
-          }}
         >
           Newest
-        </Button>
-
-        <Button
-          variant={getButtonVariant("active")}
+        </button>
+        <button
+          className={getButtonClasses("active")}
           onClick={() => handleFilterChange("active")}
-          sx={{
-            marginRight: 1,
-            color: "white",
-            bgcolor: activeFilter === "active" ? "black" : "grey",
-            "&:hover": {
-              bgcolor: "grey.700",
-              border:"none"
-            },
-            border:"none"
-          }}
         >
           Active
-        </Button>
-
-        <Button
-          variant={getButtonVariant("unanswered")}
+        </button>
+        <button
+          className={getButtonClasses("unanswered")}
           onClick={() => handleFilterChange("unanswered")}
-          sx={{
-            marginRight: 1,
-            color: "white",
-            bgcolor: activeFilter === "unanswered" ? "black" : "grey",
-            "&:hover": {
-              bgcolor: "grey.700",
-              border:"none"
-            },
-            border:"none"
-          }}
         >
           Unanswered
-        </Button>
-      </Box>
-    </Box>
+        </button>
+      </div>
+    </div>
   );
 };
 

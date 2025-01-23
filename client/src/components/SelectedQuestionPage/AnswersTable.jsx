@@ -1,22 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import Helper from "../../utils/Helper";
-import {
-  Table,
-  TableBody,
-  TableRow,
-  TableCell,
-  Box,
-  List,
-  ListItem,
-  Button,
-  IconButton,
-  Typography,
-  TextField,
-  Card,
-  CardContent,
-} from "@mui/material";
-import { ThumbUp, ThumbDown } from "@mui/icons-material";
 import AnswerForm from "../AnswerForm/AnswerForm";
 
 const AnswersTable = ({
@@ -30,15 +14,14 @@ const AnswersTable = ({
   const [startIndex, setStartIndex] = useState(0);
   const [commentsData, setCommentsData] = useState({});
   const [newCommentText, setNewCommentText] = useState({});
-  const answersPerPage = 5;
-  const commentsPerPage = 3;
   const [currentCommentPage, setCurrentCommentPage] = useState({});
   const [commentError, setCommentError] = useState({});
   const [editingAnswerId, setEditingAnswerId] = useState(null);
   const [userReputation, setUserReputation] = useState(null);
 
+  const answersPerPage = 5;
+  const commentsPerPage = 3;
   const helper = new Helper();
-
   const isFilteredView = filteredAnswers && filteredAnswers.length > 0;
 
   useEffect(() => {
@@ -71,8 +54,8 @@ const AnswersTable = ({
     }
   }, [questionId, filteredAnswers, isFilteredView]);
 
-  const fetchCommentsForAnswers = async (answers) => {
-    for (const answer of answers) {
+  const fetchCommentsForAnswers = async (answersList) => {
+    for (const answer of answersList) {
       try {
         const response = await axios.get(
           `http://localhost:8000/posts/comments/byAnswer/${answer._id}`
@@ -80,22 +63,20 @@ const AnswersTable = ({
         const sortedComments = response.data.sort(
           (a, b) => new Date(b.com_date_time) - new Date(a.com_date_time)
         );
-        setCommentsData((prevComments) => ({
-          ...prevComments,
+        setCommentsData((prev) => ({
+          ...prev,
           [answer._id]: sortedComments,
         }));
       } catch (error) {
-        console.error(
-          "Error fetching comments for answer with ID:",
-          answer._id,
-          error
-        );
+        console.error("Error fetching comments:", error);
       }
     }
   };
 
   useEffect(() => {
     const fetchUserReputation = async () => {
+      if (!sessionData.loggedIn) return; // Only proceed if the user is logged in
+
       try {
         const response = await axios.get(
           `http://localhost:8000/users/userReputation/${sessionData.username}`
@@ -107,11 +88,13 @@ const AnswersTable = ({
     };
 
     fetchUserReputation();
-  }, [sessionData.username]);
+  }, [sessionData.loggedIn, sessionData.username]);
+
+
+  const isUserLoggedIn = sessionData && sessionData.loggedIn;
 
   const postCommentOnAnswer = async (answerId) => {
     const commentText = newCommentText[answerId] || "";
-
     if (userReputation < 50) {
       setCommentError({
         ...commentError,
@@ -119,7 +102,6 @@ const AnswersTable = ({
       });
       return;
     }
-
     if (!commentText.trim()) {
       setCommentError({
         ...commentError,
@@ -127,7 +109,6 @@ const AnswersTable = ({
       });
       return;
     }
-
     try {
       const response = await axios.post(
         `http://localhost:8000/posts/comments/commentAnswer`,
@@ -137,7 +118,6 @@ const AnswersTable = ({
           answerId: answerId,
         }
       );
-
       if (response.status === 201) {
         const newCommentWithUsername = {
           ...response.data,
@@ -157,17 +137,12 @@ const AnswersTable = ({
   };
 
   const handleUpvoteComment = async (commentId, answerId) => {
-    if (!sessionData.loggedIn) {
-      console.log("User must be logged in to vote");
-      return;
-    }
-
+    if (!isUserLoggedIn) return;
     try {
       const response = await axios.patch(
         `http://localhost:8000/posts/comments/upvoteComment/${commentId}`,
         { username: sessionData.username }
       );
-
       if (response.status === 200) {
         const updatedComments = commentsData[answerId].map((comment) => {
           if (comment._id === commentId) {
@@ -175,38 +150,24 @@ const AnswersTable = ({
           }
           return comment;
         });
-
-        setCommentsData({
-          ...commentsData,
-          [answerId]: updatedComments,
-        });
+        setCommentsData({ ...commentsData, [answerId]: updatedComments });
       }
     } catch (error) {
       console.error("Error voting:", error);
     }
   };
 
-  const isUserLoggedIn = sessionData && sessionData.loggedIn;
-
   const handleVote = async (answerId, voteType) => {
-    if (!isUserLoggedIn) {
-      return;
-    }
-
+    if (!isUserLoggedIn) return;
     try {
       const response = await axios.patch(
         `http://localhost:8000/posts/answers/${voteType}/${answerId}`,
-        {
-          username: sessionData.username,
-        }
+        { username: sessionData.username }
       );
-
       if (response.status === 200) {
-        setAnswers((prevAnswers) =>
-          prevAnswers.map((answer) =>
-            answer._id === answerId
-              ? { ...answer, votes: response.data.votes }
-              : answer
+        setAnswers((prev) =>
+          prev.map((a) =>
+            a._id === answerId ? { ...a, votes: response.data.votes } : a
           )
         );
       }
@@ -223,11 +184,9 @@ const AnswersTable = ({
     try {
       await axios.delete(
         `http://localhost:8000/posts/answers/deleteAnswer/${answerId}`,
-        {
-          data: { questionId: questionId },
-        }
+        { data: { questionId: questionId } }
       );
-      setAnswers(answers.filter((answer) => answer._id !== answerId));
+      setAnswers(answers.filter((a) => a._id !== answerId));
     } catch (error) {
       console.error("Error deleting answer:", error);
     }
@@ -247,11 +206,7 @@ const AnswersTable = ({
     });
   };
 
-  const displayedAnswers = answers.slice(
-    startIndex,
-    startIndex + answersPerPage
-  );
-
+  const displayedAnswers = answers.slice(startIndex, startIndex + answersPerPage);
   const isPrevDisabled = startIndex === 0;
   const isNextDisabled = startIndex + answersPerPage >= answers.length;
 
@@ -267,9 +222,7 @@ const AnswersTable = ({
   };
 
   if (editingAnswerId) {
-    const existingAnswer = answers.find(
-      (answer) => answer._id === editingAnswerId
-    );
+    const existingAnswer = answers.find((a) => a._id === editingAnswerId);
     return (
       <AnswerForm
         sessionData={sessionData}
@@ -283,288 +236,239 @@ const AnswersTable = ({
   }
 
   return (
-    <Box sx={{ width: "91.66%", marginY: 6, marginLeft: "200px" }}>
-      <Box sx={{ overflow: "auto", height: "305px", mb: 2 }}>
-        <Table sx={{ width: "100%", borderCollapse: "collapse" }}>
-          <TableBody>
+    <div className="w-[1580px] ml-[220px] mt-10">
+      <div className="overflow-auto h-72 mb-2 border border-gray-200 rounded-lg">
+        <table className="w-full text-left border-collapse">
+          <tbody>
             {displayedAnswers.map((answer) => (
               <React.Fragment key={answer._id}>
-                <TableRow
-                  sx={{
-                    "&:last-child td, &:last-child th": { border: 0 },
-                    borderBottom: 4,
-                    borderTop: 4,
-                    borderColor: "grey.500",
-                    borderStyle: "dotted",
-                  }}
-                >
-                  <TableCell
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      padding: 4,
-                    }}
-                  >
-                    <Box
-                      sx={{ display: "flex", flexDirection: "column", mr: 2 }}
-                    >
-                      <IconButton
-                        onClick={() => handleVote(answer._id, "upvote")}
-                        size="small"
-                        disabled={!sessionData.loggedIn || isFilteredView}
-                      >
-                        <ThumbUp />
-                      </IconButton>
-                      <Typography variant="body2" sx={{ textAlign: "center" }}>
-                        {answer.votes}
-                      </Typography>
-                      <IconButton
-                        onClick={() => handleVote(answer._id, "downvote")}
-                        size="small"
-                        disabled={!sessionData.loggedIn || isFilteredView}
-                      >
-                        <ThumbDown />
-                      </IconButton>
-                    </Box>
-                    <Box sx={{ flexGrow: 1 }}>
-                      {helper.renderTextWithLinks(answer.text)}
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ paddingLeft: 60 }}>
-                    <List sx={{ listStyle: "none", padding: 0 }}>
-                      <ListItem
-                        sx={{
-                          color: "error.main",
-                          paddingBottom: 0,
-                          marginLeft: "0",
-                        }}
-                      >
-                        {answer.ans_by.username}
-                      </ListItem>
-                      <ListItem sx={{ color: "text.secondary" }}>
-                        answered{" "}
-                        {helper.formatDate(new Date(answer.ans_date_time))}
-                      </ListItem>
-                      {isFilteredView && (
-                        <Box>
-                          <Button
-                            variant="outlined"
-                            color="primary"
-                            onClick={() => handleEditAnswer(answer._id)}
-                            sx={{ marginRight: 1 }}
+                <tr className="border-b border-gray-300">
+                  <td className="p-4 align-top">
+                    <div className="flex items-center">
+                      <div className="flex flex-col items-center mr-4">
+                        <button
+                          onClick={() => handleVote(answer._id, "upvote")}
+                          disabled={!isUserLoggedIn || isFilteredView}
+                          className="text-blue-600 hover:opacity-75 mb-1"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
                           >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="outlined"
-                            color="secondary"
-                            onClick={() => handleDeleteAnswer(answer._id)}
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M6 15l6-6 6 6"
+                            />
+                          </svg>
+                        </button>
+                        <p className="text-sm font-semibold">{answer.votes}</p>
+                        <button
+                          onClick={() => handleVote(answer._id, "downvote")}
+                          disabled={!isUserLoggedIn || isFilteredView}
+                          className="text-red-600 hover:opacity-75 mt-1"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
                           >
-                            Delete
-                          </Button>
-                        </Box>
-                      )}
-                    </List>
-                  </TableCell>
-                </TableRow>
-                {commentsData[answer._id]
-                  ?.slice(
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M18 9l-6 6-6-6"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="flex-grow text-sm leading-relaxed">
+                        {helper.renderTextWithLinks(answer.text)}
+                      </div>
+                      <div className="text-right text-sm ml-8">
+                        <p className="text-red-600 font-semibold mb-1">
+                          {answer.ans_by.username}
+                        </p>
+                        <p className="text-gray-600 mb-1">
+                          answered {helper.formatDate(new Date(answer.ans_date_time))}
+                        </p>
+                        {isFilteredView && (
+                          <div className="flex space-x-2 justify-end mt-2">
+                            <button
+                              onClick={() => handleEditAnswer(answer._id)}
+                              className="border border-blue-600 text-blue-600 px-2 py-1 rounded text-xs hover:bg-blue-50"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteAnswer(answer._id)}
+                              className="border border-red-600 text-red-600 px-2 py-1 rounded text-xs hover:bg-red-50"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                {(commentsData[answer._id] || [])
+                  .slice(
                     (currentCommentPage[answer._id] || 0) * commentsPerPage,
-                    ((currentCommentPage[answer._id] || 0) + 1) *
-                      commentsPerPage
+                    ((currentCommentPage[answer._id] || 0) + 1) * commentsPerPage
                   )
                   .map((comment) => (
-                    <TableRow key={comment._id}>
-                      <TableCell colSpan={6}>
-                        <Card variant="outlined" sx={{ marginBottom: 2 }}>
-                          <CardContent>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                  marginRight: 2,
-                                }}
+                    <tr key={comment._id} className="border-b border-gray-300">
+                      <td colSpan={1} className="p-4 bg-gray-50">
+                        <div className="flex items-center space-x-3">
+                          {isUserLoggedIn && (
+                            <button
+                              onClick={() => handleUpvoteComment(comment._id, answer._id)}
+                              disabled={!isUserLoggedIn || isFilteredView}
+                              className="text-blue-600 hover:opacity-75"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-4 h-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
                               >
-                                <IconButton
-                                  onClick={() =>
-                                    handleUpvoteComment(comment._id, answer._id)
-                                  }
-                                  disabled={
-                                    !sessionData.loggedIn || isFilteredView
-                                  }
-                                  size="small"
-                                >
-                                  <ThumbUp />
-                                </IconButton>
-                                <Typography variant="body2">
-                                  {comment.votes}
-                                </Typography>
-                              </Box>
-                              <Typography
-                                variant="body2"
-                                color="textSecondary"
-                                sx={{ flexGrow: 1 }}
-                              >
-                                {comment.text}
-                              </Typography>
-                              <Typography
-                                variant="subtitle2"
-                                color="gray"
-                                sx={{
-                                  fontWeight: "bold",
-                                  textAlign: "left",
-                                  marginRight: "30px",
-                                }}
-                              >
-                                commented by {comment.com_by.username}
-                              </Typography>
-                            </Box>
-                          </CardContent>
-                        </Card>
-                      </TableCell>
-                    </TableRow>
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M6 15l6-6 6 6"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                          <p className="text-sm font-semibold">{comment.votes}</p>
+                          <p className="text-sm flex-grow">{comment.text}</p>
+                          <p className="text-xs text-gray-500 font-semibold">
+                            commented by {comment.com_by.username}
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
                   ))}
+                <tr>
+                  <td className="p-4">
+                    {isUserLoggedIn && (
+                      <>
+                        <textarea
+                          className={`w-full border rounded p-2 text-sm focus:outline-none ${commentError[answer._id] ? "border-red-500" : "border-gray-300"
+                            }`}
+                          rows={2}
+                          value={newCommentText[answer._id] || ""}
+                          onChange={(e) =>
+                            setNewCommentText({
+                              ...newCommentText,
+                              [answer._id]: e.target.value,
+                            })
+                          }
+                          placeholder="Write a comment..."
+                        />
+                        {commentError[answer._id] && (
+                          <p className="text-red-600 text-xs mt-1">
+                            {commentError[answer._id]}
+                          </p>
+                        )}
+                        <div className="flex items-center mt-2">
+                          <button
+                            onClick={() => postCommentOnAnswer(answer._id)}
+                            className="px-4 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                          >
+                            Post Comment
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    <div className="ml-auto flex space-x-2 mt-2">
+                      <button
+                        onClick={() =>
+                          setCurrentCommentPage({
+                            ...currentCommentPage,
+                            [answer._id]: Math.max(
+                              0,
+                              (currentCommentPage[answer._id] || 0) - 1
+                            ),
+                          })
+                        }
+                        disabled={
+                          (currentCommentPage[answer._id] || 0) === 0 ||
+                          (commentsData[answer._id]?.length || 0) <= commentsPerPage
+                        }
+                        className="px-3 py-1 text-sm text-gray-700 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
+                      >
+                        Prev
+                      </button>
+                      <button
+                        onClick={() =>
+                          setCurrentCommentPage({
+                            ...currentCommentPage,
+                            [answer._id]: (currentCommentPage[answer._id] || 0) + 1,
+                          })
+                        }
+                        disabled={
+                          (((currentCommentPage[answer._id] || 0) + 1) *
+                            commentsPerPage >=
+                            (commentsData[answer._id]?.length || 0)) ||
+                          (commentsData[answer._id]?.length || 0) <= commentsPerPage
+                        }
+                        className="px-3 py-1 text-sm text-gray-700 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </td>
+                </tr>
 
-                <TableRow>
-                  <TableCell colSpan={6}>
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      error={!!commentError[answer._id]}
-                      helperText={commentError[answer._id]}
-                      value={newCommentText[answer._id] || ""}
-                      onChange={(e) =>
-                        setNewCommentText({
-                          ...newCommentText,
-                          [answer._id]: e.target.value,
-                        })
-                      }
-                      placeholder="Write a comment..."
-                      multiline
-                      disabled={!sessionData.loggedIn || isFilteredView}
-                    />
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => postCommentOnAnswer(answer._id)}
-                      sx={{ marginTop: "20px", marginLeft: "20px" }}
-                      disabled={!sessionData.loggedIn || isFilteredView}
-                    >
-                      Post Comment
-                    </Button>
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    sx={{
-                      display: "flex",
-                      mt: 2,
-                      borderBottom: "none",
-                    }}
-                  >
-                    <Button
-                      onClick={() =>
-                        setCurrentCommentPage({
-                          ...currentCommentPage,
-                          [answer._id]: Math.max(
-                            0,
-                            (currentCommentPage[answer._id] || 0) - 1
-                          ),
-                        })
-                      }
-                      disabled={
-                        currentCommentPage[answer._id] === 0 ||
-                        (commentsData[answer._id]?.length || 0) <=
-                          commentsPerPage
-                      }
-                      sx={{ paddingLeft: "775px" }}
-                    >
-                      Prev
-                    </Button>
-                    <Button
-                      onClick={() =>
-                        setCurrentCommentPage({
-                          ...currentCommentPage,
-                          [answer._id]:
-                            (currentCommentPage[answer._id] || 0) + 1,
-                        })
-                      }
-                      disabled={
-                        ((currentCommentPage[answer._id] || 0) + 1) *
-                          commentsPerPage >=
-                        (commentsData[answer._id]?.length || 0)
-                      }
-                    >
-                      Next
-                    </Button>
-                  </TableCell>
-                </TableRow>
               </React.Fragment>
             ))}
-          </TableBody>
-        </Table>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          mt: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-          <Button onClick={handlePrev} disabled={isPrevDisabled}>
+          </tbody>
+        </table>
+      </div>
+      <div className="flex flex-col items-center mt-4">
+        <div className="flex space-x-4">
+          <button
+            onClick={handlePrev}
+            disabled={isPrevDisabled}
+            className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+          >
             Prev
-          </Button>
-          <Button onClick={handleNext} disabled={isNextDisabled}>
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={isNextDisabled}
+            className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+          >
             Next
-          </Button>
-        </Box>
+          </button>
+        </div>
         {isFilteredView ? (
-          <Button
-            variant="contained"
-            color="primary"
+          <button
             onClick={onBack}
-            sx={{
-              width: 150,
-              padding: "10px",
-              textTransform: "none",
-              marginTop: "20px",
-              marginRight: "1425px",
-            }}
+            className="w-36 px-4 py-2 mt-4 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
           >
             Back
-          </Button>
-        ) : sessionData.loggedIn ? (
-          <Button
-            variant="contained"
-            color="primary"
+          </button>
+        ) : isUserLoggedIn ? (
+          <button
             onClick={onAnswerPress}
-            sx={{
-              width: 150,
-              padding: "10px",
-              textTransform: "none",
-
-              "@media (max-width: 1920px)": {
-                marginTop: "20px",
-                marginRight: "1470px",
-              },
-
-              "@media (min-width: 1921px)": {
-                marginTop: "20px",
-                marginRight: "2000px",
-              },
-            }}
+            className="w-36 px-4 py-2 mt-4 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
           >
             Answer Question
-          </Button>
+          </button>
         ) : null}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

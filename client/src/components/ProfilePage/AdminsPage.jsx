@@ -1,19 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Box,
-  Typography,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from "@mui/material";
 
 const AdminsPage = () => {
   const [sessionData, setSessionData] = useState({
@@ -23,39 +9,27 @@ const AdminsPage = () => {
     created_at: "",
     reputation: 0,
   });
-
   const [users, setUsers] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
-
   const [userReputation, setUserReputation] = useState(null);
 
   useEffect(() => {
     if (sessionData.username) {
       axios
-        .get(
-          `http://localhost:8000/users/userReputation/${sessionData.username}`
-        )
-        .then((response) => {
-          setUserReputation(response.data.reputation);
-        })
-        .catch((error) => {
-          console.error("Error fetching user reputation:", error);
-        });
+        .get(`http://localhost:8000/users/userReputation/${sessionData.username}`)
+        .then((response) => setUserReputation(response.data.reputation))
+        .catch((error) => console.error("Error fetching user reputation:", error));
     }
   }, [sessionData.username]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const sessionResponse = await axios.get(
-          "http://localhost:8000/users/session"
-        );
-        const usersResponse = await axios.get(
-          "http://localhost:8000/users/admin"
-        );
+        const sessionResponse = await axios.get("http://localhost:8000/users/session");
+        const usersResponse = await axios.get("http://localhost:8000/users/admin");
 
-        if (sessionResponse.data && sessionResponse.data.loggedIn) {
+        if (sessionResponse.data?.loggedIn) {
           setSessionData({
             loggedIn: true,
             username: sessionResponse.data.username,
@@ -82,15 +56,9 @@ const AdminsPage = () => {
   const handleConfirmDelete = async () => {
     try {
       const selectedUser = users.find((user) => user._id === selectedUserId);
-      if (!selectedUser) {
-        throw new Error("User not found");
-      }
-      const selectedUsername = selectedUser.username;
+      if (!selectedUser) throw new Error("User not found");
 
-      await axios.delete(
-        `http://localhost:8000/users/deleteUser/${selectedUsername}`
-      );
-
+      await axios.delete(`http://localhost:8000/users/deleteUser/${selectedUser.username}`);
       setUsers(users.filter((user) => user._id !== selectedUserId));
       setOpenDialog(false);
     } catch (error) {
@@ -99,189 +67,109 @@ const AdminsPage = () => {
     }
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
+  const handleCloseDialog = () => setOpenDialog(false);
 
-  const formatDate = (postTime) => {
+  const formatDate = (dateString) => {
     const now = new Date();
-    const diffInSeconds = (now - new Date(postTime)) / 1000;
+    const diffInSeconds = (now - new Date(dateString)) / 1000;
 
-    if (diffInSeconds < 60) {
-      return `${Math.round(diffInSeconds)} seconds ago`;
-    } else if (diffInSeconds < 3600) {
-      return `${Math.round(diffInSeconds / 60)} minutes ago`;
-    } else if (diffInSeconds < 86400) {
-      return `${Math.round(diffInSeconds / 3600)} hours ago`;
-    } else {
-      return new Date(postTime).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    }
+    if (diffInSeconds < 60) return `${Math.round(diffInSeconds)} seconds ago`;
+    if (diffInSeconds < 3600) return `${Math.round(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.round(diffInSeconds / 3600)} hours ago`;
+
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   const memberSince = sessionData.created_at
-    ? formatDate(new Date(sessionData.created_at))
+    ? formatDate(sessionData.created_at)
     : "Loading...";
-
   const isAdminOnlyUser = users.length === 1 && users[0].username === "admin";
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        paddingBottom: 5,
-        marginTop: "20px",
-        marginLeft: "-10px",
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          width: "100%",
-          border: 3,
-          borderTop: 0,
-          borderRight: 0,
-          borderLeft: 0,
-          borderStyle: "dotted",
-          height: "175px",
-          marginLeft: "250px",
-        }}
-      >
-        <Typography
-          variant="h4"
-          sx={{
-            fontSize: "25px",
-            fontWeight: "bolder",
-          }}
-        >
-          User Profile: {sessionData.username}
-        </Typography>
-        <Typography
-          variant="h6"
-          sx={{
-            marginTop: "50px",
-            marginLeft: "-230px",
-            fontSize: "18px",
-          }}
-        >
-          Member since: {memberSince}
-        </Typography>
-        <Typography
-          variant="h2"
-          sx={{
-            marginTop: "100px",
-            marginLeft: "-220px",
-            fontSize: "15px",
-          }}
-        >
-          Reputation Score:{" "}
-          {userReputation !== null ? userReputation : "Loading..."}
-        </Typography>
-        <Typography
-          variant="h1"
-          sx={{
-            marginTop: "130px",
-            marginLeft: "700px",
-            fontSize: "18px",
-            fontWeight: "bolder",
-          }}
-        >
-          All Current Users
-        </Typography>
-      </Box>
+    <div className="w-full min-h-screen bg-gray-50 py-8 px-6">
+      {/* User Profile Section */}
+      <div className="max-w-5xl mx-auto bg-white shadow-md rounded-lg p-6 mb-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-bold text-gray-800">Admin Profile</h2>
+          <span className="text-sm text-gray-500">Reputation: {userReputation || "Loading..."}</span>
+        </div>
+        <p className="text-gray-700 mt-2">
+          <strong>Username:</strong> {sessionData.username}
+        </p>
+        <p className="text-gray-700 mt-2">
+          <strong>Member Since:</strong> {memberSince}
+        </p>
+      </div>
 
-      <Box
-        sx={{
-          maxHeight: "420px",
-          overflowY: "auto",
-          overflowX: "hidden",
-          marginLeft: "200px",
-        }}
-      >
+      {/* User List Section */}
+      <div className="max-w-5xl mx-auto bg-white shadow-md rounded-lg p-6">
+        <h3 className="text-2xl font-semibold text-gray-800 mb-4">Manage Users</h3>
         {isAdminOnlyUser ? (
-          <Typography
-            variant="h6"
-            align="left"
-            sx={{ color: "red", marginTop: "10px", marginLeft: "10px" }}
-          >
-            There are no users except admin.
-          </Typography>
+          <p className="text-red-500 text-center">No users found except admin.</p>
         ) : (
-          <Table sx={{ width: "100%", marginLeft: "50px" }}>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user._id} sx={{ borderBottom: "3px dotted" }}>
-                  <TableCell sx={{ width: "65%" }}>
-                    <Typography
-                      sx={{
-                        color: "black",
-                        fontSize: "large",
-                      }}
-                    >
-                      {user.username}
-                    </Typography>
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      width: "17.5%",
-                      "@media (max-width: 1920px)": {
-                        paddingLeft: "300px",
-                      },
-
-                      "@media (min-width: 1921px)": {
-                        paddingLeft: "200px",
-                      },
-                    }}
-                  >
-                    <Button
-                      onClick={() => handleDeleteUserById(user._id)}
-                      sx={{
-                        backgroundColor: "red",
-                        color: "common.white",
-                        fontSize: "medium",
-                        border: 3,
-                        borderRadius: "16px",
-                        textAlign: "center",
-                        borderColor: "red",
-                        width: "100px",
-                      }}
-                      disabled={user.email === sessionData.email}
-                    >
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-200">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">
+                    Username
+                  </th>
+                  <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user._id} className="hover:bg-gray-50">
+                    <td className="border border-gray-200 px-4 py-2 text-gray-700">{user.username}</td>
+                    <td className="border border-gray-200 px-4 py-2">
+                      <button
+                        onClick={() => handleDeleteUserById(user._id)}
+                        className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600 transition disabled:opacity-50"
+                        disabled={user.email === sessionData.email}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </Box>
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{"Confirm Deletion"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Are you sure you want to delete this user?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+      </div>
+
+      {/* Confirmation Dialog */}
+      {openDialog && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm mx-auto">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">Confirm Deletion</h3>
+            <p className="text-gray-700 mb-4">
+              Are you sure you want to delete this user? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleCloseDialog}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

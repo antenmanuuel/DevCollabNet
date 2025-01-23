@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  Box,
-  Typography,
-  Button,
-  Modal,
-  TextField,
-  Grid,
-  Card,
-} from "@mui/material";
 
 const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
   const [sessionData, setSessionData] = useState({
@@ -19,30 +10,14 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
     reputation: 0,
   });
 
-  
-
   const [userTags, setUserTags] = useState([]);
-
   const [editForm, setEditForm] = useState({
     visible: false,
     tagName: "",
     tagId: "",
   });
   const [editError, setEditError] = useState("");
-
-  const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    p: 4,
-  };
-
   const [userReputation, setUserReputation] = useState(null);
-
 
   useEffect(() => {
     if (sessionData.username) {
@@ -50,12 +25,10 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
         .get(
           `http://localhost:8000/users/userReputation/${sessionData.username}`
         )
-        .then((response) => {
-          setUserReputation(response.data.reputation);
-        })
-        .catch((error) => {
-          console.error("Error fetching user reputation:", error);
-        });
+        .then((response) => setUserReputation(response.data.reputation))
+        .catch((error) =>
+          console.error("Error fetching user reputation:", error)
+        );
     }
   }, [sessionData.username]);
 
@@ -63,7 +36,7 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
     const fetchSessionData = async () => {
       try {
         const response = await axios.get("http://localhost:8000/users/session");
-        if (response.data && response.data.loggedIn) {
+        if (response.data?.loggedIn) {
           setSessionData({
             loggedIn: true,
             username: response.data.username,
@@ -97,15 +70,12 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
     fetchUserTags();
   }, [sessionData.loggedIn, sessionData.username]);
 
-  // Add this function within your component
   const handleDeleteTag = async (tagId) => {
     try {
-      const response = await axios.delete(
+      await axios.delete(
         `http://localhost:8000/posts/tags/tag_id/${tagId}`,
         { withCredentials: true }
       );
-      console.log(response.data.message);
-      // Remove the tag from the local state to update the UI
       setUserTags((prevTags) => prevTags.filter((tag) => tag._id !== tagId));
     } catch (error) {
       console.error("Error deleting the tag:", error);
@@ -149,7 +119,7 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
     }
 
     try {
-      const response = await axios.put(
+      await axios.put(
         `http://localhost:8000/posts/tags/tag_id/${editForm.tagId}`,
         { newName: trimmedTagName }
       );
@@ -165,280 +135,144 @@ const UsersPageT = ({ goTags, goQuestions, goAnswers, current }) => {
     }
   };
 
-  const formatDate = (postTime) => {
+  const formatDate = (dateString) => {
     const now = new Date();
-    const diffInSeconds = (now - new Date(postTime)) / 1000;
+    const diffInSeconds = (now - new Date(dateString)) / 1000;
 
-    if (diffInSeconds < 60) {
-      return `${Math.round(diffInSeconds)} seconds ago`;
-    } else if (diffInSeconds < 3600) {
-      return `${Math.round(diffInSeconds / 60)} minutes ago`;
-    } else if (diffInSeconds < 86400) {
-      return `${Math.round(diffInSeconds / 3600)} hours ago`;
-    } else {
-      return new Date(postTime).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    }
+    if (diffInSeconds < 60) return `${Math.round(diffInSeconds)} seconds ago`;
+    if (diffInSeconds < 3600) return `${Math.round(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.round(diffInSeconds / 3600)} hours ago`;
+
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
-
-  // Grouping tags into rows of three
-  const rows = [];
-  for (let i = 0; i < userTags.length; i += 3) {
-    rows.push(userTags.slice(i, i + 3));
-  }
-
-  const totalTagCount = userTags.length;
 
   const memberSince = sessionData.created_at
     ? formatDate(new Date(sessionData.created_at))
     : "Loading...";
-  return (
-    <Box
-      sx={{
-        width: "85.3%",
-        paddingBottom: 5,
-        position: "absolute",
-        border: 3,
-        borderColor: "black",
-        borderStyle: "dotted",
-        left: "275.5px",
-        height: "900px",
-        borderLeft: 0,
-        borderRight: 0,
-        borderTop: 0,
-        borderBottom: 0,
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          width: "100%",
-          left: "275.5px",
-          borderTop: 0,
-          borderRight: 0,
-          borderLeft: 0,
-          height: "175px",
-        }}
-      >
-        <Typography
-          variant="h4"
-          sx={{
-            position: "absolute",
-            top: "10px",
-            left: "30px",
-            fontSize: "25px",
-            fontWeight: "bolder",
-          }}
-        >
-          User Profile:{" "}
-          {sessionData.loggedIn ? sessionData.username : "Loading..."}
-        </Typography>
-        <Typography
-          variant="h6"
-          sx={{
-            position: "absolute",
-            top: "50px",
-            left: "30px",
-            fontSize: "18px",
-          }}
-        >
-          Member since: {memberSince}
-        </Typography>
-        <Typography
-          variant="h2"
-          sx={{
-            position: "absolute",
-            top: "90px",
-            left: "30px",
-            fontSize: "15px",
-          }}
-        >
-          Reputation Score:{" "}
-          {userReputation !== null ? userReputation : "Loading..."}
-        </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            top: "130px",
-            position: "absolute",
-            width: "100%",
-          }}
-        >
-          {/* Display Tag Count */}
-          <Typography
-            variant="h6"
-            sx={{
-              position: "absolute",
-              left:"40px",
-              fontSize: "18px",
-              fontWeight: "bolder",
-            }}
-          >
-            {totalTagCount} Tags
-          </Typography>
 
-          <Typography
-            variant="h1"
-            sx={{
-              fontSize: "18px",
-              fontWeight: "bolder",
-            }}
-          >
-            All {current} created by {sessionData.username}
-          </Typography>
-        </Box>
-      </Box>
-      {/* Grid layout for tags */}
-      <Box sx={{ marginTop: "80px", width: "90%", position: "absolute" }}>
-        <Grid container spacing={4} sx={{ paddingLeft: "100px" }}>
-          {userTags.map((tag, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  width: "55%",
-                }}
-              >
-                <Box
-                  sx={{
-                    padding: "25px",
-                    textAlign: "center",
-                    border: "2px dashed",
-                    borderColor: "gray",
-                  }}
-                >
-                  <Typography variant="h6" color="primary">
+  return (
+    <div className="w-full min-h-screen bg-gray-50 py-6 px-4">
+      {/* User Profile Section */}
+      <div className="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">
+          User Profile: {sessionData.loggedIn ? sessionData.username : "Loading..."}
+        </h2>
+        <p className="text-gray-700 mb-2">
+          <strong>Member Since:</strong> {memberSince}
+        </p>
+        <p className="text-gray-700">
+          <strong>Reputation Score:</strong> {userReputation !== null ? userReputation : "Loading..."}
+        </p>
+      </div>
+
+      {/* Tags Table */}
+      <div className="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-6">
+        <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+          {current} Tags Created by {sessionData.username}
+        </h3>
+        {userTags.length > 0 ? (
+          <table className="w-full border-collapse border border-gray-200">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">
+                  Tag Name
+                </th>
+                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">
+                  Questions Count
+                </th>
+                <th className="border border-gray-200 px-4 py-2 text-center text-sm font-medium text-gray-700">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {userTags.map((tag) => (
+                <tr key={tag._id} className="hover:bg-gray-50">
+                  <td className="border border-gray-200 px-4 py-2 text-gray-800">
                     {tag.name}
-                  </Typography>
-                  <Typography variant="body2">{tag.count} Questions</Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      gap: 2,
-                      marginTop: "10px",
-                    }}
-                  >
-                    <Button
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2 text-gray-700">
+                    {tag.count}
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2 text-center space-x-2">
+                    <button
                       onClick={() => handleTagEdit(tag)}
-                      sx={{
-                        backgroundColor: "blue",
-                        color: "white",
-                        "&:hover": { backgroundColor: "darkblue" },
-                      }}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
                     >
                       Edit
-                    </Button>
-                    <Button
+                    </button>
+                    <button
                       onClick={() => handleDeleteTag(tag._id)}
-                      sx={{
-                        backgroundColor: "red",
-                        color: "white",
-                        "&:hover": { backgroundColor: "darkred" },
-                      }}
+                      className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
                     >
                       Delete
-                    </Button>
-                  </Box>
-                </Box>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-      <Modal open={editForm.visible} onClose={hideEditForm}>
-        <Box sx={{ ...style }}>
-          <TextField
-            label="Tag Name"
-            fullWidth
-            value={editForm.tagName}
-            onChange={handleTagNameChange}
-            error={!!editError}
-            helperText={editError || " "}
-            sx={{ mb: 2 }}
-          />
-          <Box sx={{ display: "flex", width: "100%" }}>
-            <Box mr={1} width="50%">
-              <Button
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-gray-500">No tags found.</p>
+        )}
+      </div>
+
+      {/* Navigation Buttons */}
+      <div className="max-w-6xl mx-auto mt-6 flex justify-center space-x-4">
+        <button
+          onClick={goTags}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+        >
+          View Tags
+        </button>
+        <button
+          onClick={goAnswers}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+        >
+          View Answers
+        </button>
+        <button
+          onClick={goQuestions}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+        >
+          View Questions
+        </button>
+      </div>
+
+      {/* Edit Modal */}
+      {editForm.visible && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
+            <h3 className="text-lg font-bold mb-4">Edit Tag</h3>
+            <input
+              type="text"
+              value={editForm.tagName}
+              onChange={handleTagNameChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-4"
+            />
+            {editError && <p className="text-red-500 mb-4">{editError}</p>}
+            <div className="flex justify-end space-x-4">
+              <button
                 onClick={hideEditForm}
-                color="secondary"
-                fullWidth
-                sx={{
-                  backgroundColor: "red",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "darkred",
-                    color: "white",
-                  },
-                }}
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
               >
                 Cancel
-              </Button>
-            </Box>
-            <Box width="50%">
-              {" "}
-              {/* Half width */}
-              <Button
+              </button>
+              <button
                 onClick={handleSubmitEdit}
-                variant="contained"
-                color="primary"
-                fullWidth
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               >
                 Save
-              </Button>
-            </Box>
-          </Box>
-        </Box>
-      </Modal>
-      <Box
-        sx={{
-          width: "100%",
-          paddingBottom: 5,
-          position: "absolute",
-          border: 3,
-          borderColor: "black",
-          borderStyle: "dotted",
-          bottom: "0px",
-          top: "775px",
-          borderBottom: 0,
-          borderRight: 0,
-          borderLeft: 0,
-        }}
-      >
-        <Button
-          variant="contained"
-          sx={{ marginTop: "5px", marginRight: "5px", left: "350px" }}
-          onClick={goTags}
-        >
-          All Tags Made by{" "}
-          {sessionData.loggedIn ? sessionData.username : "Loading..."}
-        </Button>
-        <Button
-          variant="contained"
-          sx={{ marginTop: "5px", left: "350px" }}
-          onClick={goAnswers}
-        >
-          Questions Answered By{" "}
-          {sessionData.loggedIn ? sessionData.username : "Loading..."}
-        </Button>
-        <Button
-          variant="contained"
-          sx={{ marginTop: "5px", left: "355px" }}
-          onClick={goQuestions}
-        >
-          Questions By{" "}
-          {sessionData.loggedIn ? sessionData.username : "Loading..."}
-        </Button>
-      </Box>
-    </Box>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

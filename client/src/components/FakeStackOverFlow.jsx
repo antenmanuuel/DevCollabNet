@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import Header from "./Header/Header";
 import SideNavbar from "./SideNavbar/SideNavbar";
 import MainPage from "./MainPage/MainPage";
-import { Box } from "@mui/material";
 
-function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout ,isAdmin }) {
+function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout, isAdmin }) {
   const [currentPage, setCurrentPage] = useState("QuestionsPage");
   const [questionsKey, setQuestionsKey] = useState(0);
   const [searchTerm, setSearchTermState] = useState("");
@@ -24,7 +23,7 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout ,isAdmi
 
   const handleSetAdminProfilePage = () => {
     setCurrentPage("AdminsPage");
-  }
+  };
 
   const handleSearch = (term) => {
     setSearchTermState(term);
@@ -35,32 +34,29 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout ,isAdmi
       setCurrentPage("TagsPage");
       setTimeout(() => setCurrentPage("QuestionsPage"), 1);
     }
-    //add if statement for UsersPage
     if (currentPage === "ProfilePage") {
       setCurrentPage("QuestionsPage");
     }
-
     if (currentPage === "AdminsPage") {
       setCurrentPage("QuestionsPage");
     }
-
   };
 
   return (
-    <Box display="flex" flexDirection="column" height="100vh">
+    <div className="flex flex-col h-screen">
       <Header
         setSearchTerm={handleSearch}
         currentPage={currentPage}
         isLoggedIn={sessionData.loggedIn}
         onLoginLogout={handleLoginLogout}
       />
-      <Box display="flex" flexGrow={1}>
+      <div className="flex flex-grow">
         <SideNavbar
           setQuestionsPage={handleSetQuestionsPage}
           setTagsPage={handleSetTagsPage}
           setProfilePage={handleSetProfilePage}
           setAdminPage={handleSetAdminProfilePage}
-          isAdmin={sessionData.isAdmin} 
+          isAdmin={sessionData.isAdmin}
         />
         <MainPage
           key={questionsKey}
@@ -68,12 +64,12 @@ function FakeStackOverflow({ goToWelcome, sessionData, handleLoginLogout ,isAdmi
           showQuestionsPage={currentPage === "QuestionsPage"}
           showTagsPage={currentPage === "TagsPage"}
           showProfilePage={currentPage === "ProfilePage"}
-          showAdminPage = {currentPage === "AdminsPage"}
+          showAdminPage={currentPage === "AdminsPage"}
           sessionData={sessionData}
           isAdmin={sessionData.isAdmin}
         />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }
 

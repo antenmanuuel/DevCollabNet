@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Box,
-  Typography,
-  Button,
-} from "@mui/material";
 import QuestionsForm from "../QuestionsForm/QuestionsForm";
 
 const UsersPageQ = ({ goTags, goQuestions, goAnswers, current }) => {
@@ -30,12 +21,10 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers, current }) => {
         .get(
           `http://localhost:8000/users/userReputation/${sessionData.username}`
         )
-        .then((response) => {
-          setUserReputation(response.data.reputation);
-        })
-        .catch((error) => {
-          console.error("Error fetching user reputation:", error);
-        });
+        .then((response) => setUserReputation(response.data.reputation))
+        .catch((error) =>
+          console.error("Error fetching user reputation:", error)
+        );
     }
   }, [sessionData.username]);
 
@@ -43,7 +32,7 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers, current }) => {
     const fetchSessionData = async () => {
       try {
         const response = await axios.get("http://localhost:8000/users/session");
-        if (response.data && response.data.loggedIn) {
+        if (response.data?.loggedIn) {
           setSessionData({
             loggedIn: true,
             username: response.data.username,
@@ -100,19 +89,15 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers, current }) => {
     const now = new Date();
     const diffInSeconds = (now - new Date(postTime)) / 1000;
 
-    if (diffInSeconds < 60) {
-      return `${Math.round(diffInSeconds)} seconds ago`;
-    } else if (diffInSeconds < 3600) {
-      return `${Math.round(diffInSeconds / 60)} minutes ago`;
-    } else if (diffInSeconds < 86400) {
-      return `${Math.round(diffInSeconds / 3600)} hours ago`;
-    } else {
-      return new Date(postTime).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-    }
+    if (diffInSeconds < 60) return `${Math.round(diffInSeconds)} seconds ago`;
+    if (diffInSeconds < 3600) return `${Math.round(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.round(diffInSeconds / 3600)} hours ago`;
+
+    return new Date(postTime).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   const memberSince = sessionData.created_at
@@ -122,178 +107,98 @@ const UsersPageQ = ({ goTags, goQuestions, goAnswers, current }) => {
   const handleDeleteQuestion = async (questionId) => {
     try {
       await axios.delete(`http://localhost:8000/posts/questions/${questionId}`);
-      setUserQuestions(
-        userQuestions.filter((question) => question._id !== questionId)
-      );
+      setUserQuestions(userQuestions.filter((q) => q._id !== questionId));
     } catch (error) {
       console.error("Error deleting question:", error);
     }
   };
 
   return (
-    <Box
-      sx={{
-        width: "85.3%",
-        paddingBottom: 5,
-        position: "absolute",
-        border: 3,
-        borderColor: "black",
-        borderStyle: "dotted",
-        left: "275.5px",
-        height: "900px",
-        borderLeft: 0,
-        borderRight: 0,
-        borderTop: 0,
-        borderBottom: 0,
-      }}
-    >
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          width: "100%",
-          left: "275.5px",
-          border: 3,
-          borderTop: 0,
-          borderRight: 0,
-          borderLeft: 0,
-          borderStyle: "dotted",
-          height: "175px",
-        }}
-      >
-        <Typography
-          variant="h4"
-          sx={{
-            position: "absolute",
-            top: "10px",
-            left: "30px",
-            fontSize: "25px",
-            fontWeight: "bolder",
-          }}
-        >
-          User Profile:{" "}
-          {sessionData.loggedIn ? sessionData.username : "Loading..."}
-        </Typography>
-        <Typography
-          variant="h6"
-          sx={{
-            position: "absolute",
-            top: "50px",
-            left: "30px",
-            fontSize: "18px",
-          }}
-        >
-          Member since: {memberSince}
-        </Typography>
-        <Typography
-          variant="h2"
-          sx={{
-            position: "absolute",
-            top: "90px",
-            left: "30px",
-            fontSize: "15px",
-          }}
-        >
-          Reputation Score:{" "}
-          {userReputation !== null ? userReputation : "Loading..."}
-        </Typography>
-        <Typography
-          variant="h1"
-          sx={{
-            position: "absolute",
-            top: "130px",
-            left: "550px",
-            fontSize: "18px",
-            fontWeight: "bolder",
-          }}
-        >
-          All {current} created by {sessionData.username}
-        </Typography>
-      </Box>
-      <Box sx={{ maxHeight: "500px", overflowY: "auto" }}>
-        <Table sx={{ width: "100%" }}>
-          <TableBody>
-            {userQuestions.map((question) => (
-              <TableRow
-                key={question._id}
-                sx={{ borderBottom: "3px", borderStyle: "dotted" }}
-              >
-                <TableCell sx={{ width: "65%" }}>
-                  <Typography
+    <div className="w-full min-h-screen bg-gray-50 py-6 px-4">
+      {/* User Profile Section */}
+      <div className="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">
+          User Profile: {sessionData.loggedIn ? sessionData.username : "Loading..."}
+        </h2>
+        <p className="text-gray-700 mb-2">
+          <strong>Member Since:</strong> {memberSince}
+        </p>
+        <p className="text-gray-700">
+          <strong>Reputation Score:</strong> {userReputation !== null ? userReputation : "Loading..."}
+        </p>
+      </div>
+
+      {/* Questions Table */}
+      <div className="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-6">
+        <h3 className="text-2xl font-semibold text-gray-800 mb-4">
+          {current} Created by {sessionData.username}
+        </h3>
+        {userQuestions.length > 0 ? (
+          <table className="w-full border-collapse border border-gray-200">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">
+                  Question Title
+                </th>
+                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700">
+                  Asked By
+                </th>
+                <th className="border border-gray-200 px-4 py-2 text-center text-sm font-medium text-gray-700">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {userQuestions.map((question) => (
+                <tr key={question._id} className="hover:bg-gray-50">
+                  <td
+                    className="border border-gray-200 px-4 py-2 text-blue-500 underline cursor-pointer"
                     onClick={() => handleQuestionEdit(question)}
-                    sx={{ cursor: "pointer", color: "blue", fontSize: "large" }}
                   >
                     {question.title}
-                  </Typography>
-                </TableCell>
-                <TableCell sx={{ width: "17.5%" }}>
-                  <Typography sx={{ color: "gray", fontSize: "medium" }}>
-                    {question.asked_by.username} asked {formatDate(question.ask_date_time)}
-                  </Typography>
-                </TableCell>
-                <TableCell sx={{ width: "17.5%", paddingLeft: "70px" }}>
-                  <Button
-                    onClick={() => handleDeleteQuestion(question._id)}
-                    sx={{
-                      color: "black",
-                      fontSize: "medium",
-                      backgroundColor: "red",
-                      border: 3,
-                      borderRadius: "16px",
-                      textAlign: "center",
-                      borderColor: "red",
-                      width: "100px",
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Box>
-      <Box
-        sx={{
-          width: "100%",
-          paddingBottom: 5,
-          position: "absolute",
-          border: 3,
-          borderColor: "black",
-          borderStyle: "dotted",
-          bottom: "0px",
-          top: "775px",
-          borderBottom: 0,
-          borderRight: 0,
-          borderLeft: 0,
-        }}
-      >
-        <Button
-          variant="contained"
-          sx={{ marginTop: "5px", marginRight: "5px", left: "350px" }}
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2 text-gray-700">
+                    {question.asked_by.username} - {formatDate(question.ask_date_time)}
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2 text-center">
+                    <button
+                      onClick={() => handleDeleteQuestion(question._id)}
+                      className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-gray-500">No questions found.</p>
+        )}
+      </div>
+
+      {/* Navigation Buttons */}
+      <div className="max-w-6xl mx-auto mt-6 flex justify-center space-x-4">
+        <button
           onClick={goTags}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
         >
-          All Tags Made by{" "}
-          {sessionData.loggedIn ? sessionData.username : "Loading..."}
-        </Button>
-        <Button
-          variant="contained"
-          sx={{ marginTop: "5px", left: "350px" }}
+          View Tags
+        </button>
+        <button
           onClick={goAnswers}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
         >
-          Questions Answered By{" "}
-          {sessionData.loggedIn ? sessionData.username : "Loading..."}
-        </Button>
-        <Button
-          variant="contained"
-          sx={{ marginTop: "5px", left: "355px" }}
+          View Answers
+        </button>
+        <button
           onClick={goQuestions}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
         >
-          Questions By{" "}
-          {sessionData.loggedIn ? sessionData.username : "Loading..."}
-        </Button>
-      </Box>
-    </Box>
+          View Questions
+        </button>
+      </div>
+    </div>
   );
 };
 
